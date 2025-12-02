@@ -2,11 +2,12 @@
 # @File  : LoginBase.py
 # @Author: kongjingchun
 # @Date  : 2025/12/01/18:01
-# @Desc  :
+# @Desc  :登录页面元素定位
 
 
 class LoginBase:
-    def login_input(self, input_placeholder):
+    @staticmethod
+    def login_input(input_placeholder):
         """
         登录用户名、密码输入框
         :param input_placeholder:
@@ -14,7 +15,8 @@ class LoginBase:
         """
         return "//input[@placeholder='" + input_placeholder + "']"
 
-    def login_button(self, button_name):
+    @staticmethod
+    def login_button(button_name):
         """
         登录按钮
         :return:

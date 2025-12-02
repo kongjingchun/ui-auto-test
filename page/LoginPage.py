@@ -17,7 +17,7 @@ class LoginPage(LoginBase):
         :param input_value:
         :return:
         """
-        input_xpath = self.login_input(input_placeholder)  # 修正调用父类方法
+        input_xpath = LoginBase.login_input(input_placeholder)  # 修正调用父类方法
         return driver.find_element(By.XPATH, input_xpath).send_keys(input_value)
 
     def click_login(self, driver, button_name):
@@ -27,5 +27,5 @@ class LoginPage(LoginBase):
         :param button_name:
         :return:
         """
-        button_xpath = self.login_button(button_name)  # 修正调用父类方法
+        button_xpath = LoginBase.login_button(button_name)  # 修正调用父类方法
         return driver.find_element(By.XPATH, button_xpath).click()
