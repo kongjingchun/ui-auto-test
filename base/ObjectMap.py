@@ -13,8 +13,8 @@ from selenium.webdriver.support import expected_conditions as EC
 
 class ObjectMap:
     @staticmethod
-    def wait_and_get_element(driver: WebDriver, locate_type: By, locator_expression: str,
-                             timeout: int = 10, is_visibility: bool = False) -> WebElement:
+    def wait_for_element(driver: WebDriver, locate_type: By, locator_expression: str,
+                         timeout: int = 10, is_visibility: bool = False) -> WebElement:
         """
         等待并获取页面元素对象，支持超时等待和可见性判断
 
