@@ -48,3 +48,40 @@ class ObjectMap:
                 f"元素定位失败（等待{visibility_text}），定位方式: {locate_type}，"
                 f"定位表达式: {locator_expression}，超时时间: {timeout}秒"
             )
+
+    @staticmethod
+    def wait_page_load(driver: WebDriver, timeout: int = 30) -> bool:
+        """
+        等待页面加载完成
+        检查页面 document.readyState 状态，以及 jQuery（如果存在）是否加载完成
+
+        Args:
+            driver: 浏览器驱动对象
+            timeout: 超时时间(秒)，默认30秒
+
+        Returns:
+            bool: 页面加载完成返回True
+
+        Raises:
+            TimeoutException: 页面加载超时
+        """
+        try:
+            wait = WebDriverWait(driver, timeout)
+
+            # 等待页面 document.readyState 为 complete
+            def page_ready(driver):
+                return driver.execute_script("return document.readyState") == "complete"
+
+            # 等待页面加载完成
+            wait.until(lambda d: page_ready(d))
+
+            # 如果页面使用了 jQuery，等待 jQuery 加载完成
+            try:
+                wait.until(lambda d: d.execute_script("return typeof jQuery !== 'undefined' && jQuery.active == 0"))
+            except TimeoutException:
+                # 如果页面没有使用 jQuery，忽略此错误
+                pass
+
+            return True
+        except TimeoutException:
+            raise TimeoutException(f"页面加载超时，超时时间: {timeout}秒")

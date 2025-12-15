@@ -6,51 +6,63 @@
 
 import datetime
 import os
+from pathlib import Path
+from typing import List, Union
 
 
-def get_now_time():
+def get_now_time() -> datetime.datetime:
     """
     获取当前时间
 
     Returns:
-        datetime: 当前的日期时间对象
+        datetime.datetime: 当前的日期时间对象
     """
     return datetime.datetime.now()
 
 
-def get_project_path():
+def get_project_path(levels_up: int = 2) -> str:
     """
     获取项目根路径
-
-    通过当前文件的绝对路径，向上两级目录获取项目根路径
-
+    通过当前文件的绝对路径，向上指定级数目录获取项目根路径
+    Args:
+        levels_up (int): 向上几级目录，默认为2
     Returns:
         str: 项目根目录的绝对路径
     """
-    return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    current_file = Path(__file__).resolve()
+    project_path = current_file.parents[levels_up - 1]
+    return str(project_path)
 
 
-def sep(path, add_sep_before=False, add_sep_after=False):
+def sep(path: Union[List[str], tuple], add_sep_before: bool = False,
+        add_sep_after: bool = False) -> str:
     """
     构造路径字符串，在路径片段之间添加系统分隔符
-    
     Args:
-        path (list): 路径片段列表
-        add_sep_before (bool): 是否在路径前添加分隔符，默认为True
-        add_sep_after (bool): 是否在路径后添加分隔符，默认为True
-    
+        path: 路径片段列表或元组
+        add_sep_before: 是否在路径前添加分隔符，默认为False
+        add_sep_after: 是否在路径后添加分隔符，默认为False
     Returns:
         str: 处理后的路径字符串
+    Example:
+        >>> sep(['dir1', 'dir2', 'file.txt'])
+        'dir1/dir2/file.txt'
+        >>> sep(['dir1', 'dir2'], add_sep_before=True, add_sep_after=True)
+        '/dir1/dir2/'
     """
-    all_path = os.sep.join(path)
+    # 使用 os.path.join 更安全，能正确处理不同操作系统的路径
+    all_path = os.path.join(*path)
+
     if add_sep_before:
         all_path = os.sep + all_path
     if add_sep_after:
         all_path = all_path + os.sep
+
     return all_path
 
 
 if __name__ == '__main__':
     # 测试函数功能
-    print(get_now_time())  # 打印当前时间
-    print(get_project_path())  # 打印项目根路径
+    print(f"当前时间: {get_now_time()}")
+    print(f"项目根路径: {get_project_path()}")
+    print(f"路径拼接示例: {sep(['dir1', 'dir2', 'file.txt'])}")
