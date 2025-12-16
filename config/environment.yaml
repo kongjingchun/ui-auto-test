@@ -1,3 +1,8 @@
-username: 周杰伦
-password: 1234abcd!
+user:
+  jay:
+    username: 周杰伦
+    password: 1234abcd!
+  william:
+      username: William
+      password: 123456
 url: http://120.53.230.254/

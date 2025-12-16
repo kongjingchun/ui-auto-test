@@ -12,12 +12,6 @@ from page.LoginPage import LoginPage
 class TestLogin:
     def test_login(self):
         driver = DriverConfig.driver_config()
-        driver.get("http://120.53.230.254/login")
-        sleep(1)
-        LoginPage().login_input_value(driver, "用户名", "周杰伦")
-        sleep(1)
-        LoginPage().login_input_value(driver, "密码", "1234abcd!")
-        sleep(2)
-        LoginPage().click_login(driver, "登录")
-        sleep(2)
+        LoginPage().login(driver, "jay")
+        sleep(5)
         driver.quit()

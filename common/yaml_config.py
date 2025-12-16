@@ -10,7 +10,7 @@ from common.tools import get_project_path, sep
 
 class GetConf:
     """配置读取类，用于读取YAML格式的配置文件"""
-    
+
     def __init__(self, config_file: Optional[str] = None):
         """
         初始化配置读取器
@@ -24,10 +24,10 @@ class GetConf:
         """
         if config_file is None:
             config_file = get_project_path() + sep(["config", "environment.yaml"], add_sep_before=True)
-        
+
         self.config_file = config_file
         self.env_data: Dict[str, Any] = self._load_config()
-    
+
     def _load_config(self) -> Dict[str, Any]:
         """
         加载YAML配置文件
@@ -64,7 +64,7 @@ class GetConf:
         """
         keys = key.split(".")
         value = self.env_data
-        
+
         try:
             for k in keys:
                 value = value[k]
@@ -72,7 +72,7 @@ class GetConf:
         except (KeyError, TypeError):
             return default
 
-    def get_username_password(self) -> Tuple[str, str]:
+    def get_username_password(self, user) -> Tuple[str, str]:
         """
         获取用户名和密码
         
@@ -83,9 +83,9 @@ class GetConf:
             KeyError: 配置文件中缺少username或password字段
         """
         try:
-            username = self.env_data.get("username")
-            password = self.env_data.get("password")
-            
+            username = self.env_data["user"][user]["username"]
+            password = self.env_data["user"][user]["password"]
+
             if username is None or password is None:
                 missing = []
                 if username is None:
@@ -93,7 +93,7 @@ class GetConf:
                 if password is None:
                     missing.append("password")
                 raise KeyError(f"配置文件中缺少必需的字段: {', '.join(missing)}")
-            
+
             return username, password
         except KeyError as e:
             raise KeyError(f"获取用户名密码失败: {e}")
@@ -115,4 +115,4 @@ class GetConf:
 
 
 if __name__ == '__main__':
-    print(GetConf().get("usernam1e"))
+    print(GetConf().get_username_password("jay"))
