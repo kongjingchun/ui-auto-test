@@ -490,3 +490,17 @@ class ObjectMap:
         # 通过send_keys方法上传文件
         return element.send_keys(file_path)
 
+    def switch_windows_2_latest_handle(self, driver):
+        """
+        切换到最新的窗口句柄
+
+        Args:
+            driver: 浏览器驱动对象
+
+        Returns:
+            None
+        """
+        # 获取所有窗口句柄
+        handles = driver.window_handles
+        # 切换到最新的窗口句柄
+        driver.switch_to.window(handles[-1])
