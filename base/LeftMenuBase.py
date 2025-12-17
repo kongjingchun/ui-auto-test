@@ -11,7 +11,7 @@ class LeftMenuBase:
         :param menu_name:菜单栏名称
         :return:
         """
-        return "//aside[@class='el-aside']//span[text()='" + menu_name + "']/parent::li"
+        return "//aside[@class='el-aside']//span[text()='" + menu_name + "']"
 
 
 

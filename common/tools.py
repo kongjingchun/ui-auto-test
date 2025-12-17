@@ -61,8 +61,12 @@ def sep(path: Union[List[str], tuple], add_sep_before: bool = False,
     return all_path
 
 
+def get_img_path(img_name):
+    return get_project_path() + sep(['img', img_name], add_sep_before=True)
+
+
+
 if __name__ == '__main__':
     # 测试函数功能
-    print(f"当前时间: {get_now_time()}")
-    print(f"项目根路径: {get_project_path()}")
-    print(f"路径拼接示例: {sep(['dir1', 'dir2', 'file.txt'])}")
+    print(get_img_path('机器猫.img'))
+
