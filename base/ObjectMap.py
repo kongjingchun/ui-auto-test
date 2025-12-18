@@ -321,14 +321,16 @@ class ObjectMap:
                     continue
                 else:
                     # 最后一次重试也失败，抛出异常
-                    raise Exception(f"元素填值失败：元素引用已过时，定位方式: {locate_type}，定位表达式: {locator_expression}")
+                    raise Exception(
+                        f"元素填值失败：元素引用已过时，定位方式: {locate_type}，定位表达式: {locator_expression}")
 
             except Exception as e:
                 # 其他异常直接抛出，提供更详细的错误信息
                 raise Exception(f"元素填值失败：定位方式: {locate_type}，定位表达式: {locator_expression}，错误: {str(e)}")
 
         # 如果所有重试都失败（理论上不会执行到这里，因为会抛出异常）
-        raise Exception(f"元素填值失败：重试{max_retries}次后仍然失败，定位方式: {locate_type}，定位表达式: {locator_expression}")
+        raise Exception(
+            f"元素填值失败：重试{max_retries}次后仍然失败，定位方式: {locate_type}，定位表达式: {locator_expression}")
 
     def element_click(
             self,
@@ -553,5 +555,5 @@ class ObjectMap:
         self.wait_for_ready_state_complete(driver)
         # 截图
         driver.get_screenshot_as_file(source_img_path)
-        sleep(2)
+        sleep(3)
         return FindImg().get_confidence(source_img_path, search_img_path)

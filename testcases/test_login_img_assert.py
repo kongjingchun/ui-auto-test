@@ -9,4 +9,4 @@ from page.LoginPage import LoginPage
 class TestLoginAssert:
     def test_login_img_assert(self, driver):
         LoginPage().login(driver, "jay")
-        LoginPage().login_assert(driver, '机器猫.png')
+        LoginPage().login_assert(driver, '123.png')

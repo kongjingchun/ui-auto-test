@@ -1,2 +1,9 @@
 一、依赖
     pyyaml
+    selenium
+    pytest-xdist            分布式执行
+    pytest-rerunfailures    重试
+    pytest-assume           断言
+    pytest-html             简易版测试报告
+    aircv                   图像识别1
+    opencv-python           图像识别2

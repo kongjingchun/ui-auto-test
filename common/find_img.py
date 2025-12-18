@@ -39,7 +39,12 @@ if __name__ == '__main__':
     # 测试图像匹配功能
     find_img = FindImg()
     result = find_img.get_confidence(
-        get_project_path() + sep(['img', 'source_img', '机器猫.png'], add_sep_before=True),
-        get_project_path() + sep(['img', 'assert_img', '机器猫.png'], add_sep_before=True),
+        get_project_path() + sep(['img', 'source_img', '123.png'],add_sep_before=True),
+        get_project_path() + sep(['img', 'assert_img', '123.png'], add_sep_before=True)
+
     )
+    # result = find_img.get_confidence(
+    #     "D:\code\\trading_system_autotest\img\source_img\123.png",
+    #     "D:\code\\trading_system_autotest\img\source_img\123.png"
+    # )
     print(result)
