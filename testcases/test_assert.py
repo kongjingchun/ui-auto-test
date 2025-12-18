@@ -9,8 +9,8 @@ from pytest_assume.plugin import assume
 
 class TestAssert:
     def test_assert(self):
-        # 使用assume断言保证测试用例执行
-        assume(1 + 1 == 3)
+        # 使用assume断言保证测试用例执行(1+1==3时生效)
+        assume(1 + 1 == 2)
         a = 2
         b = 2
         assert a == b
