@@ -5,12 +5,20 @@
 # @Desc  :
 from time import sleep
 
+import allure
+import pytest
+
+from common.report_add_img import add_img_2_report
 from config.driver_config import DriverConfig
 from page.LoginPage import LoginPage
 
 
 class TestLogin:
+    @pytest.mark.login
+    @allure.feature("登录")
+    @allure.description("登录")
     def test_login(self, driver):
-        LoginPage().login(driver, "jay")
-        sleep(5)
-        driver.quit()
+        with allure.step("登录"):
+            LoginPage().login(driver, "kjc")
+            sleep(1)
+            add_img_2_report(driver, "登录")

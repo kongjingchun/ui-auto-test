@@ -23,7 +23,13 @@ class LoginBase:
         """
         return "//span[text()='" + button_name + "']/parent::button"
 
-
+    @staticmethod
+    def login_successful():
+        """
+        登录成功提示
+        :return:
+        """
+        return "//p[text()='登录成功']"
 
 
 if __name__ == '__main__':

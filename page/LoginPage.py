@@ -40,6 +40,11 @@ class LoginPage(LoginBase, ObjectMap):
         self.login_input_value(driver, "用户名", username)
         self.login_input_value(driver, "密码", password)
         self.click_login(driver, "登录")
+        self.assert_login(driver)
+
+    def assert_login(self, driver):
+        login_success_xpath = LoginBase.login_successful()
+        return self.element_appear(driver, By.XPATH, login_success_xpath, timeout=2)
 
     def login_assert(self, driver, img_name):
         assert self.find_img_in_source(driver, img_name) > 0.9, "未找到合适的图片"
