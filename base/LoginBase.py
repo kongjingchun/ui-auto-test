@@ -31,6 +31,22 @@ class LoginBase:
         """
         return "//p[text()='登录成功']"
 
+    @staticmethod
+    def need_captcha():
+        """
+        验证码勾选框
+        :return:
+        """
+        return "//span[@class='el-checkbox__inner']"
+
+    def captcha(self):
+        """
+        验证码
+        :return:
+        """
+        return "//img[@class='el-image__inner']"
+
+
 
 if __name__ == '__main__':
     print(LoginBase().login_input("用户名"))

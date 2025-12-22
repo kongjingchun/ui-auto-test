@@ -8,3 +8,4 @@
     aircv                   图像识别1
     opencv-python           图像识别2
     allure-pytest           allure测试报告
+    ddddocr                 OCR验证码识别

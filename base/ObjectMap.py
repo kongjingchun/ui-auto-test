@@ -1,3 +1,5 @@
+import datetime
+import os
 import time
 from time import sleep
 from urllib.parse import urljoin
@@ -566,3 +568,26 @@ class ObjectMap:
         sleep(3)
         # 使用图像匹配工具查找目标图像并返回置信度
         return FindImg().get_confidence(source_img_path, search_img_path)
+
+    def element_screenshot(self, driver, locate_type, locator_expression):
+        """
+        对指定元素进行截图并保存为文件
+            
+        :param driver: 浏览器驱动对象
+        :param locate_type: 元素定位方式
+        :param locator_expression: 元素定位表达式
+        :return: 截图文件的完整路径
+        """
+        # 生成唯一的截图文件名（时间戳+微秒）
+        timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S%f')
+        screenshot_filename = f"{timestamp}.png"
+        # 构建截图保存目录路径
+        screenshot_dir = get_project_path() + sep(['img', 'ele_img'], add_sep_before=True, add_sep_after=True)
+        # 确保目录存在，不存在则创建
+        os.makedirs(screenshot_dir, exist_ok=True)
+        # 构建完整的截图文件路径
+        screenshot_path = screenshot_dir + screenshot_filename
+        # 定位元素并截图保存
+        element = self.element_get(driver, locate_type, locator_expression)
+        element.screenshot(screenshot_path)
+        return screenshot_path

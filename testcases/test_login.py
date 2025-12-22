@@ -19,6 +19,6 @@ class TestLogin:
     @allure.description("登录")
     def test_login(self, driver):
         with allure.step("登录"):
-            LoginPage().login(driver, "kjc")
-            sleep(1)
+            LoginPage().login(driver, "jay", True)
+            sleep(3)
             add_img_2_report(driver, "登录")

@@ -3,10 +3,13 @@
 # @Author: kongjingchun
 # @Date  : 2025/12/01/18:31
 # @Desc  :
+from time import sleep
 
 from selenium.webdriver.common.by import By
 from base.LoginBase import LoginBase
 from base.ObjectMap import ObjectMap
+from common.ocr_identify import OCRIdentify
+from common.report_add_img import add_img_path_2_report
 from common.yaml_config import GetConf
 from logs.log import log
 
@@ -37,11 +40,26 @@ class LoginPage(LoginBase, ObjectMap):
         button_xpath = LoginBase.login_button(button_name)  # 调用父类方法
         return self.element_click(driver, By.XPATH, button_xpath)
 
-    def login(self, driver, user):
+    def click_need_captcha(self, driver):
+        need_captcha_xpath = LoginBase.need_captcha()
+        return self.element_click(driver, By.XPATH, need_captcha_xpath)
+
+    def login(self, driver, user, need_xpath=False):
         self.element_to_url(driver, "/login")
+        if need_xpath:
+            log.info("需要验证码")
+            self.click_need_captcha(driver)
+            captcha_xpath = self.captcha()
+            captcha_path = self.element_screenshot(driver, By.XPATH, captcha_xpath)
+            add_img_path_2_report(captcha_path, "图像验证码")
+            ocr_value = OCRIdentify().identify(captcha_path)
+            log.info("验证码识别结果为：" + ocr_value)
+            self.login_input_value(driver, "请输入验证码", ocr_value)
+            sleep(1)
         username, password = GetConf().get_username_password(user)
         self.login_input_value(driver, "用户名", username)
         self.login_input_value(driver, "密码", password)
+        self.click_need_captcha(driver)
         self.click_login(driver, "登录")
         self.assert_login(driver)
 
