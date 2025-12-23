@@ -1,6 +1,6 @@
 # encoding: utf-8
 # @File  : tools.py
-# @Author: kongjingchun
+# @Author: 孔敬淳
 # @Date  : 2025/11/28/18:30
 # @Desc  : 工具类，提供常用的功能函数
 
@@ -16,6 +16,14 @@ def get_now_time() -> datetime.datetime:
     :return: 当前的日期时间对象
     """
     return datetime.datetime.now()
+
+
+def get_now_time_str() -> str:
+    """
+    获取当前时间字符串
+    :return: 当前时间字符串
+    """
+    return get_now_time().strftime("%Y%m%d%H%M%S")
 
 
 def get_project_path(levels_up: int = 2) -> str:

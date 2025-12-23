@@ -10,6 +10,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 
 from common.find_img import FindImg
+from common.report_add_img import add_img_2_report, add_img_path_2_report
 from common.yaml_config import GetConf
 from common.tools import get_project_path, sep
 
@@ -566,6 +567,8 @@ class ObjectMap:
         # 截图并保存到源图像路径
         driver.get_screenshot_as_file(source_img_path)
         sleep(3)
+        add_img_path_2_report(source_img_path, "页面截图")
+        add_img_path_2_report(search_img_path, "查找的图片")
         # 使用图像匹配工具查找目标图像并返回置信度
         return FindImg().get_confidence(source_img_path, search_img_path)
 

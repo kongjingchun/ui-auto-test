@@ -1,6 +1,6 @@
 # encoding: utf-8
 # @File  : IframeBaiduMapBase.py
-# @Author: kongjingchun
+# @Author: 孔敬淳
 # @Date  : 2025/12/17/17:49
 # @Desc  :
 class IframeBaiduMapBase:

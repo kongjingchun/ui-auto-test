@@ -1,6 +1,6 @@
 # encoding: utf-8
 # @File  : ocr_identify.py
-# @Author: kongjingchun
+# @Author: 孔敬淳
 # @Date  : 2025/12/22/11:46
 # @Desc  : OCR图像识别工具类，用于识别图片中的文字内容
 import ddddocr

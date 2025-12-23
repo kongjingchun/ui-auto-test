@@ -1,6 +1,6 @@
 # encoding: utf-8
 # @File  : driver_config.py
-# @Author: kongjingchun
+# @Author: 孔敬淳
 # @Date  : 2025/12/01/17:52
 # @Desc  : Chrome 浏览器驱动配置类
 

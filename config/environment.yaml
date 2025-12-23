@@ -3,9 +3,15 @@ user:
     username: 周杰伦
     password: 1234abcd!
   william:
-      username: William
-      password: 123456
+    username: William
+    password: 123456
   kjc:
     username: kjc
     password: 123456
 url: http://www.tcpjwtester.top/
+mysql:
+  db: trading_system
+  host: 120.53.230.254
+  password: william
+  port: 3306
+  user: root

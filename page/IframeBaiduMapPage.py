@@ -1,6 +1,6 @@
 # encoding: utf-8
 # @File  : GoodsPage.py
-# @Author: kongjingchun
+# @Author: 孔敬淳
 # @Date  : 2025/12/17/11:43
 # @Desc  :
 

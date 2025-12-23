@@ -1,6 +1,6 @@
 # encoding: utf-8
 # @File  : GoodsBase.py
-# @Author: kongjingchun
+# @Author: 孔敬淳
 # @Date  : 2025/12/16/16:24
 # @Desc  : 商品页面元素定位基类，提供商品相关页面元素的XPath定位表达式
 

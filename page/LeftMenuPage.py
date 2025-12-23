@@ -1,6 +1,6 @@
 # encoding: utf-8
 # @File  : LeftMenuPage.py
-# @Author: kongjingchun
+# @Author: 孔敬淳
 # @Date  : 2025/12/16/16:13
 # @Desc  : 左侧菜单页面操作类，用于点击一级和二级菜单项
 

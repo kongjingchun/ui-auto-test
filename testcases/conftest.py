@@ -1,10 +1,14 @@
 # encoding: utf-8
 # @File  : conftest.py
-# @Author: kongjingchun
+# @Author: 孔敬淳
 # @Date  : 2025/12/18/15:24
 # @Desc  : pytest配置文件，用于定义测试用例的fixture和全局配置
 
+import os
 import pytest
+
+# 配置Allure测试报告默认语言为中文
+os.environ.setdefault('ALLURE_LANG', 'zh-CN')
 
 from common.report_add_img import add_img_2_report
 from config.driver_config import DriverConfig

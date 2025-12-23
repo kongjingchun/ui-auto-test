@@ -1,6 +1,6 @@
 # encoding: utf-8
 # @File  : HomeBase.py
-# @Author: kongjingchun
+# @Author: 孔敬淳
 # @Date  : 2025/12/02/16:05
 # @Desc  :首页元素定位
 
@@ -52,3 +52,7 @@ class HomeBase:
         :return:
         """
         return "//span[text()='我的地址']/ancestor::div[@class='first_card']/div[contains(@class,'avatar')]//img"
+
+    @staticmethod
+    def user_balance():
+        return "//tr[@class = 'el-descriptions-row'][2]//td[1]"

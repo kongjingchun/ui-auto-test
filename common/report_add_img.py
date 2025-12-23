@@ -1,3 +1,8 @@
+# encoding: utf-8
+# @File  : LoginPage.py
+# @Author: 孔敬淳
+# @Date  : 2025/12/01/18:31
+# @Desc  :
 from time import sleep
 
 import allure
@@ -5,7 +10,7 @@ import allure
 
 def add_img_2_report(driver, step_name, need_sleep=True):
     """添加截图到Allure测试报告
-    
+
     Args:
         driver: WebDriver实例
         step_name: 步骤名称,用于报告中显示

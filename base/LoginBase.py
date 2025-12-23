@@ -1,6 +1,6 @@
 # encoding: utf-8
 # @File  : LoginBase.py
-# @Author: kongjingchun
+# @Author: 孔敬淳
 # @Date  : 2025/12/01/18:01
 # @Desc  :登录页面元素定位
 
