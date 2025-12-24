@@ -560,11 +560,14 @@ class ObjectMap:
         source_img_path = get_project_path() + sep(['img', 'source_img', img_name], add_sep_before=True)
         # 构建目标图像路径（要查找的图像路径）
         search_img_path = get_project_path() + sep(['img', 'assert_img', img_name], add_sep_before=True)
-        
+
         # 确保source_img目录存在，不存在则自动创建
         source_img_dir = os.path.dirname(source_img_path)
         os.makedirs(source_img_dir, exist_ok=True)
-        
+        # 确保assert_img目录存在，不存在则自动创建
+        assert_img_dir = os.path.dirname(search_img_path)
+        os.makedirs(assert_img_dir, exist_ok=True)
+
         print(source_img_path)
         print(search_img_path)
         # 等待页面完全加载完成
