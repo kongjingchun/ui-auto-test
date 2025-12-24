@@ -1,11 +1,13 @@
 一、依赖
-    pyyaml
-    selenium
-    pytest-xdist            分布式执行
-    pytest-rerunfailures    重试
-    pytest-assume           断言
-    pytest-html             简易版测试报告
-    aircv                   图像识别1
-    opencv-python           图像识别2
-    allure-pytest           allure测试报告
+    webdriver-manager       浏览器驱动管理工具
+    pyyaml                  YAML配置文件解析
+    selenium                Web自动化测试
+    pytest-xdist            并行执行测试
+    pytest-rerunfailures    失败用例重跑
+    pytest-assume           多重断言
+    pytest-html             HTML测试报告
+    aircv                   图像模板匹配
+    opencv-python           图像处理库
+    allure-pytest           Allure美化报告
     ddddocr                 OCR验证码识别
+    redis                   Redis数据库客户端

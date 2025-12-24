@@ -30,7 +30,10 @@ class GetConf:
         """获取MySQL配置"""
         return self.env["mysql"]
 
+    def get_redis_config(self):
+        """获取Redis配置"""
+        return self.env["redis"]
+
 
 if __name__ == '__main__':
-    print(GetConf().get_mysql_config())
-
+    print(GetConf().get_redis_config())

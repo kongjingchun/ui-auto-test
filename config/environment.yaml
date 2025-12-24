@@ -12,9 +12,15 @@ user:
     username: kmaijia
     password: kmaijia
 url: http://www.tcpjwtester.top/
+
 mysql:
   db: trading_system
   host: 120.53.230.254
   password: william
   port: 3306
   user: root
+
+redis:
+  host: 120.53.230.254
+  port: 6379
+  db: 0
