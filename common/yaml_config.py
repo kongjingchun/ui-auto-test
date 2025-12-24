@@ -34,6 +34,14 @@ class GetConf:
         """获取Redis配置"""
         return self.env["redis"]
 
+    def get_dingding_webhook(self):
+        """获取钉钉WebHook地址"""
+        return self.env["dingding_group"]["webhook"]
+
+    def get_jenkins_url(self):
+        """获取jenkins地址"""
+        return self.env["jenkins"]
+
 
 if __name__ == '__main__':
-    print(GetConf().get_redis_config())
+    print(GetConf().get_jenkins_url())

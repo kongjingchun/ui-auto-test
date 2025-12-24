@@ -24,3 +24,9 @@ redis:
   host: 120.53.230.254
   port: 6379
   db: 0
+
+jenkins:
+  url: http://120.53.230.254:8080
+
+dingding_group:
+  webhook: https://oapi.dingtalk.com/robot/send?access_token=b1572bfb00b878a14dde02f96d99398dc98623111ef56d10aeb937fefa8e1b52

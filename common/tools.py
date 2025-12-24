@@ -9,6 +9,8 @@ import os
 from pathlib import Path
 from typing import List, Union
 
+import requests
+
 
 def get_now_time() -> datetime.datetime:
     """
@@ -64,6 +66,21 @@ def get_img_path(img_name):
     :return: 图片文件的完整路径
     """
     return get_project_path() + sep(['img', img_name], add_sep_before=True)
+
+
+def get_every_wallpaper():
+    """
+    从bing获取每日壁纸
+    :return:
+    """
+    everyday_wallpaper_url = "https://cn.bing.com/HPImageArchive.aspx?format=js&idx=0&n=10&mkt=zh-CN"
+    try:
+        res = requests.get(url=everyday_wallpaper_url)
+        wallpaper_url = "https://cn.bing.com" + res.json()["images"][0]["url"][:-7]
+    except Exception as e:
+        print(e)
+        wallpaper_url = ""
+    return wallpaper_url
 
 
 if __name__ == '__main__':

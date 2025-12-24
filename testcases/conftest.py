@@ -8,8 +8,10 @@ import os
 import pytest
 from openpyxl.styles.builtins import total
 
+from common.ding_talk import send_ding_talk
 from common.process_redis import Process
 from common.report_add_img import add_img_2_report
+from common.yaml_config import GetConf
 from config.driver_config import DriverConfig
 
 # 配置Allure测试报告默认语言为中文
@@ -72,4 +74,13 @@ def pytest_runtest_makereport(item, call):
         else:
             pass
         process = Process().get_process()
-        print(f"测试进度: {process}")
+        webhook = GetConf().get_dingding_webhook()
+        send_ding_talk(
+            webhook,
+            "测试用例:"
+            + report.description
+            + "\n测试结果: "
+            + report.outcome
+            + "\n自动化测试进度: "
+            + process,
+        )

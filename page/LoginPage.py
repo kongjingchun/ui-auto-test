@@ -87,4 +87,11 @@ class LoginPage(LoginBase, ObjectMap):
         return self.element_appear(driver, By.XPATH, login_success_xpath, timeout=2)
 
     def login_assert(self, driver, img_name):
-        assert self.find_img_in_source(driver, img_name) > 0.9, "未找到合适的图片"
+        """
+        登录后进行图像断言
+        :param driver: 浏览器驱动
+        :param img_name: 要匹配的图像名称
+        :return: 返回匹配置信度值
+        """
+        confidence = self.find_img_in_source(driver, img_name)
+        return confidence

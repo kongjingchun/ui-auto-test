@@ -27,7 +27,7 @@ class FindImg:
         在源图像中查找目标图像，返回匹配置信度
         :param source_path: 源图像路径（大图）
         :param search_path: 目标图像路径（小图）
-        :return: 匹配置信度值，如果未找到匹配则返回None
+        :return: 匹配置信度值，如果未找到匹配则返回0
         """
         # 步骤1: 读取源图像（被查找的大图）
         img_src = self.img_imread(source_path)
@@ -35,7 +35,20 @@ class FindImg:
         img_sch = self.img_imread(search_path)
         # 步骤3: 使用模板匹配算法在源图像中查找目标图像，返回匹配结果（包含位置、置信度等信息）
         result = ac.find_template(img_src, img_sch)
-        # 步骤4: 在源图像上绘制蓝色矩形框标记匹配位置
+        
+        # 判断是否找到匹配结果
+        if result is None:
+            print("未找到匹配的图像")
+            # 保存原始源图像供查看
+            diff_img_path = get_project_path() + sep(["img", "diff_img", get_now_time_str() + "-未找到.png"],
+                                                     add_sep_before=True)
+            diff_img_dir = os.path.dirname(diff_img_path)
+            os.makedirs(diff_img_dir, exist_ok=True)
+            cv2.imencode(".png", img_src)[1].tofile(diff_img_path)
+            add_img_path_2_report(diff_img_path, "未找到匹配图")
+            return 0  # 返回0表示没有匹配
+        
+        # 步骤4: 在源图像上绘制红色矩形框标记匹配位置
         # rectangle参数说明: 图像对象, 矩形左上角坐标, 矩形右下角坐标, 颜色, 线宽像素
         cv2.rectangle(
             img_src, result["rectangle"][0], result["rectangle"][3], color=(0, 0, 255), thickness=3
