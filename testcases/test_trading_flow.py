@@ -40,7 +40,6 @@ class TestTradingFlow:
                 price=10,
                 status="上架",
                 bottom_button_name="提交"
-
             )
             add_img_2_report(driver, "新增二手商品")
             sleep(3)
