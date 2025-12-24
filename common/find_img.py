@@ -3,6 +3,7 @@
 # @Author: 孔敬淳
 # @Date  : 2025/12/18/20:49
 # @Desc  : 图像匹配工具类，用于在源图像中查找目标图像
+import os
 import aircv as ac
 import cv2
 
@@ -42,6 +43,10 @@ class FindImg:
         # 步骤5: 构建差异图片的保存路径（项目路径/img/diff_img/时间戳-对比的图.png）
         diff_img_path = get_project_path() + sep(["img", "diff_img", get_now_time_str() + "-对比的图.png"],
                                                  add_sep_before=True)
+        # 确保diff_img目录存在，不存在则自动创建
+        diff_img_dir = os.path.dirname(diff_img_path)
+        os.makedirs(diff_img_dir, exist_ok=True)
+        
         # 步骤6: 将标记后的图像编码为PNG格式并保存到文件（使用tofile支持中文路径）
         cv2.imencode(".png", img_src)[1].tofile(diff_img_path)
         # 步骤7: 将对比图添加到测试报告中

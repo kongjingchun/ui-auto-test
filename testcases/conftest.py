@@ -6,12 +6,21 @@
 
 import os
 import pytest
+from openpyxl.styles.builtins import total
+
+from common.process_redis import Process
+from common.report_add_img import add_img_2_report
+from config.driver_config import DriverConfig
 
 # 配置Allure测试报告默认语言为中文
 os.environ.setdefault('ALLURE_LANG', 'zh-CN')
 
-from common.report_add_img import add_img_2_report
-from config.driver_config import DriverConfig
+
+def pytest_collection_finish(session):
+    """pytest收集完测试用例后执行，初始化测试进度"""
+    total = len(session.items)
+    Process().reset_all()  # 清空之前的进度数据
+    Process().init_process(total)  # 初始化新的测试进度
 
 
 @pytest.fixture()
@@ -55,3 +64,12 @@ def pytest_runtest_makereport(item, call):
         # 如果测试失败，添加失败截图到报告
         if report.failed:
             add_img_2_report(get_driver, "失败截图", need_sleep=False)
+            Process().update_fail()  # 失败用例计数+1
+            Process().insert_into_fail_testcase_names(report.description)  # 记录失败用例名称
+        elif report.passed:
+            # 成功用例计数+1
+            Process().update_success()
+        else:
+            pass
+        process = Process().get_process()
+        print(f"测试进度: {process}")
