@@ -9,6 +9,7 @@ import allure
 
 from common.report_add_img import add_img_2_report
 from common.yaml_config import GetConf
+from logs.log import log
 from page.LeftMenuPage import LeftMenuPage
 from page.LoginPage import LoginPage
 from page.TopMenuPage import TopMenuPage
@@ -39,12 +40,15 @@ class TestInitializeUser:
         with allure.step("点击用户管理"):
             LeftMenuPage().click_two_level_menu(driver, "用户管理")
             add_img_2_report(driver, "点击用户管理")
-        with allure.step("创建教务管理员"):
-            UserManagePage().create_user(driver, role_name="创建教务管理员", user="dean")
-            sleep(3)
-        with allure.step("api注册教务管理员"):
-            CmsUserManage().register_cms_user("dean_cms")
+        # with allure.step("创建教务管理员"):
+        #     UserManagePage().create_user(driver, role_name="创建教务管理员", user="dean")
+        # with allure.step("api注册教务管理员"):
+        #     CmsUserManage().register_cms_user("dean_cms")
         with allure.step("切换到cms"):
             TopMenuPage().switch_school(driver, "CMS管理系统")
         with allure.step("点击到全部用户管理"):
             LeftMenuPage().click_two_level_menu(driver, "全部用户管理")
+        with allure.step("搜索cms用户"):
+            user_id = CmsUserManage().search_cms_user(driver, "dean_cms")
+            log.info("查找到用户id:" + user_id)
+

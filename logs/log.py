@@ -20,7 +20,7 @@ def get_log(logger_name):
     # 创建日志对象
     logger = logging.getLogger(logger_name)
     logger.setLevel(logging.INFO)
-    
+
     # 避免重复添加handler
     if logger.handlers:
         return logger

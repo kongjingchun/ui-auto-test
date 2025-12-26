@@ -5,13 +5,15 @@
 # @Desc  :
 import requests
 from flask import Config
+from selenium.webdriver.common.by import By
 
+from base.ObjectMap import ObjectMap
 from base.cms.CmsUserManageBase import CmsUserManageBase
 from common.yaml_config import GetConf
 from logs.log import log
 
 
-class CmsUserManage(CmsUserManageBase):
+class CmsUserManage(CmsUserManageBase, ObjectMap):
     """CMS用户管理类
 
     继承UserManageBase类，提供CMS用户管理相关的页面操作方法
@@ -29,7 +31,7 @@ class CmsUserManage(CmsUserManageBase):
         url = GetConf().get_url()
         res = requests.post(url + "api/auth/register", json=data)
         response_data = res.json()
-        
+
         # 判断返回结果中是否包含"注册成功"
         if "注册成功" in str(response_data):
             log.info(f"用户 {username} 注册成功")
@@ -39,7 +41,34 @@ class CmsUserManage(CmsUserManageBase):
             log.error(error_msg)
             raise Exception(error_msg)
 
+    def switch_2_cms_user_manage_iframe(self, driver):
+        """进入用户管理iframe"""
+        log.info("进入用户管理iframe")
+        iframe_xpath = self.cms_user_manage_iframe()
+        return self.switch_into_iframe(driver, By.XPATH, iframe_xpath)
+
+    def input_search_value(self, driver, value):
+        """在搜索框中输入内容并查询"""
+        log.info("在搜索框中输入内容查询")
+        search_input_xpath = self.search_input()
+        return self.element_input_value(driver, By.XPATH, search_input_xpath, value)
+
+    def switch_out_cms_iframe(self, driver):
+        """退出cms_iframe"""
+        log.info("退出iframe")
+        return self.switch_out_iframe(driver)
+
+    def search_cms_user(self, driver, user):
+        """搜索用户"""
+
+        username = GetConf().get_user_info(user, "username")
+        log.info("搜索用户:" + username)
+        self.switch_2_cms_user_manage_iframe(driver)
+        self.input_search_value(driver, username)
+        user_id = self.get_element_text(driver, By.XPATH, "//span[text()='"+username+"']/ancestor::td/preceding-sibling::td//span")
+        self.switch_out_cms_iframe(driver)
+        return user_id
+
 
 if __name__ == '__main__':
     res = CmsUserManage().register_cms_user("dean_cms")
-

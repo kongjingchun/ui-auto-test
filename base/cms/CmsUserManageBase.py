@@ -5,4 +5,10 @@
 # @Desc  :
 
 class CmsUserManageBase:
-    pass
+    def cms_user_manage_iframe(self):
+        """获取全部用户管理的xpath定位表达式"""
+        return "//iframe"
+
+    def search_input(self):
+        """获取搜索输入框的xpath定位表达式"""
+        return "//input[contains(@placeholder,'用户名')]"

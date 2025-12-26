@@ -4,14 +4,14 @@ user:
     password: 111
   dean:
 #    每次切换
-    username: Auto_dean004
+    username: Auto_dean006
 #    每次切换
-    user_code: Auto_dean_code004
+    user_code: Auto_dean_code006
     phone: 17601616126
     email: 411861376@qq.com
   dean_cms:
 #    每次切换
-    username: Auto_dean_cms004
+    username: Auto_dean_cms006
     password: Autotest
 
 school_name: 演示大学

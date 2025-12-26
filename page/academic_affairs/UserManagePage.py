@@ -29,6 +29,15 @@ class UserManagePage(UserManageBase, ObjectMap):
         iframe_xpath = self.user_manage_iframe()
         return self.switch_into_iframe(driver, By.XPATH, iframe_xpath)
 
+    def switch_out_of_user_manage_iframe(self, driver):
+        """退出用户管理页面的iframe
+
+        Returns:
+            退出操作结果
+        """
+        log.info("退出用户管理页面的iframe")
+        return self.switch_out_iframe(driver)
+
     def move_add_user_button(self, driver):
         """鼠标悬停到创建按钮
         
@@ -54,7 +63,12 @@ class UserManagePage(UserManageBase, ObjectMap):
         xpath = self.add_user_role_select(role_name)
         return self.element_click(driver, By.XPATH, xpath)
 
-    # 点击提交信息按钮
+    def input_user_value(self, driver, input_name, value):
+        """输入用户信息"""
+        log.info(f"输入用户信息：{input_name}为：{value}")
+        xpath = self.input_xpath(input_name)
+        return self.element_input_value(driver, By.XPATH, xpath, value)
+
     def click_submit_user_button(self, driver):
         """点击提交信息按钮
         Returns:
@@ -74,12 +88,12 @@ class UserManagePage(UserManageBase, ObjectMap):
             创建用户操作结果
         """
         user_name, user_code, user_phone, user_email = GetConf().get_user_info(user, "username", "user_code", "phone", "email")
-        log.info(f"创建{role_name}用户信息为：用户姓名：{user_name}，用户工号：{user_code}，用户手机号：{user_phone}，用户邮箱：{user_email}")
         self.switch_2_user_manage_iframe(driver)
         self.move_add_user_button(driver)
         self.click_add_user_role_select(driver, role_name)
-        self.element_input_value(driver, By.XPATH, self.input_user_value("姓名"), str(user_name))
-        self.element_input_value(driver, By.XPATH, self.input_user_value("工号"), str(user_code))
-        self.element_input_value(driver, By.XPATH, self.input_user_value("手机"), str(user_phone))
-        self.element_input_value(driver, By.XPATH, self.input_user_value("邮箱"), str(user_email))
+        self.input_user_value(driver, "姓名", str(user_name))
+        self.input_user_value(driver, "工号", str(user_code))
+        self.input_user_value(driver, "手机", str(user_phone))
+        self.input_user_value(driver, "邮箱", str(user_email))
         self.click_submit_user_button(driver)
+        self.switch_out_of_user_manage_iframe(driver)

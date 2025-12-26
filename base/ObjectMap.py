@@ -213,65 +213,55 @@ class ObjectMap:
         :param locate_type: 定位方式
         :param locator_expression: 定位表达式
         :param fill_value: 输入值
-        :param timeout: 超时时间(秒)，默认30秒
+        :param timeout: 超时时间(秒)
         :return: True成功
         """
-        # 元素必须先出现
-        element = self.element_appear(
-            driver,
-            locate_type=locate_type,
-            locator_expression=locator_expression,
-            timeout=timeout
-        )
-        try:
-            # 先清除元素中的原有值
-            element.clear()
-        except StaleElementReferenceException:  # 页面元素没有刷新出来，就对元素进行捕获，从而引发了这个异常
-            self.wait_for_ready_state_complete(driver=driver)
-            time.sleep(0.06)
-            element = self.element_appear(
-                driver,
-                locate_type=locate_type,
-                locator_expression=locator_expression,
-                timeout=timeout
-            )
+        # 将输入值转换为字符串
+        fill_value = str(fill_value) if isinstance(fill_value, (int, float)) else fill_value
+        
+        # 判断是否需要回车
+        need_enter = fill_value.endswith("\n")
+        if need_enter:
+            fill_value = fill_value[:-1]
+        
+        log.info(f"向元素 {locator_expression} 输入值 {fill_value}")
+        
+        # 获取并操作元素，最多重试一次
+        for attempt in range(2):
             try:
-                element.clear()
-            except Exception:
-                pass
-        except Exception:
-            pass
-        # 填入的值转成字符串
-        if type(fill_value) is int or type(fill_value) is float:
-            fill_value = str(fill_value)
-        try:
-            log.info(f"向元素 {locator_expression} 输入值 {fill_value} ")
-            # 填入的值不是以\n结尾
-            if not fill_value.endswith("\n"):
+                # 等待元素出现
+                element = self.element_appear(
+                    driver,
+                    locate_type=locate_type,
+                    locator_expression=locator_expression,
+                    timeout=timeout
+                )
+                
+                # 清除原有值
+                try:
+                    element.clear()
+                except Exception:
+                    pass  # 清除失败不影响后续操作
+                
+                # 输入值
                 element.send_keys(fill_value)
+                if need_enter:
+                    element.send_keys(Keys.RETURN)
+                
+                # 等待页面就绪
                 self.wait_for_ready_state_complete(driver=driver)
-            else:
-                fill_value = fill_value[:-1]
-                element.send_keys(fill_value)
-                element.send_keys(Keys.RETURN)
-                self.wait_for_ready_state_complete(driver=driver)
-        except StaleElementReferenceException:
-            self.wait_for_ready_state_complete(driver=driver)
-            time.sleep(0.06)
-            element = self.element_appear(driver, locate_type=locate_type, locator_expression=locator_expression)
-            element.clear()
-            if not fill_value.endswith("\n"):
-                element.send_keys(fill_value)
-                self.wait_for_ready_state_complete(driver=driver)
-            else:
-                fill_value = fill_value[:-1]
-                element.send_keys(fill_value)
-                element.send_keys(Keys.RETURN)
-                self.wait_for_ready_state_complete(driver=driver)
-        except Exception:
-            raise Exception("元素填值失败")
-
-        return True
+                return True
+                
+            except StaleElementReferenceException:
+                if attempt == 0:
+                    # 第一次失败，等待页面刷新后重试
+                    self.wait_for_ready_state_complete(driver=driver)
+                    time.sleep(0.06)
+                    continue
+                else:
+                    raise Exception(f"元素 {locator_expression} 填值失败：页面元素过期")
+            except Exception as e:
+                raise Exception(f"元素 {locator_expression} 填值失败：{str(e)}")
 
     def element_double_click(
             self,
@@ -380,7 +370,7 @@ class ObjectMap:
         iframe = self.element_get(driver, locate_iframe_type, locate_iframe_expression)
         driver.switch_to.frame(iframe)
 
-    def switch_from_iframe_to_content(self, driver, to_root=False):
+    def switch_out_iframe(self, driver, to_root=False):
         """
         从iframe切回主文档
         :param driver: 浏览器驱动
@@ -451,3 +441,44 @@ class ObjectMap:
         ele = self.element_get(driver, locate_type, locator_expression)
         driver.execute_script("arguments[0].scrollIntoView()", ele)
         return True
+
+# 获取元素中值的方法
+    def get_element_value(self, driver, locate_type, locator_expression):
+        """
+        获取表单元素的value属性值（适用于input、textarea等）
+        :param driver: 浏览器驱动
+        :param locate_type: 定位方式
+        :param locator_expression: 定位表达式
+        :return: 元素的value属性值
+        """
+        element = self.element_get(driver, locate_type, locator_expression)
+        return element.get_attribute("value")
+    
+    def get_element_text(self, driver, locate_type, locator_expression, timeout=10):
+        """
+        获取元素的文本内容（适用于span、div、p等标签）
+        :param driver: 浏览器驱动
+        :param locate_type: 定位方式
+        :param locator_expression: 定位表达式
+        :param timeout: 超时时间(秒)
+        :return: 元素的文本内容
+        """
+        element = self.element_get(driver, locate_type, locator_expression, timeout=timeout)
+        text = element.text.strip()
+        log.info(f"获取元素 {locator_expression} 的文本内容: {text}")
+        return text
+    
+    def get_element_attribute(self, driver, locate_type, locator_expression, attribute_name, timeout=10):
+        """
+        获取元素的指定属性值
+        :param driver: 浏览器驱动
+        :param locate_type: 定位方式
+        :param locator_expression: 定位表达式
+        :param attribute_name: 属性名（如 'class', 'id', 'data-v-0b15bdb0' 等）
+        :param timeout: 超时时间(秒)
+        :return: 属性值
+        """
+        element = self.element_get(driver, locate_type, locator_expression, timeout=timeout)
+        attr_value = element.get_attribute(attribute_name)
+        log.info(f"获取元素 {locator_expression} 的属性 {attribute_name}: {attr_value}")
+        return attr_value

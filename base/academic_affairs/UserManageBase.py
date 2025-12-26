@@ -10,7 +10,6 @@ class UserManageBase:
     提供用户管理相关页面元素的XPath定位表达式
     """
 
-
     def user_manage_iframe(self):
         """获取用户管理页面的iframe的XPath定位表达式"""
         return "//iframe"
@@ -24,7 +23,7 @@ class UserManageBase:
         return "//li[contains(.,'教务管理员')]"
         # return "//li[contains(., '" + role_name + "') and div[@class='role-item']]"
 
-    def input_user_value(self, input_name):
+    def input_xpath(self, input_name):
         """信息填写的Xpath定位表达式"""
         return "//div[contains(@aria-label,'创建')]//input[contains(@placeholder,'" + input_name + "')]"
 
