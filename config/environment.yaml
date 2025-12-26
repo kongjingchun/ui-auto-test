@@ -2,15 +2,20 @@ user:
   superadmin:
     username: superadmin
     password: 111
-  jiaowu:
-    username: William
-    password: 1234abcd!
-  kshoujia:
-    username: kshoujia
-    password: kshoujia
-  kmaijia:
-    username: kmaijia
-    password: kmaijia
+  dean:
+#    每次切换
+    username: Auto_dean004
+#    每次切换
+    user_code: Auto_dean_code004
+    phone: 17601616126
+    email: 411861376@qq.com
+  dean_cms:
+#    每次切换
+    username: Auto_dean_cms004
+    password: Autotest
+
+school_name: 演示大学
+
 url: http://192.168.200.204:5173/
 
 mysql:

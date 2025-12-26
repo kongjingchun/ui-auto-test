@@ -55,7 +55,7 @@ class ObjectMap:
                 f"定位表达式: {locator_expression}"
             )
 
-    def wait_for_ready_state_complete(self, driver, timeout=30):
+    def wait_for_ready_state_complete(self, driver, timeout=10):
         """
         等待页面完全加载
         :param driver: 浏览器驱动
@@ -86,13 +86,13 @@ class ObjectMap:
                 time.sleep(0.1)
         raise Exception("打开网页时，页面元素在%s秒后仍然没有完全加载完" % timeout)
 
-    def element_disappear(self, driver, locate_type, locator_expression, timeout=30):
+    def element_disappear(self, driver, locate_type, locator_expression, timeout=10):
         """
         等待页面元素消失（Selenium 4优化版本）
         :param driver: 浏览器驱动对象
         :param locate_type: 元素定位方式
         :param locator_expression: 元素定位表达式
-        :param timeout: 超时时间(秒)，默认30秒
+        :param timeout: 超时时间(秒)
         :return: 元素消失返回True
         """
         if not locate_type:
@@ -111,7 +111,7 @@ class ObjectMap:
                 f"定位表达式: {locator_expression}"
             )
 
-    def element_appear(self, driver, locate_type, locator_expression, timeout=30):
+    def element_appear(self, driver, locate_type, locator_expression, timeout=10):
         """
         等待页面元素出现并返回元素对象（Selenium 4优化版本）
         :param driver: 浏览器驱动对象
@@ -206,7 +206,7 @@ class ObjectMap:
         actions.move_to_element(element).perform()
         return True
 
-    def element_input_value(self, driver, locate_type, locator_expression, fill_value, timeout=30):
+    def element_input_value(self, driver, locate_type, locator_expression, fill_value, timeout=10):
         """
         向元素输入文本
         :param driver: 浏览器驱动
@@ -245,6 +245,7 @@ class ObjectMap:
         if type(fill_value) is int or type(fill_value) is float:
             fill_value = str(fill_value)
         try:
+            log.info(f"向元素 {locator_expression} 输入值 {fill_value} ")
             # 填入的值不是以\n结尾
             if not fill_value.endswith("\n"):
                 element.send_keys(fill_value)
@@ -281,7 +282,7 @@ class ObjectMap:
             locator_expression_disappear=None,
             locate_type_appear=None,
             locator_expression_appear=None,
-            timeout=30
+            timeout=10
     ):
         """
         双击元素
@@ -323,7 +324,7 @@ class ObjectMap:
             locator_expression_disappear=None,
             locate_type_appear=None,
             locator_expression_appear=None,
-            timeout=30
+            timeout=10
     ):
         """
         点击元素

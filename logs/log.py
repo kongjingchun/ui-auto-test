@@ -40,7 +40,7 @@ def get_log(logger_name):
 
     # 设置日志格式：时间-文件-模块-函数-行号-级别-消息
     all_log_formatter = logging.Formatter(
-        "%(asctime)s - %(filename)s - %(module)s - %(funcName)s - %(lineno)d - %(levelname)s - %(message)s————————",
+        "%(asctime)s - %(filename)s - %(module)s - %(funcName)s - %(lineno)d - %(levelname)s ————————- %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S")
     # 应用日志格式
     fh.setFormatter(all_log_formatter)

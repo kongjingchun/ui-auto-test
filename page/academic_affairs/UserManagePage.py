@@ -9,6 +9,7 @@ from selenium.webdriver.common.by import By
 
 from base.ObjectMap import ObjectMap
 from base.academic_affairs.UserManageBase import UserManageBase
+from common.yaml_config import GetConf
 from logs.log import log
 
 
@@ -61,37 +62,24 @@ class UserManagePage(UserManageBase, ObjectMap):
         """
         log.info("点击提交信息按钮")
         xpath = self.submit_user_button()
-        return self.element_click(driver, By.XPATH, xpath)
+        return self.element_double_click(driver, By.XPATH, xpath)
 
-
-    def create_user(self, driver, role_name, user_name, user_code, user_phone, user_email):
+    def create_user(self, driver, role_name, user):
         """创建用户
         Args:
             driver: WebDriver实例
             role_name: 角色名称（如：创建教务管理员、创建教师、创建学生）
-            user_name: 用户姓名
-            user_code: 用户学号
-            user_phone: 用户手机号
-            user_email: 用户邮箱
+            user:用户
         Returns:
             创建用户操作结果
         """
-        log.info("创建" + role_name + "用户信息为：用户姓名：" + user_name + "，用户工号：" + user_code + "，用户手机号：" + user_phone + "，用户邮箱：" + user_email)
+        user_name, user_code, user_phone, user_email = GetConf().get_user_info(user, "username", "user_code", "phone", "email")
+        log.info(f"创建{role_name}用户信息为：用户姓名：{user_name}，用户工号：{user_code}，用户手机号：{user_phone}，用户邮箱：{user_email}")
         self.switch_2_user_manage_iframe(driver)
         self.move_add_user_button(driver)
         self.click_add_user_role_select(driver, role_name)
-        self.element_input_value(driver, By.XPATH, self.input_user_value("姓名"), user_name)
-        self.element_input_value(driver, By.XPATH, self.input_user_value("工号"), user_code)
-        self.element_input_value(driver, By.XPATH, self.input_user_value("手机"), user_phone)
-        self.element_input_value(driver, By.XPATH, self.input_user_value("邮箱"), user_email)
-        # xpath = self.submit_user_button()
-        # element = self.element_get(driver, By.XPATH, xpath)
-        # # sleep(2)
-        # # element.click()
-        # # sleep(2)
-        # # element.click()
-        # sleep(2)
-        # # element.click()
-        log.info(self.click_submit_user_button(driver))
-        log.info(self.click_submit_user_button(driver))
-        sleep(3)
+        self.element_input_value(driver, By.XPATH, self.input_user_value("姓名"), str(user_name))
+        self.element_input_value(driver, By.XPATH, self.input_user_value("工号"), str(user_code))
+        self.element_input_value(driver, By.XPATH, self.input_user_value("手机"), str(user_phone))
+        self.element_input_value(driver, By.XPATH, self.input_user_value("邮箱"), str(user_email))
+        self.click_submit_user_button(driver)

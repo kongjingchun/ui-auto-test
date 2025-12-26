@@ -19,11 +19,11 @@ edu_platform/
 │  ├──organization_portal_management.py  # 机构门户管理
 │  └──__init__.py
 ├──academic_affairs/  # 教务管理（文件夹）
-│  ├──user_management.py  # 用户管理
-│  ├──role_management.py  # 角色管理
-│  ├──course_management.py  # 课程管理
+│  ├──user_manage.py  # 用户管理
+│  ├──role_manage.py  # 角色管理
+│  ├──course_manage.py  # 课程管理
 │  ├──administrative_class_management.py  # 行政班管理
-│  ├──semester_management.py  # 学期管理
+│  ├──semester_manage.py  # 学期管理
 │  └──__init__.py
 ├──data_center/  # 数据中心（文件夹）
 │  ├──platform_access_statistics.py  # 平台访问统计
