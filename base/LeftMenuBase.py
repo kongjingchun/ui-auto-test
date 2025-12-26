@@ -1,28 +1,12 @@
 # encoding: utf-8
 # @File  : LeftMenuBase.py
 # @Author: 孔敬淳
-# @Date  : 2025/12/15/15:36
-# @Desc  :
+# @Date  : 2025/12/25/12:02
+# @Desc  : 左侧菜单元素定位基类
 
 class LeftMenuBase:
-    def level_one_menu(self, menu_name):
-        """
-        一级菜单栏
-        :param menu_name:菜单栏名称
-        :return:
-        """
-        return "//aside[@class='el-aside']//span[text()='" + menu_name + "']"
+    """左侧菜单元素定位基类"""
 
-
-
-    def level_two_menu(self, menu_name):
-        """
-        二级菜单栏
-        :param menu_name:菜单栏名称
-        :return:
-        """
-        return "//aside[@class='el-aside']//span[text()='" + menu_name + "']/parent::li"
-
-
-if __name__ == '__main__':
-    print(LeftMenuBase().level_one_menu("已卖出的宝贝"))
+    def two_level_menu(self, menu_name):
+        """二级菜单定位"""
+        return "//div[text()='" + menu_name + "']/parent::div"

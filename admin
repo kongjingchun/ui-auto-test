@@ -11,3 +11,41 @@
     allure-pytest           Allure美化报告
     ddddocr                 OCR验证码识别
     redis                   Redis数据库客户端
+
+二、大致结构命名
+# 项目根目录（edu_platform）
+edu_platform/
+├──organization_management/  # 机构管理（文件夹）
+│  ├──organization_portal_management.py  # 机构门户管理
+│  └──__init__.py
+├──academic_affairs/  # 教务管理（文件夹）
+│  ├──user_management.py  # 用户管理
+│  ├──role_management.py  # 角色管理
+│  ├──course_management.py  # 课程管理
+│  ├──administrative_class_management.py  # 行政班管理
+│  ├──semester_management.py  # 学期管理
+│  └──__init__.py
+├──data_center/  # 数据中心（文件夹）
+│  ├──platform_access_statistics.py  # 平台访问统计
+│  ├──resource_construction.py  # 资源建设
+│  └──__init__.py
+├──ai_major_construction_system/  # AI专业建设系统（文件夹）
+│  ├──major_management.py  # 专业管理
+│  ├──major_dashboard_management.py  # 专业大屏管理
+│  ├──major_portal_management.py  # 专业门户管理
+│  ├──training_program_management.py  # 培养方案管理
+│  ├──major_quality_control.py  # 专业质量管控
+│  ├──major_construction_exhibition_center.py  # 专业建设展示中心
+│  ├──major_settings.py  # 专业设置
+│  └──__init__.py
+├──questionnaire_management/  # 问卷管理（文件夹）
+│  ├──questionnaire_category.py  # 问卷分类
+│  ├──questionnaire_tag.py  # 问卷标签
+│  ├──questionnaire_list.py  # 问卷列表
+│  ├──my_questionnaires.py  # 我的问卷
+│  └──__init__.py
+├──department_management/  # 院系管理（文件夹）
+│  ├──department_list_management.py  # 院系列表管理
+│  ├──department_info_settings.py  # 院系信息设置
+│  └──__init__.py
+└──base_page.py  # PageObject公共基类

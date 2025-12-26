@@ -1,8 +1,8 @@
 user:
-  jay:
-    username: 周杰伦
-    password: 1234abcd!
-  william:
+  superadmin:
+    username: superadmin
+    password: 111
+  jiaowu:
     username: William
     password: 1234abcd!
   kshoujia:
@@ -11,7 +11,7 @@ user:
   kmaijia:
     username: kmaijia
     password: kmaijia
-url: http://www.tcpjwtester.top/
+url: http://192.168.200.204:5173/
 
 mysql:
   db: trading_system
