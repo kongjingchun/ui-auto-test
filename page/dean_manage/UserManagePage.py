@@ -8,7 +8,7 @@ from time import sleep
 from selenium.webdriver.common.by import By
 
 from base.ObjectMap import ObjectMap
-from base.academic_affairs.UserManageBase import UserManageBase
+from base.dean_manage.UserManageBase import UserManageBase
 from common.yaml_config import GetConf
 from logs.log import log
 

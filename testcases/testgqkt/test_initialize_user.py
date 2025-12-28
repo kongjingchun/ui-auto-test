@@ -13,7 +13,7 @@ from logs.log import log
 from page.LeftMenuPage import LeftMenuPage
 from page.LoginPage import LoginPage
 from page.TopMenuPage import TopMenuPage
-from page.academic_affairs.UserManagePage import UserManagePage
+from page.dean_manage.UserManagePage import UserManagePage
 from page.cms.CmsUserManagePage import CmsUserManage
 
 
