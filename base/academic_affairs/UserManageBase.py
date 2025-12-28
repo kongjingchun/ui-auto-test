@@ -30,3 +30,7 @@ class UserManageBase:
     def submit_user_button(self):
         """创建用户按钮的Xpath定位表达式"""
         return "//div[@class = 'dialog-footer']/button[contains(.,'创建用户')]"
+
+    def create_success_alert(self):
+        """创建成功提示框的Xpath定位表达式"""
+        return "//p[contains(text(),'创建成功')]"

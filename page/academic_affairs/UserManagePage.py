@@ -78,6 +78,15 @@ class UserManagePage(UserManageBase, ObjectMap):
         xpath = self.submit_user_button()
         return self.element_double_click(driver, By.XPATH, xpath)
 
+    # 判断创建成功的提示框是否出现
+    def is_create_success_alert_display(self, driver):
+        """判断创建成功的提示框是否出现
+        Returns:
+            bool: True表示创建成功，False表示失败
+        """
+        log.info("判断创建成功的提示框是否出现")
+        return self.element_is_display(driver, By.XPATH, self.create_success_alert())
+
     def create_user(self, driver, role_name, user):
         """创建用户
         Args:
@@ -85,9 +94,12 @@ class UserManagePage(UserManageBase, ObjectMap):
             role_name: 角色名称（如：创建教务管理员、创建教师、创建学生）
             user:用户
         Returns:
-            创建用户操作结果
+            bool: True表示创建成功，False表示失败
         """
-        user_name, user_code, user_phone, user_email = GetConf().get_user_info(user, "username", "user_code", "phone", "email")
+        user_name, user_code, user_phone, user_email = GetConf().get_user_info(user, "username", "user_code", "phone",
+                                                                               "email")
+
+        # 收集所有步骤的返回值
         self.switch_2_user_manage_iframe(driver)
         self.move_add_user_button(driver)
         self.click_add_user_role_select(driver, role_name)
@@ -96,4 +108,7 @@ class UserManagePage(UserManageBase, ObjectMap):
         self.input_user_value(driver, "手机", str(user_phone))
         self.input_user_value(driver, "邮箱", str(user_email))
         self.click_submit_user_button(driver)
+        results = self.is_create_success_alert_display(driver)
         self.switch_out_of_user_manage_iframe(driver)
+        log.info("创建用户结果：" + str(results))
+        return  results

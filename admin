@@ -11,6 +11,7 @@
     allure-pytest           Allure美化报告
     ddddocr                 OCR验证码识别
     redis                   Redis数据库客户端
+    pymysql                 mysql数据库
 
 二、大致结构命名
 # 项目根目录（edu_platform）

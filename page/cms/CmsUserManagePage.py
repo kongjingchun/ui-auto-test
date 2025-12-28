@@ -39,7 +39,7 @@ class CmsUserManage(CmsUserManageBase, ObjectMap):
         else:
             error_msg = f"用户 {username} 注册失败，返回结果：{response_data}"
             log.error(error_msg)
-            raise Exception(error_msg)
+            return False
 
     def switch_2_cms_user_manage_iframe(self, driver):
         """进入用户管理iframe"""
@@ -65,7 +65,8 @@ class CmsUserManage(CmsUserManageBase, ObjectMap):
         log.info("搜索用户:" + username)
         self.switch_2_cms_user_manage_iframe(driver)
         self.input_search_value(driver, username)
-        user_id = self.get_element_text(driver, By.XPATH, "//span[text()='"+username+"']/ancestor::td/preceding-sibling::td//span")
+        user_id = self.get_element_text(driver, By.XPATH,
+                                        "//span[text()='" + username + "']/ancestor::td/preceding-sibling::td//span")
         self.switch_out_cms_iframe(driver)
         return user_id
 

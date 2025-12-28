@@ -58,9 +58,9 @@ class TopMenuPage(TopMenuBase, ObjectMap):
     def switch_school(self, driver, school_name):
         """切换学校"""
         self.click_school_switch(driver)
-        self.click_school_switch_list(driver, school_name)
+        return self.click_school_switch_list(driver, school_name)
 
     def switch_role(self, driver, role_name):
         """切换角色"""
         self.click_role_switch(driver)
-        self.click_role_switch_list(driver, role_name)
+        return self.click_role_switch_list(driver, role_name)

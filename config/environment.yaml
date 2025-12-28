@@ -1,22 +1,22 @@
 user:
   superadmin:
     username: superadmin
-    password: 111
+    password: gqkt111!
   dean:
 #    每次切换
-    username: Auto_dean006
+    username: Auto_dean001
 #    每次切换
-    user_code: Auto_dean_code006
+    user_code: Auto_dean_code001
     phone: 17601616126
     email: 411861376@qq.com
   dean_cms:
 #    每次切换
-    username: Auto_dean_cms006
+    username: Auto_dean_cms001
     password: Autotest
 
-school_name: 演示大学
+school_name: 智慧大学
 
-url: http://192.168.200.204:5173/
+url: https://www.gqkt.cn/
 
 mysql:
   db: trading_system

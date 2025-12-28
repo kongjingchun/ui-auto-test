@@ -48,12 +48,12 @@ class ObjectMap:
 
             log.info(f"元素 {locator_expression} 已通过 {locate_type} 方式找到")
             return element
-
         except TimeoutException:
             raise ElementNotVisibleException(
                 f"元素定位失败（超时{timeout}秒），定位方式: {locate_type}，"
                 f"定位表达式: {locator_expression}"
             )
+
 
     def wait_for_ready_state_complete(self, driver, timeout=10):
         """
@@ -184,8 +184,12 @@ class ObjectMap:
         """
         try:
             # Selenium 4推荐：使用WebDriverWait检查元素可见性
-            self.element_get(driver, locate_type, locator_expression, timeout, must_be_visible=True)
-            return True
+            # self.element_get(driver, locate_type, locator_expression, timeout, must_be_visible=True)
+            res = self.element_get(driver, locate_type, locator_expression, timeout, must_be_visible=True)
+            if res:
+                return True
+            else:
+                return False
         except (NoSuchElementException, TimeoutException):
             return False
 
@@ -218,14 +222,14 @@ class ObjectMap:
         """
         # 将输入值转换为字符串
         fill_value = str(fill_value) if isinstance(fill_value, (int, float)) else fill_value
-        
+
         # 判断是否需要回车
         need_enter = fill_value.endswith("\n")
         if need_enter:
             fill_value = fill_value[:-1]
-        
+
         log.info(f"向元素 {locator_expression} 输入值 {fill_value}")
-        
+
         # 获取并操作元素，最多重试一次
         for attempt in range(2):
             try:
@@ -236,22 +240,22 @@ class ObjectMap:
                     locator_expression=locator_expression,
                     timeout=timeout
                 )
-                
+
                 # 清除原有值
                 try:
                     element.clear()
                 except Exception:
                     pass  # 清除失败不影响后续操作
-                
+
                 # 输入值
                 element.send_keys(fill_value)
                 if need_enter:
                     element.send_keys(Keys.RETURN)
-                
+
                 # 等待页面就绪
                 self.wait_for_ready_state_complete(driver=driver)
                 return True
-                
+
             except StaleElementReferenceException:
                 if attempt == 0:
                     # 第一次失败，等待页面刷新后重试
@@ -369,6 +373,7 @@ class ObjectMap:
         """
         iframe = self.element_get(driver, locate_iframe_type, locate_iframe_expression)
         driver.switch_to.frame(iframe)
+        return True
 
     def switch_out_iframe(self, driver, to_root=False):
         """
@@ -382,6 +387,7 @@ class ObjectMap:
             driver.switch_to.default_content()
         else:
             driver.switch_to.parent_frame()
+        return True
 
     def switch_window_2_latest_handle(self, driver):
         """
@@ -442,7 +448,7 @@ class ObjectMap:
         driver.execute_script("arguments[0].scrollIntoView()", ele)
         return True
 
-# 获取元素中值的方法
+    # 获取元素中值的方法
     def get_element_value(self, driver, locate_type, locator_expression):
         """
         获取表单元素的value属性值（适用于input、textarea等）
@@ -453,7 +459,7 @@ class ObjectMap:
         """
         element = self.element_get(driver, locate_type, locator_expression)
         return element.get_attribute("value")
-    
+
     def get_element_text(self, driver, locate_type, locator_expression, timeout=10):
         """
         获取元素的文本内容（适用于span、div、p等标签）
@@ -467,7 +473,7 @@ class ObjectMap:
         text = element.text.strip()
         log.info(f"获取元素 {locator_expression} 的文本内容: {text}")
         return text
-    
+
     def get_element_attribute(self, driver, locate_type, locator_expression, attribute_name, timeout=10):
         """
         获取元素的指定属性值
