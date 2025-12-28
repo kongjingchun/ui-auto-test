@@ -12,7 +12,7 @@ class UserManageBase:
 
     def user_manage_iframe(self):
         """获取用户管理页面的iframe的XPath定位表达式"""
-        return "//iframe"
+        return "//iframe[@id='app-iframe-2006']"
 
     def add_user_button(self):
         """获取手动新增按钮的XPath定位表达式"""
@@ -23,7 +23,7 @@ class UserManageBase:
         return "//li[contains(.,'教务管理员')]"
         # return "//li[contains(., '" + role_name + "') and div[@class='role-item']]"
 
-    def input_xpath(self, input_name):
+    def creat_input_xpath(self, input_name):
         """信息填写的Xpath定位表达式"""
         return "//div[contains(@aria-label,'创建')]//input[contains(@placeholder,'" + input_name + "')]"
 
@@ -34,3 +34,11 @@ class UserManageBase:
     def create_success_alert(self):
         """创建成功提示框的Xpath定位表达式"""
         return "//p[contains(text(),'创建成功')]"
+
+    def search_input(self, input_name):
+        """工号搜索框的Xpath定位表达式"""
+        return "//input[contains(@placeholder,'" + input_name + "')]"
+
+    def user_bind_button(self, user_name):
+        """用户绑定按钮的Xpath定位表达式"""
+        return "//span[contains(text(),'" + user_name + "')]/ancestor::td/following-sibling ::td//div[@class='action-buttons']//button[contains(.,'绑定')]"
