@@ -1,3 +1,8 @@
+# 全局变量配置（只需修改这里的序号）
+test_suffix: 11  # 测试环境序号
+
+school_name: 智慧大学
+url: https://www.gqkt.cn/
 user:
   # 超级管理员
   superadmin:
@@ -5,29 +10,27 @@ user:
     password: gqkt111!
   # CMS 教务管理员
   dean_cms:
-    username: Auto_dean_cms09
+    username: Auto_dean_cms{suffix}
     password: Autotest
   # 教务管理员
   dean:
-    姓名: Auto_dean09
-    工号: Auto_dean_code09
+    姓名: Auto_dean{suffix}
+    工号: Auto_dean_code{suffix}
     手机: 15100000001
     邮箱: Autotest001@xuetangx.com
   # CMS 专业管理员
   prof_cms:
-    username: Auto_prof_cms09
+    username: Auto_prof_cms{suffix}
     password: Autotest
   # 专业管理员
   prof:
-    姓名: Auto_prof09
-    工号: Auto_prof_code09
+    姓名: Auto_prof{suffix}
+    工号: Auto_prof_code{suffix}
     手机: 15100000002
     邮箱: Autotest002@xuetangx.com
-
-school_name: 智慧大学
-
-url: https://www.gqkt.cn/
-
+department:
+  - name: 测试部门{suffix}
+    code: Auto_dept{suffix}
 mysql:
   db: trading_system
   host: 120.53.230.254

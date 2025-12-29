@@ -1,9 +1,8 @@
 # encoding: utf-8
-# @File  : test_initialize_user.py
+# @File  : test_001_initialize_user.py
 # @Author: 孔敬淳
 # @Date  : 2025/12/24/21:27
 # @Desc  :
-from time import sleep
 
 import allure
 
@@ -11,7 +10,7 @@ from common.report_add_img import add_img_2_report
 from common.yaml_config import GetConf
 from logs.log import log
 from page.LeftMenuPage import LeftMenuPage
-from page.LoginPage import LoginPage
+from page.login.LoginPage import LoginPage
 from page.TopMenuPage import TopMenuPage
 from page.dean_manage.UserManagePage import UserManagePage
 from page.cms.CmsUserManagePage import CmsUserManage

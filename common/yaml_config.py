@@ -18,6 +18,30 @@ class GetConf:
                   encoding="utf-8") as env_file:
             self.env = yaml.load(env_file, Loader=yaml.FullLoader)
 
+        # 处理变量替换
+        self._process_variables()
+
+    def _process_variables(self):
+        """处理YAML中的变量替换"""
+        if 'test_suffix' in self.env:
+            suffix = str(self.env['test_suffix'])
+            self._replace_suffix(self.env, suffix)
+
+    def _replace_suffix(self, data, suffix):
+        """递归替换字典中的{suffix}占位符"""
+        if isinstance(data, dict):
+            for key, value in data.items():
+                if isinstance(value, str) and '{suffix}' in value:
+                    data[key] = value.replace('{suffix}', suffix)
+                elif isinstance(value, (dict, list)):
+                    self._replace_suffix(value, suffix)
+        elif isinstance(data, list):
+            for i, item in enumerate(data):
+                if isinstance(item, str) and '{suffix}' in item:
+                    data[i] = item.replace('{suffix}', suffix)
+                elif isinstance(item, (dict, list)):
+                    self._replace_suffix(item, suffix)
+
     def get_user_info(self, user: str, *fields: str) -> Any:
         """
         获取用户信息

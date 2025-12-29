@@ -5,9 +5,8 @@
 # @Desc  : 登录页面对象类，封装登录相关的页面操作方法
 from selenium.webdriver.common.by import By
 
-from base.LoginBase import LoginBase
+from base.login.LoginBase import LoginBase
 from base.ObjectMap import ObjectMap
-from common.yaml_config import GetConf
 
 
 class LoginPage(LoginBase, ObjectMap):
