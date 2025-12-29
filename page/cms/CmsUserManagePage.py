@@ -20,9 +20,10 @@ class CmsUserManage(CmsUserManageBase, ObjectMap):
     """
 
     # 接口注册CMS用户
-    def register_cms_user(self, user):
+    def register_cms_user(self, user_info):
         """注册CMS用户"""
-        username, password = GetConf().get_user_info(user, "username", "password")
+        username = user_info["username"]
+        password = user_info["password"]
         log.info("api注册cms用户:用户名：" + username + "密码：" + password)
         data = {
             "username": str(username),
@@ -58,15 +59,13 @@ class CmsUserManage(CmsUserManageBase, ObjectMap):
         log.info("退出iframe")
         return self.switch_out_iframe(driver)
 
-    def search_cms_user(self, driver, user):
+    def search_cms_user(self, driver, username):
         """搜索用户"""
 
-        username = GetConf().get_user_info(user, "username")
         log.info("搜索用户:" + username)
         self.switch_2_cms_user_manage_iframe(driver)
         self.input_search_value(driver, username)
-        user_id = self.get_element_text(driver, By.XPATH,
-                                        "//span[text()='" + username + "']/ancestor::td/preceding-sibling::td//span")
+        user_id = self.get_element_text(driver, By.XPATH,self.get_user_id_xpath( username))
         self.switch_out_cms_iframe(driver)
         return user_id
 

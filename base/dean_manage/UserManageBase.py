@@ -20,7 +20,7 @@ class UserManageBase:
 
     def add_user_role_select(self, role_name):
         """选择创建角色身份的XPath定位表达式"""
-        return "//li[contains(.,'教务管理员')]"
+        return "//li[contains(.,'" + role_name + "')]"
         # return "//li[contains(., '" + role_name + "') and div[@class='role-item']]"
 
     def creat_input_xpath(self, input_name):
@@ -52,7 +52,7 @@ class UserManageBase:
         """确认绑定按钮的Xpath定位表达式"""
         return "//span[contains(.,'确认绑定')]/parent::button"
 
-#     绑定成功提示
+    #     绑定成功提示
     def bind_success_alert(self):
         """绑定成功提示框的Xpath定位表达式"""
         return "//p[contains(text(),'绑定用户成功')]"

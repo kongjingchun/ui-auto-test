@@ -138,7 +138,7 @@ class UserManagePage(UserManageBase, ObjectMap):
         """创建用户
         Args:
             driver: WebDriver实例
-            role_name: 角色名称（如：创建教务管理员、创建教师、创建学生）
+            role_name: 创建的角色名称（如：创建教务管理员、创建教师、创建学生）
             user_info: 用户信息字典，key为字段名称，value为字段值
                       例如：{"姓名": "张三", "工号": "001", "手机": "13800138000", "邮箱": "test@example.com"}
         Returns:
@@ -173,5 +173,6 @@ class UserManagePage(UserManageBase, ObjectMap):
         self.input_user_bind_input(driver, user_id)
         self.click_user_bind_confirm_button(driver)
         results = self.is_user_bind_success_alert_display(driver)
+        self.switch_out_of_user_manage_iframe(driver)
         log.info("绑定用户结果：" + str(results))
         return results

@@ -19,7 +19,7 @@ from page.cms.CmsUserManagePage import CmsUserManage
 
 class TestInitializeUser:
 
-    @allure.story("初始化教务账号")
+    @allure.story("初始化账号")
     def test_001_initialize_user(self, driver):
         """
         测试初始化教务账号流程
@@ -28,17 +28,25 @@ class TestInitializeUser:
         """
         # 学校名称
         school_name = GetConf().get_school_name()
+        # 超级管理员信息（账密）
+        superadmin = GetConf().get_user_info("superadmin")
+        # 创建的CMS教务管理员信息
+        dean_cms_user_info = GetConf().get_user_info("dean_cms")
         # 创建的教务管理员信息
-        user_info = GetConf().get_user_info("dean")
-        # 创建的教务管理员工号
-        user_code = user_info["工号"]
+        dean_user_info = GetConf().get_user_info("dean")
+        # 创建的CMS专业负责人信息
+        prof_cms_user_info = GetConf().get_user_info("prof_cms")
+        # 创建的专业负责人信息
+        prof_user_info = GetConf().get_user_info("prof")
 
-        with allure.step("api注册教务管理员"):
-            result = CmsUserManage().register_cms_user("dean_cms")
-            assert result is True, "api注册教务管理员失败"
+        with allure.step("api注册cms账户"):
+            result = CmsUserManage().register_cms_user(dean_cms_user_info)
+            assert result is True, "api注册教务账户失败"
+            result = CmsUserManage().register_cms_user(prof_cms_user_info)
+            assert result is True, "api注册专业负责人账户失败"
 
         with allure.step("登录"):
-            result = LoginPage().user_login(driver, "superadmin")
+            result = LoginPage().user_login(driver, superadmin)
             add_img_2_report(driver, "登录")
             assert result is True, "登录失败"
 
@@ -52,11 +60,15 @@ class TestInitializeUser:
             add_img_2_report(driver, "点击到全部用户管理")
             assert result is True, "点击到全部用户管理失败"
 
-        with allure.step("搜索cms用户"):
-            user_id = CmsUserManage().search_cms_user(driver, "dean_cms")
-            add_img_2_report(driver, "搜索cms用户")
-            assert user_id is not None and user_id != "", "搜索cms用户失败，未找到用户"
-            log.info("查找到用户id:" + user_id)
+        with allure.step("查询cms用户ID"):
+            dean_user_id = CmsUserManage().search_cms_user(driver, dean_cms_user_info["username"])
+            add_img_2_report(driver, "查询教务管理员ID")
+            assert dean_user_id is not None and dean_user_id != "", "查询教务管理员ID失败，未找到用户"
+            log.info("教务管理员id为:" + dean_user_id)
+            prof_user_id = CmsUserManage().search_cms_user(driver, prof_cms_user_info["username"])
+            add_img_2_report(driver, "查询专业负责人ID")
+            assert prof_user_id is not None and prof_user_id != "", "查询专业负责人ID失败，未找到用户"
+            log.info("专业负责人id为:" + prof_user_id)
 
         with allure.step("切换学校"):
             result = TopMenuPage().switch_school(driver, school_name)
@@ -72,14 +84,19 @@ class TestInitializeUser:
             result = LeftMenuPage().click_two_level_menu(driver, "用户管理")
             add_img_2_report(driver, "点击用户管理")
             assert result is True, "点击用户管理失败"
-        #
-        with allure.step("创建教务管理员"):
-            result = UserManagePage().create_user(driver, role_name="创建教务管理员", user_info=user_info)
+
+        with allure.step("创建用户"):
+            result = UserManagePage().create_user(driver, role_name="创建教务管理员", user_info=dean_user_info)
             add_img_2_report(driver, "创建教务管理员")
             assert result is True, "创建教务管理员失败"
+            result = UserManagePage().create_user(driver, role_name="创建专业负责人", user_info=prof_user_info)
+            add_img_2_report(driver, "创建专业负责人")
+            assert result is True, "创建专业负责人失败"
 
-        # 用户绑定
         with allure.step("用户绑定"):
-            result = UserManagePage().bind_user(driver, user_code, user_id)
-            add_img_2_report(driver, "用户绑定")
-            assert result is True, "用户绑定失败"
+            result = UserManagePage().bind_user(driver, dean_user_info["工号"], dean_user_id)
+            add_img_2_report(driver, "教务管理员绑定")
+            assert result is True, "教务管理员绑定失败"
+            result = UserManagePage().bind_user(driver, prof_user_info["工号"], prof_user_id)
+            add_img_2_report(driver, "专业负责人绑定")
+            assert result is True, "专业负责人绑定失败"

@@ -41,7 +41,7 @@ class LoginPage(LoginBase, ObjectMap):
         """
         return self.element_click(driver, By.XPATH, self.login_button())
 
-    def user_login(self, driver, user_name):
+    def user_login(self, driver, user_info):
         """用户登录操作
         
         Args:
@@ -51,8 +51,9 @@ class LoginPage(LoginBase, ObjectMap):
         Returns:
             登录操作结果
         """
-        user_name, password = GetConf().get_username_password(user_name)
+        username = user_info["username"]
+        password = user_info["password"]
         self.element_to_url(driver, "login")
-        self.login_input_value(driver, '账户', user_name)
+        self.login_input_value(driver, '账户', username)
         self.login_input_value(driver, '密码', password)
         return self.click_login_button(driver)

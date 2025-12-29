@@ -1,18 +1,28 @@
 user:
+  # 超级管理员
   superadmin:
     username: superadmin
     password: gqkt111!
-  dean:
-#    每次切换
-    姓名: Auto_dean05
-#    每次切换
-    工号: Auto_dean_code05
-    手机: 17601616126
-    邮箱: 411861376@qq.com
+  # CMS 教务管理员
   dean_cms:
-#    每次切换
-    username: Auto_dean_cms05
+    username: Auto_dean_cms09
     password: Autotest
+  # 教务管理员
+  dean:
+    姓名: Auto_dean09
+    工号: Auto_dean_code09
+    手机: 15100000001
+    邮箱: Autotest001@xuetangx.com
+  # CMS 专业管理员
+  prof_cms:
+    username: Auto_prof_cms09
+    password: Autotest
+  # 专业管理员
+  prof:
+    姓名: Auto_prof09
+    工号: Auto_prof_code09
+    手机: 15100000002
+    邮箱: Autotest002@xuetangx.com
 
 school_name: 智慧大学
 
