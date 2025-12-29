@@ -36,9 +36,23 @@ class UserManageBase:
         return "//p[contains(text(),'创建成功')]"
 
     def search_input(self, input_name):
-        """工号搜索框的Xpath定位表达式"""
+        """搜索框的Xpath定位表达式"""
+
         return "//input[contains(@placeholder,'" + input_name + "')]"
 
     def user_bind_button(self, user_name):
         """用户绑定按钮的Xpath定位表达式"""
         return "//span[contains(text(),'" + user_name + "')]/ancestor::td/following-sibling ::td//div[@class='action-buttons']//button[contains(.,'绑定')]"
+
+    def user_bind_input(self):
+        """绑定用户平台ID输入框的Xpath定位表达式"""
+        return "//input[@placeholder='请输入平台用户ID']"
+
+    def user_bind_confirm_button(self):
+        """确认绑定按钮的Xpath定位表达式"""
+        return "//span[contains(.,'确认绑定')]/parent::button"
+
+#     绑定成功提示
+    def bind_success_alert(self):
+        """绑定成功提示框的Xpath定位表达式"""
+        return "//p[contains(text(),'绑定用户成功')]"

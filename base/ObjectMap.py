@@ -332,24 +332,36 @@ class ObjectMap:
         :param timeout: 超时时间(秒)，默认30秒
         :return: True成功，False失败
         """
-        try:
-            # Selenium 4推荐：使用WebDriverWait等待元素可点击
-            wait = WebDriverWait(driver, timeout, poll_frequency=0.1)
-            element = wait.until(
-                EC.element_to_be_clickable((locate_type, locator_expression))
-            )
-            element.click()
+        # 最多重试2次，处理stale element异常
+        for attempt in range(2):
+            try:
+                # Selenium 4推荐：使用WebDriverWait等待元素可点击
+                wait = WebDriverWait(driver, timeout, poll_frequency=0.1)
+                element = wait.until(
+                    EC.element_to_be_clickable((locate_type, locator_expression))
+                )
+                element.click()
 
-            # 点击后等待元素出现或消失
-            if locate_type_appear:
-                self.element_appear(driver, locate_type_appear, locator_expression_appear)
-            if locate_type_disappear:
-                self.element_disappear(driver, locate_type_disappear, locator_expression_disappear)
+                # 点击后等待元素出现或消失
+                if locate_type_appear:
+                    self.element_appear(driver, locate_type_appear, locator_expression_appear)
+                if locate_type_disappear:
+                    self.element_disappear(driver, locate_type_disappear, locator_expression_disappear)
 
-            return True
-        except (TimeoutException, Exception) as e:
-            log.error(f"元素点击失败: {e}")
-            return False
+                return True
+            except StaleElementReferenceException:
+                if attempt == 0:
+                    # 第一次失败，等待页面刷新后重试
+                    log.warning(f"元素 {locator_expression} 点击时发生stale element异常，等待页面刷新后重试")
+                    self.wait_for_ready_state_complete(driver=driver)
+                    time.sleep(0.1)
+                    continue
+                else:
+                    log.error(f"元素 {locator_expression} 点击失败：页面元素过期（已重试）")
+                    return False
+            except (TimeoutException, Exception) as e:
+                log.error(f"元素点击失败: {e}")
+                return False
 
     def upload(self, driver, locate_type, locator_expression, file_path):
         """

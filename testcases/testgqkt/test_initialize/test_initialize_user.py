@@ -26,10 +26,22 @@ class TestInitializeUser:
         :param driver: WebDriver实例
         :return: None
         """
+        # 学校名称
         school_name = GetConf().get_school_name()
-        # with allure.step("api注册教务管理员"):
-        #     result = CmsUserManage().register_cms_user("dean_cms")
-        #     assert result is True, "api注册教务管理员失败"
+        # 创建的教务管理员信息
+        user_info = GetConf().get_user_info("dean")
+        # 创建的教务管理员工号
+        user_code = user_info["工号"]
+
+        with allure.step("api注册教务管理员"):
+            result = CmsUserManage().register_cms_user("dean_cms")
+            assert result is True, "api注册教务管理员失败"
+
+        with allure.step("登录"):
+            result = LoginPage().user_login(driver, "superadmin")
+            add_img_2_report(driver, "登录")
+            assert result is True, "登录失败"
+
         with allure.step("切换到cms"):
             result = TopMenuPage().switch_school(driver, "CMS管理系统")
             add_img_2_report(driver, "切换到cms")
@@ -46,11 +58,6 @@ class TestInitializeUser:
             assert user_id is not None and user_id != "", "搜索cms用户失败，未找到用户"
             log.info("查找到用户id:" + user_id)
 
-        with allure.step("登录"):
-            result = LoginPage().user_login(driver, "superadmin")
-            add_img_2_report(driver, "登录")
-            assert result is True, "登录失败"
-
         with allure.step("切换学校"):
             result = TopMenuPage().switch_school(driver, school_name)
             add_img_2_report(driver, "切换学校")
@@ -65,12 +72,14 @@ class TestInitializeUser:
             result = LeftMenuPage().click_two_level_menu(driver, "用户管理")
             add_img_2_report(driver, "点击用户管理")
             assert result is True, "点击用户管理失败"
-
+        #
         with allure.step("创建教务管理员"):
-            result = UserManagePage().create_user(driver, role_name="创建教务管理员", user="dean")
+            result = UserManagePage().create_user(driver, role_name="创建教务管理员", user_info=user_info)
             add_img_2_report(driver, "创建教务管理员")
             assert result is True, "创建教务管理员失败"
 
-        #用户绑定
+        # 用户绑定
         with allure.step("用户绑定"):
-            pass
+            result = UserManagePage().bind_user(driver, user_code, user_id)
+            add_img_2_report(driver, "用户绑定")
+            assert result is True, "用户绑定失败"

@@ -67,4 +67,6 @@ class GetConf:
 
 
 if __name__ == '__main__':
-    print(GetConf().get_school_name())
+    user_info=GetConf().get_user_info("dean")
+    for input_name, value in user_info.items():
+        print(input_name, value)

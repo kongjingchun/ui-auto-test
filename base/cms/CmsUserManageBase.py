@@ -12,3 +12,4 @@ class CmsUserManageBase:
     def search_input(self):
         """获取搜索输入框的xpath定位表达式"""
         return "//input[contains(@placeholder,'用户名')]"
+
