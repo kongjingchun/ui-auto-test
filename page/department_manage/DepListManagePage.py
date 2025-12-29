@@ -24,3 +24,26 @@ class DepListManagePage(DepListManageBase, ObjectMap):
         """
         log.info("切换到院系列表管理页面的iframe")
         return self.switch_into_iframe(driver, By.XPATH, self.dep_manage_iframe())
+
+    def click_new_dep_button(self, driver):
+        """点击新建院系按钮
+
+        Returns:
+            点击操作结果
+        """
+        log.info("点击新建院系按钮")
+        return self.element_click(driver, By.XPATH, self.new_dep_button())
+
+    def input_new_dep_input(self, driver, dep_info):
+        """输入新建院系信息
+
+        Args:
+            driver: WebDriver实例
+            input_name: 输入框名称
+            value: 输入的值
+        Returns:
+            输入操作结果
+        """
+
+        log.info(f"输入新建院系信息：{input_name}为：{value}")
+        return self.element_input_value(driver, By.XPATH, self.new_dep_input(input_name), value)

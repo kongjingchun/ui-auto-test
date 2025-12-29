@@ -28,9 +28,18 @@ user:
     工号: Auto_prof_code{suffix}
     手机: 15100000002
     邮箱: Autotest002@xuetangx.com
+# 院系信息
 department:
-  - name: 测试部门{suffix}
-    code: Auto_dept{suffix}
+  院系名称: 测试部门{suffix}
+  院系代码: Auto_dept{suffix}
+
+
+
+
+
+
+
+
 mysql:
   db: trading_system
   host: 120.53.230.254

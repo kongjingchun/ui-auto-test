@@ -23,7 +23,7 @@ class UserManageBase:
         return "//li[contains(.,'" + role_name + "')]"
         # return "//li[contains(., '" + role_name + "') and div[@class='role-item']]"
 
-    def creat_input_xpath(self, input_name):
+    def creat_user_input_xpath(self, input_name):
         """信息填写的Xpath定位表达式"""
         return "//div[contains(@aria-label,'创建')]//input[contains(@placeholder,'" + input_name + "')]"
 

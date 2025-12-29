@@ -50,7 +50,7 @@ class GetConf:
         :return: 如果传入多个字段，返回元组；如果传入单个字段，返回该字段值；如果不传字段，返回整个用户字典
         """
         user_data = self.env["user"][user]
-        
+
         if not fields:
             # 如果没有指定字段，返回整个用户信息字典
             return user_data
@@ -60,7 +60,7 @@ class GetConf:
         else:
             # 如果有多个字段，返回元组
             return tuple(user_data.get(field) for field in fields)
-    
+
     def get_username_password(self, user: str) -> Tuple[str, str]:
         """获取用户名和密码（向后兼容的便捷方法）"""
         return self.get_user_info(user, "username", "password")
@@ -89,6 +89,34 @@ class GetConf:
         """获取jenkins地址"""
         return self.env["jenkins"]
 
+    def get_info(self, config_key: str, *fields: str) -> Any:
+        """
+        获取YAML配置信息
+        :param config_key: 配置项名称，如 'department', 'mysql', 'redis' 等
+        :param fields: 要获取的字段名
+        :return: 没有指定字段返回整个配置，单个字段返回值，多个字段返回元组
+        """
+        config_data = self.env.get(config_key)
+        
+        if config_data is None:
+            return None
+        
+        if not fields:
+            # 如果没有指定字段，返回整个配置
+            return config_data
+        elif len(fields) == 1:
+            # 如果只有一个字段，返回单个值
+            if isinstance(config_data, dict):
+                return config_data.get(fields[0])
+            else:
+                return config_data
+        else:
+            # 如果有多个字段，返回元组
+            if isinstance(config_data, dict):
+                return tuple(config_data.get(field) for field in fields)
+            else:
+                return config_data
+
 
 if __name__ == '__main__':
-    print(GetConf().get_user_info("dean"))
+    print(GetConf().get_info("department"))

@@ -66,7 +66,7 @@ class UserManagePage(UserManageBase, ObjectMap):
     def input_user_value(self, driver, input_name, value):
         """输入用户信息"""
         log.info(f"输入用户信息：{input_name}为：{value}")
-        xpath = self.creat_input_xpath(input_name)
+        xpath = self.creat_user_input_xpath(input_name)
         return self.element_input_value(driver, By.XPATH, xpath, value)
 
     def click_submit_user_button(self, driver):
