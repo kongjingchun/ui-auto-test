@@ -1,5 +1,5 @@
 一、大致结构命名
-# 项目根目录
+# 项目根目录（大致）
 project_root/
 ├──organization/  # 机构管理
 │  ├──organization_portal.py  # 机构门户管理
