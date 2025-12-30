@@ -44,14 +44,14 @@ class CmsUserManage(CmsUserManageBase, ObjectMap):
 
     def switch_2_cms_user_manage_iframe(self, driver):
         """进入用户管理iframe"""
-        log.info("进入用户管理iframe")
         iframe_xpath = self.cms_user_manage_iframe()
+        log.info(f"进入用户管理iframe，xpath定位为：{iframe_xpath}")
         return self.switch_into_iframe(driver, By.XPATH, iframe_xpath)
 
     def input_search_value(self, driver, value):
         """在搜索框中输入内容并查询"""
-        log.info("在搜索框中输入内容查询")
         search_input_xpath = self.search_input()
+        log.info(f"在搜索框中输入内容查询：{value}，xpath定位为：{search_input_xpath}")
         return self.element_input_value(driver, By.XPATH, search_input_xpath, value)
 
     def switch_out_cms_iframe(self, driver):
@@ -61,11 +61,12 @@ class CmsUserManage(CmsUserManageBase, ObjectMap):
 
     def search_cms_user(self, driver, username):
         """搜索用户"""
-
-        log.info("搜索用户:" + username)
+        log.info(f"搜索用户:{username}")
         self.switch_2_cms_user_manage_iframe(driver)
         self.input_search_value(driver, username)
-        user_id = self.get_element_text(driver, By.XPATH,self.get_user_id_xpath( username))
+        user_id_xpath = self.get_user_id_xpath(username)
+        log.info(f"获取用户ID，xpath定位为：{user_id_xpath}")
+        user_id = self.get_element_text(driver, By.XPATH, user_id_xpath)
         self.switch_out_cms_iframe(driver)
         return user_id
 

@@ -28,8 +28,8 @@ class UserManagePage(UserManageBase, ObjectMap):
         Returns:
             悬停操作结果
         """
-        log.info("鼠标悬停到手动创建按钮")
         xpath = self.add_user_button()
+        log.info(f"鼠标悬停到手动创建按钮，xpath定位为：{xpath}")
         return self.action_move_to_element(driver, By.XPATH, xpath)
 
     def click_add_user_role_select(self, driver, role_name):
@@ -40,14 +40,14 @@ class UserManagePage(UserManageBase, ObjectMap):
         Returns:
             点击操作结果
         """
-        log.info("创建的角色身份为：" + role_name)
         xpath = self.add_user_role_select(role_name)
+        log.info(f"创建的角色身份为：{role_name}，xpath定位为：{xpath}")
         return self.element_click(driver, By.XPATH, xpath)
 
     def input_user_value(self, driver, input_name, value):
         """输入用户信息"""
-        log.info(f"输入用户信息：{input_name}为：{value}")
         xpath = self.creat_user_input_xpath(input_name)
+        log.info(f"输入用户信息：{input_name}为：{value}，xpath定位为：{xpath}")
         return self.element_input_value(driver, By.XPATH, xpath, value)
 
     def click_submit_user_button(self, driver):
@@ -55,8 +55,8 @@ class UserManagePage(UserManageBase, ObjectMap):
         Returns:
             点击操作结果
         """
-        log.info("点击提交信息按钮")
         xpath = self.submit_user_button()
+        log.info(f"点击提交信息按钮，xpath定位为：{xpath}")
         return self.element_double_click(driver, By.XPATH, xpath)
 
     def is_create_success_alert_display(self, driver):
@@ -64,8 +64,9 @@ class UserManagePage(UserManageBase, ObjectMap):
         Returns:
             bool: True表示创建成功，False表示失败
         """
-        log.info("判断创建成功的提示框是否出现")
-        return self.element_is_display(driver, By.XPATH, self.create_success_alert())
+        xpath = self.create_success_alert()
+        log.info(f"判断创建成功的提示框是否出现，xpath定位为：{xpath}")
+        return self.element_is_display(driver, By.XPATH, xpath)
 
     def input_search_input(self, driver, input_name, value):
         """向搜索输入框输入内容
@@ -76,8 +77,9 @@ class UserManagePage(UserManageBase, ObjectMap):
         Returns:
             输入操作结果
         """
-        log.info(f"通过{input_name}搜索{value}")
-        return self.element_input_value(driver, By.XPATH, self.search_input(input_name), value)
+        xpath = self.search_input(input_name)
+        log.info(f"通过{input_name}搜索{value}，xpath定位为：{xpath}")
+        return self.element_input_value(driver, By.XPATH, xpath, value)
 
     def click_user_bind_button(self, driver, user_name):
         """点击用户绑定按钮
@@ -87,8 +89,9 @@ class UserManagePage(UserManageBase, ObjectMap):
         Returns:
             点击操作结果
         """
-        log.info(f"点击用户绑定按钮：{user_name}")
-        return self.element_click(driver, By.XPATH, self.user_bind_button(user_name))
+        xpath = self.user_bind_button(user_name)
+        log.info(f"点击用户绑定按钮：{user_name}，xpath定位为：{xpath}")
+        return self.element_click(driver, By.XPATH, xpath)
 
     def input_user_bind_input(self, driver, user_id):
         """输入用户绑定ID
@@ -98,8 +101,9 @@ class UserManagePage(UserManageBase, ObjectMap):
         Returns:
             输入操作结果
         """
-        log.info(f"输入用户绑定ID：{user_id}")
-        return self.element_input_value(driver, By.XPATH, self.user_bind_input(), user_id)
+        xpath = self.user_bind_input()
+        log.info(f"输入用户绑定ID：{user_id}，xpath定位为：{xpath}")
+        return self.element_input_value(driver, By.XPATH, xpath, user_id)
 
     def click_user_bind_confirm_button(self, driver):
         """点击确认绑定
@@ -108,12 +112,14 @@ class UserManagePage(UserManageBase, ObjectMap):
         Returns:
             点击操作结果
         """
-        log.info("点击确认绑定")
-        return self.element_click(driver, By.XPATH, self.user_bind_confirm_button())
+        xpath = self.user_bind_confirm_button()
+        log.info(f"点击确认绑定，xpath定位为：{xpath}")
+        return self.element_click(driver, By.XPATH, xpath)
 
     def is_user_bind_success_alert_display(self, driver):
-        log.info("判断绑定成功的提示框是否出现")
-        return self.element_is_display(driver, By.XPATH, self.bind_success_alert())
+        xpath = self.bind_success_alert()
+        log.info(f"判断绑定成功的提示框是否出现，xpath定位为：{xpath}")
+        return self.element_is_display(driver, By.XPATH, xpath)
 
     def create_user(self, driver, role_name, user_info):
         """创建用户

@@ -7,6 +7,7 @@ from selenium.webdriver.common.by import By
 
 from base.login.LoginBase import LoginBase
 from base.ObjectMap import ObjectMap
+from logs.log import log
 
 
 class LoginPage(LoginBase, ObjectMap):
@@ -27,6 +28,7 @@ class LoginPage(LoginBase, ObjectMap):
             元素操作结果
         """
         input_xpath = self.login_input(input_name)
+        log.info(f"在登录页面输入{input_name}：{input_value}，xpath定位为：{input_xpath}")
         return self.element_input_value(driver, By.XPATH, input_xpath, input_value)
 
     def click_login_button(self, driver):
@@ -38,7 +40,9 @@ class LoginPage(LoginBase, ObjectMap):
         Returns:
             点击操作结果
         """
-        return self.element_click(driver, By.XPATH, self.login_button())
+        xpath = self.login_button()
+        log.info(f"点击登录按钮，xpath定位为：{xpath}")
+        return self.element_click(driver, By.XPATH, xpath)
 
     def user_login(self, driver, user_info):
         """用户登录操作
@@ -52,6 +56,7 @@ class LoginPage(LoginBase, ObjectMap):
         """
         username = user_info["username"]
         password = user_info["password"]
+        log.info(f"用户登录：{username}")
         self.element_to_url(driver, "login")
         self.login_input_value(driver, '账户', username)
         self.login_input_value(driver, '密码', password)

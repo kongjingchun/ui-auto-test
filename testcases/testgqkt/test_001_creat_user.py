@@ -16,7 +16,7 @@ from page.dean_manage.UserManagePage import UserManagePage
 from page.cms.CmsUserManagePage import CmsUserManage
 
 
-class TestInitializeUser:
+class TestCreateUser:
 
     @allure.story("初始化账号")
     def test_001_initialize_user(self, driver):

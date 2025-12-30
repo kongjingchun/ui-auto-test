@@ -13,18 +13,14 @@ from page.department_manage.DeptListManagePage import DeptListManagePage
 
 
 class TestInitializeDeptMajor:
-    """初始学校院系、专业等流程"""
+    """创建院系测试"""
 
-    @allure.story("初始化学校")
-    def test_001_initialize_dept_major(self, driver):
-        """
-        初始学校院系、专业等流程
-        :param driver: WebDriver实例
-        :return: None
-        """
+    @allure.story("创建院系")
+    def test_001_initialize_dept(self, driver):
+        """创建院系流程"""
         # 教务管理员账号
         dean_cms_user_info = GetConf().get_user_info("dean_cms")
-        # 新建的学院信息
+        # 新建的院系信息
         dept_info = GetConf().get_info("department")
 
         with allure.step("登录教务管理员"):

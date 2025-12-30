@@ -24,14 +24,26 @@ user:
     password: Autotest
   # 专业管理员
   prof:
-    姓名: Auto_prof{suffix}
+    姓名: &prof_name Auto_prof{suffix}
     工号: Auto_prof_code{suffix}
     手机: 15100000002
     邮箱: Autotest002@xuetangx.com
 # 院系信息
 department:
-  院系名称: auto_dept{suffix}
+  院系名称: &dept_name auto_dept{suffix}
   院系代码: Auto_dept{suffix}
+
+major:
+  专业名称: auto_major{suffix}
+  学校专业代码: Auto_major{suffix}
+  国家专业代码: Auto_major{suffix}
+  所属院系: *dept_name
+  专业负责人: *prof_name
+  专业建设层次: 国家一流本科专业
+  专业特色标签:
+    - 国家级特色专业
+    - 省级特色专业 
+
 
 
 

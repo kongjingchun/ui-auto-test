@@ -54,7 +54,6 @@ class ObjectMap:
                 f"定位表达式: {locator_expression}"
             )
 
-
     def wait_for_ready_state_complete(self, driver, timeout=10):
         """
         等待页面完全加载
@@ -267,6 +266,77 @@ class ObjectMap:
             except Exception as e:
                 raise Exception(f"元素 {locator_expression} 填值失败：{str(e)}")
 
+    def element_click(
+            self,
+            driver,
+            locate_type,
+            locator_expression,
+            locate_type_disappear=None,
+            locator_expression_disappear=None,
+            locate_type_appear=None,
+            locator_expression_appear=None,
+            timeout=10
+    ):
+        """
+        点击元素
+        :param driver: 浏览器驱动
+        :param locate_type: 定位方式
+        :param locator_expression: 定位表达式
+        :param locate_type_disappear: 等待消失的元素定位方式
+        :param locator_expression_disappear: 等待消失的元素定位表达式
+        :param locate_type_appear: 等待出现的元素定位方式
+        :param locator_expression_appear: 等待出现的元素定位表达式
+        :param timeout: 超时时间(秒)，默认30秒
+        :return: True成功，False失败
+        """
+        # 最多重试3次，处理stale element和click intercepted异常
+        for attempt in range(3):
+            try:
+                # Selenium 4推荐：使用WebDriverWait等待元素可点击
+                wait = WebDriverWait(driver, timeout, poll_frequency=0.1)
+                element = wait.until(
+                    EC.element_to_be_clickable((locate_type, locator_expression))
+                )
+                
+                # 滚动元素到可视区域中心位置
+                driver.execute_script("arguments[0].scrollIntoView({block: 'center', behavior: 'smooth'});", element)
+                time.sleep(0.3)  # 等待滚动完成
+                
+                try:
+                    element.click()
+                except Exception as click_error:
+                    # 如果普通点击失败，尝试使用JavaScript点击
+                    if "click intercepted" in str(click_error).lower() or "not clickable" in str(click_error).lower():
+                        log.warning(f"元素 {locator_expression} 被遮挡或不可点击，尝试使用JavaScript点击")
+                        driver.execute_script("arguments[0].click();", element)
+                    else:
+                        raise
+
+                # 点击后等待元素出现或消失
+                if locate_type_appear:
+                    self.element_appear(driver, locate_type_appear, locator_expression_appear)
+                if locate_type_disappear:
+                    self.element_disappear(driver, locate_type_disappear, locator_expression_disappear)
+
+                return True
+            except StaleElementReferenceException:
+                if attempt < 2:
+                    # 前两次失败，等待页面刷新后重试
+                    log.warning(f"元素 {locator_expression} 点击时发生stale element异常，等待页面刷新后重试（第{attempt+1}次）")
+                    self.wait_for_ready_state_complete(driver=driver)
+                    time.sleep(0.2)
+                    continue
+                else:
+                    log.error(f"元素 {locator_expression} 点击失败：页面元素过期（已重试{attempt+1}次）")
+                    return False
+            except (TimeoutException, Exception) as e:
+                if attempt < 2:
+                    log.warning(f"元素点击失败（第{attempt+1}次尝试）: {e}")
+                    time.sleep(0.3)
+                    continue
+                log.error(f"元素点击失败（已重试{attempt+1}次）: {e}")
+                return False
+
     def element_double_click(
             self,
             driver,
@@ -308,60 +378,6 @@ class ObjectMap:
         except (TimeoutException, Exception) as e:
             log.error(f"元素点击失败: {e}")
             return False
-
-    def element_click(
-            self,
-            driver,
-            locate_type,
-            locator_expression,
-            locate_type_disappear=None,
-            locator_expression_disappear=None,
-            locate_type_appear=None,
-            locator_expression_appear=None,
-            timeout=10
-    ):
-        """
-        点击元素
-        :param driver: 浏览器驱动
-        :param locate_type: 定位方式
-        :param locator_expression: 定位表达式
-        :param locate_type_disappear: 等待消失的元素定位方式
-        :param locator_expression_disappear: 等待消失的元素定位表达式
-        :param locate_type_appear: 等待出现的元素定位方式
-        :param locator_expression_appear: 等待出现的元素定位表达式
-        :param timeout: 超时时间(秒)，默认30秒
-        :return: True成功，False失败
-        """
-        # 最多重试2次，处理stale element异常
-        for attempt in range(2):
-            try:
-                # Selenium 4推荐：使用WebDriverWait等待元素可点击
-                wait = WebDriverWait(driver, timeout, poll_frequency=0.1)
-                element = wait.until(
-                    EC.element_to_be_clickable((locate_type, locator_expression))
-                )
-                element.click()
-
-                # 点击后等待元素出现或消失
-                if locate_type_appear:
-                    self.element_appear(driver, locate_type_appear, locator_expression_appear)
-                if locate_type_disappear:
-                    self.element_disappear(driver, locate_type_disappear, locator_expression_disappear)
-
-                return True
-            except StaleElementReferenceException:
-                if attempt == 0:
-                    # 第一次失败，等待页面刷新后重试
-                    log.warning(f"元素 {locator_expression} 点击时发生stale element异常，等待页面刷新后重试")
-                    self.wait_for_ready_state_complete(driver=driver)
-                    time.sleep(0.1)
-                    continue
-                else:
-                    log.error(f"元素 {locator_expression} 点击失败：页面元素过期（已重试）")
-                    return False
-            except (TimeoutException, Exception) as e:
-                log.error(f"元素点击失败: {e}")
-                return False
 
     def upload(self, driver, locate_type, locator_expression, file_path):
         """

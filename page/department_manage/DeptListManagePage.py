@@ -22,8 +22,9 @@ class DeptListManagePage(DeptListManageBase, ObjectMap):
         Returns:
             切换操作结果
         """
-        log.info("切换到院系列表管理页面的iframe")
-        return self.switch_into_iframe(driver, By.XPATH, self.dept_manage_iframe())
+        xpath = self.dept_manage_iframe()
+        log.info(f"切换到院系列表管理页面的iframe，xpath定位为：{xpath}")
+        return self.switch_into_iframe(driver, By.XPATH, xpath)
 
     def click_new_dept_button(self, driver):
         """点击新建院系按钮
@@ -31,8 +32,9 @@ class DeptListManagePage(DeptListManageBase, ObjectMap):
         Returns:
             点击操作结果
         """
-        log.info("点击新建院系按钮")
-        return self.element_click(driver, By.XPATH, self.new_dept_button())
+        xpath = self.new_dept_button()
+        log.info(f"点击新建院系按钮，xpath定位为：{xpath}")
+        return self.element_click(driver, By.XPATH, xpath)
 
     def input_new_dept_input(self, driver, input_name, value):
         """输入新建院系信息
@@ -44,9 +46,9 @@ class DeptListManagePage(DeptListManageBase, ObjectMap):
         Returns:
             输入操作结果
         """
-
-        log.info(f"输入新建院系信息：{input_name}为：{value}")
-        return self.element_input_value(driver, By.XPATH, self.new_dept_input(input_name), value)
+        xpath = self.new_dept_input(input_name)
+        log.info(f"输入新建院系信息：{input_name}为：{value}，xpath定位为：{xpath}")
+        return self.element_input_value(driver, By.XPATH, xpath, value)
 
     def click_new_dept_confirm_button(self, driver):
         """点击新建院系确认按钮
@@ -54,8 +56,9 @@ class DeptListManagePage(DeptListManageBase, ObjectMap):
         Returns:
             点击操作结果
         """
-        log.info("点击新建院系确认按钮")
-        return self.element_click(driver, By.XPATH, self.new_dept_confirm_button())
+        xpath = self.new_dept_confirm_button()
+        log.info(f"点击新建院系确认按钮，xpath定位为：{xpath}")
+        return self.element_click(driver, By.XPATH, xpath)
 
     def is_create_success_alert_display(self, driver):
         """查看创建成功提示框是否出现
@@ -63,8 +66,9 @@ class DeptListManagePage(DeptListManageBase, ObjectMap):
         Returns:
             提示框是否出现
         """
-        log.info("查看创建成功提示框是否出现")
-        return self.element_is_display(driver, By.XPATH, self.create_success_alert())
+        xpath = self.create_success_alert()
+        log.info(f"查看创建成功提示框是否出现，xpath定位为：{xpath}")
+        return self.element_is_display(driver, By.XPATH, xpath)
 
     def create_dept(self, driver, dept_info):
         """创建院系
