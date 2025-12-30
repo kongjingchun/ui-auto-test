@@ -26,3 +26,11 @@ class DepListManageBase:
             return "//input[contains(@placeholder,'请输入院系名称')]"
         else:
             return "//input[contains(@placeholder,'请输入院系代码')]"
+
+    def new_dep_confirm_button(self):
+        """新建确定按钮"""
+        return "//span[text()='确定']/parent::button"
+
+    def create_success_alert(self):
+        """创建成功提示框"""
+        return "//p[text()='创建成功']"

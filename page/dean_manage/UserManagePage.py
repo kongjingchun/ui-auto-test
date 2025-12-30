@@ -19,25 +19,6 @@ class UserManagePage(UserManageBase, ObjectMap):
     继承UserManageBase和ObjectMap类，提供用户管理页面的元素操作方法
     """
 
-    def switch_2_user_manage_iframe(self, driver):
-        """切换到用户管理页面的iframe
-
-        Returns:
-            切换操作结果
-        """
-        log.info("切换到用户管理页面的iframe")
-        iframe_xpath = self.user_manage_iframe()
-        return self.switch_into_iframe(driver, By.XPATH, iframe_xpath)
-
-    def switch_out_of_user_manage_iframe(self, driver):
-        """退出用户管理页面的iframe
-
-        Returns:
-            退出操作结果
-        """
-        log.info("退出用户管理页面的iframe")
-        return self.switch_out_iframe(driver)
-
     def move_add_user_button(self, driver):
         """鼠标悬停到创建按钮
         
@@ -144,7 +125,7 @@ class UserManagePage(UserManageBase, ObjectMap):
         Returns:
             bool: True表示创建成功，False表示失败
         """
-        self.switch_2_user_manage_iframe(driver)
+        self.switch_into_iframe(driver, By.XPATH, self.user_manage_iframe())
         self.move_add_user_button(driver)
         self.click_add_user_role_select(driver, role_name)
 
@@ -153,7 +134,7 @@ class UserManagePage(UserManageBase, ObjectMap):
             self.input_user_value(driver, input_name, str(value))
         self.click_submit_user_button(driver)
         results = self.is_create_success_alert_display(driver)
-        self.switch_out_of_user_manage_iframe(driver)
+        self.switch_out_iframe(driver)
         log.info("创建用户结果：" + str(results))
         return results
 
@@ -167,12 +148,12 @@ class UserManagePage(UserManageBase, ObjectMap):
         Returns:
             bool: True表示绑定成功，False表示失败
         """
-        self.switch_2_user_manage_iframe(driver)
+        self.switch_into_iframe(driver, By.XPATH, self.user_manage_iframe())
         self.input_search_input(driver, "工号", user)
         self.click_user_bind_button(driver, user)
         self.input_user_bind_input(driver, user_id)
         self.click_user_bind_confirm_button(driver)
-        results = self.is_user_bind_success_alert_display(driver)
-        self.switch_out_of_user_manage_iframe(driver)
-        log.info("绑定用户结果：" + str(results))
-        return results
+        result = self.is_user_bind_success_alert_display(driver)
+        self.switch_out_iframe(driver)
+        log.info("绑定用户结果：" + str(result))
+        return result

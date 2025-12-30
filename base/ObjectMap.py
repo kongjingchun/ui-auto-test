@@ -383,6 +383,7 @@ class ObjectMap:
         :param locate_iframe_expression: iframe定位表达式
         :return: None
         """
+        log.info(f"切换到iframe：{locate_iframe_expression}")
         iframe = self.element_get(driver, locate_iframe_type, locate_iframe_expression)
         driver.switch_to.frame(iframe)
         return True
@@ -395,6 +396,7 @@ class ObjectMap:
         :return: None
         """
         # Selenium 4改进：提供更灵活的iframe切换
+        log.info("从iframe切回主文档")
         if to_root:
             driver.switch_to.default_content()
         else:
