@@ -229,7 +229,7 @@ class ObjectMap:
 
         log.info(f"向元素 {locator_expression} 输入值 {fill_value}")
 
-        # 获取并操作元素，最多重试一次
+        # 获取并操作元素，最多重试2次
         for attempt in range(2):
             try:
                 # 等待元素出现
@@ -239,6 +239,10 @@ class ObjectMap:
                     locator_expression=locator_expression,
                     timeout=timeout
                 )
+
+                # 滚动元素到可视区域中心位置
+                driver.execute_script("arguments[0].scrollIntoView({block: 'center', behavior: 'smooth'});", element)
+                time.sleep(0.2)  # 等待滚动完成
 
                 # 清除原有值
                 try:
@@ -258,6 +262,7 @@ class ObjectMap:
             except StaleElementReferenceException:
                 if attempt == 0:
                     # 第一次失败，等待页面刷新后重试
+                    log.warning(f"元素 {locator_expression} 输入时发生stale element异常，等待页面刷新后重试")
                     self.wait_for_ready_state_complete(driver=driver)
                     time.sleep(0.06)
                     continue
