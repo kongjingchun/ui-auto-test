@@ -1,19 +1,4 @@
-一、依赖
-    webdriver-manager       浏览器驱动管理工具
-    pyyaml                  YAML配置文件解析
-    selenium                Web自动化测试
-    pytest-xdist            并行执行测试
-    pytest-rerunfailures    失败用例重跑
-    pytest-assume           多重断言
-    pytest-html             HTML测试报告
-    aircv                   图像模板匹配
-    opencv-python           图像处理库
-    allure-pytest           Allure美化报告
-    ddddocr                 OCR验证码识别
-    redis                   Redis数据库客户端
-    pymysql                 mysql数据库
-
-二、大致结构命名
+一、大致结构命名
 # 项目根目录
 project_root/
 ├──organization/  # 机构管理

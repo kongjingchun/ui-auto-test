@@ -30,7 +30,7 @@ user:
     邮箱: Autotest002@xuetangx.com
 # 院系信息
 department:
-  院系名称: 测试部门{suffix}
+  院系名称: auto_dept{suffix}
   院系代码: Auto_dept{suffix}
 
 
