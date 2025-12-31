@@ -1,5 +1,5 @@
 # encoding: utf-8
-# @File  : test_002_creat_dept.py.py
+# @File  : test_002_create_dept.py
 # @Author: 孔敬淳
 # @Date  : 2025/12/29/16:34
 # @Desc  :

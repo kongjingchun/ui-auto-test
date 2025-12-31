@@ -17,9 +17,13 @@
     "python.terminal.executeInFileDir": false,
     "python.terminal.activateEnvInCurrentTerminal": true,
     "[python]": {
-        "editor.defaultFormatter": "ms-python.python",
+        "editor.defaultFormatter": "ms-python.autopep8",
         "editor.formatOnSave": true
     },
+    "autopep8.args": [
+        "--max-line-length=120",
+        "--ignore=E501"
+    ],
     "code-runner.executorMap": {
         "python": "cd $workspaceRoot && export PYTHONPATH=$workspaceRoot && $workspaceRoot/.venv/bin/python -m pytest $fileName -v -s"
     },

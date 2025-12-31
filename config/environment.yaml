@@ -1,5 +1,5 @@
 # 全局变量配置（只需修改这里的序号）
-test_suffix: 11  # 测试环境序号
+test_suffix: 11 # 测试环境序号
 
 school_name: 智慧大学
 url: https://www.gqkt.cn/
@@ -34,7 +34,7 @@ department:
   院系代码: Auto_dept{suffix}
 
 major:
-  专业名称: auto_major{suffix}
+  专业名称: &major_name auto_major{suffix}
   学校专业代码: Auto_major{suffix}
   国家专业代码: Auto_major{suffix}
   所属院系: *dept_name
@@ -42,15 +42,16 @@ major:
   专业建设层次: 国家一流本科专业
   专业特色标签:
     - 国家级特色专业
-    - 省级特色专业 
+    - 省级特色专业
 
-
-
-
-
-
-
-
+admin_class:
+  行政班名称: Auto_admin_class{suffix}
+  行政班编号: Auto_admin_class_code{suffix}
+  行政班描述: Auto_admin_class_desc{suffix}
+  所属学院: *dept_name
+  所属专业: *major_name
+  年级: 2025级
+  行政班描述: 行政班描述
 
 mysql:
   db: trading_system
