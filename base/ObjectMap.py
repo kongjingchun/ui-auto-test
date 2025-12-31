@@ -232,12 +232,10 @@ class ObjectMap:
         # 获取并操作元素，最多重试2次
         for attempt in range(2):
             try:
-                # 等待元素出现
-                element = self.element_appear(
-                    driver,
-                    locate_type=locate_type,
-                    locator_expression=locator_expression,
-                    timeout=timeout
+                # 等待元素出现并可见
+                wait = WebDriverWait(driver, timeout, poll_frequency=0.1)
+                element = wait.until(
+                    EC.visibility_of_element_located((locate_type, locator_expression))
                 )
 
                 # 滚动元素到可视区域中心位置
@@ -264,12 +262,19 @@ class ObjectMap:
                     # 第一次失败，等待页面刷新后重试
                     log.warning(f"元素 {locator_expression} 输入时发生stale element异常，等待页面刷新后重试")
                     self.wait_for_ready_state_complete(driver=driver)
-                    time.sleep(0.06)
+                    time.sleep(0.1)
                     continue
                 else:
-                    raise Exception(f"元素 {locator_expression} 填值失败：页面元素过期")
+                    raise Exception(f"元素 {locator_expression} 填值失败：页面元素过期（已重试{attempt + 1}次）")
+            except TimeoutException as e:
+                raise Exception(f"元素 {locator_expression} 填值失败：元素超时未出现或不可交互 - {str(e)}")
             except Exception as e:
-                raise Exception(f"元素 {locator_expression} 填值失败：{str(e)}")
+                if attempt == 0:
+                    log.warning(f"元素 {locator_expression} 输入失败（第{attempt + 1}次尝试），将重试：{str(e)}")
+                    time.sleep(0.2)
+                    continue
+                else:
+                    raise Exception(f"元素 {locator_expression} 填值失败：{str(e)}")
 
     def element_click(
             self,
@@ -302,11 +307,11 @@ class ObjectMap:
                 element = wait.until(
                     EC.element_to_be_clickable((locate_type, locator_expression))
                 )
-                
+
                 # 滚动元素到可视区域中心位置
                 driver.execute_script("arguments[0].scrollIntoView({block: 'center', behavior: 'smooth'});", element)
                 time.sleep(0.3)  # 等待滚动完成
-                
+
                 try:
                     element.click()
                 except Exception as click_error:
@@ -327,19 +332,19 @@ class ObjectMap:
             except StaleElementReferenceException:
                 if attempt < 2:
                     # 前两次失败，等待页面刷新后重试
-                    log.warning(f"元素 {locator_expression} 点击时发生stale element异常，等待页面刷新后重试（第{attempt+1}次）")
+                    log.warning(f"元素 {locator_expression} 点击时发生stale element异常，等待页面刷新后重试（第{attempt + 1}次）")
                     self.wait_for_ready_state_complete(driver=driver)
                     time.sleep(0.2)
                     continue
                 else:
-                    log.error(f"元素 {locator_expression} 点击失败：页面元素过期（已重试{attempt+1}次）")
+                    log.error(f"元素 {locator_expression} 点击失败：页面元素过期（已重试{attempt + 1}次）")
                     return False
             except (TimeoutException, Exception) as e:
                 if attempt < 2:
-                    log.warning(f"元素点击失败（第{attempt+1}次尝试）: {e}")
+                    log.warning(f"元素点击失败（第{attempt + 1}次尝试）: {e}")
                     time.sleep(0.3)
                     continue
-                log.error(f"元素点击失败（已重试{attempt+1}次）: {e}")
+                log.error(f"元素点击失败（已重试{attempt + 1}次）: {e}")
                 return False
 
     def element_double_click(

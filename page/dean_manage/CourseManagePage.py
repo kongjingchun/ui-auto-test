@@ -158,17 +158,14 @@ class CourseManagePage(CourseManageBase, ObjectMap):
         """
         self.switch_into_iframe(driver, By.XPATH, self.course_manage_iframe())
         self.click_new_course_button(driver)
-        sleep(1)
         self.input_new_course_input(driver, "名称", course_info['课程名称'])
         self.input_new_course_input(driver, "代码", course_info['课程代码'])
         # 如果存在课程描述，则输入
         if course_info.get('课程描述'):
             self.input_new_course_input(driver, "描述", course_info['课程描述'])
         self.click_new_course_dept_dropdown(driver)
-        sleep(1)
         self.click_new_course_dept_dropdown_option(driver, course_info['所属学院'])
         self.click_new_course_responsible_person_dropdown(driver)
-        sleep(1)
         self.click_new_course_responsible_person_dropdown_option(driver, course_info['课程负责人'])
         # 如果是否一流课程为true，则打开开关
         if course_info.get('是否一流课程', False):
