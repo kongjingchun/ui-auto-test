@@ -8,10 +8,21 @@
 /UIreport/*
 report.html
 test.log
-common/__pycache__/*
 logs/all_logs/*
-# 忽略所有 .pyc 文件
+
+# Python 缓存文件
 *.pyc
-**/*.pyc
-# 忽略所有 __pycache__ 目录
+*.pyo
+*.pyd
+__pycache__/
 **/__pycache__/
+*.cpython-*.pyc
+
+# IDE 配置文件（.pythonpath 是个人配置，不需要提交）
+.pythonpath
+
+# 虚拟环境
+.venv/
+venv/
+env/
+ENV/

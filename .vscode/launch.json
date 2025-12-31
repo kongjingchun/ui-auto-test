@@ -12,7 +12,12 @@
                 "-s"
             ],
             "console": "integratedTerminal",
-            "justMyCode": false
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            },
+            "purpose": ["debug-test"]
         },
         {
             "name": "Python: Pytest - All Tests",
@@ -25,7 +30,11 @@
                 "-s"
             ],
             "console": "integratedTerminal",
-            "justMyCode": false
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
         },
         {
             "name": "Python: Pytest - Current Test",
@@ -40,7 +49,11 @@
                 "${selectedText}"
             ],
             "console": "integratedTerminal",
-            "justMyCode": false
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
         }
     ]
 }

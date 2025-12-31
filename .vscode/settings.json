@@ -8,9 +8,24 @@
     ],
     "python.testing.autoTestDiscoverOnSaveEnabled": true,
     "python.defaultInterpreterPath": "${workspaceFolder}",
+    "python.terminal.activateEnvironment": true,
+    "python.envFile": "${workspaceFolder}/.env",
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}"
+    ],
+    "python.testing.cwd": "${workspaceFolder}",
+    "python.terminal.executeInFileDir": false,
+    "python.terminal.activateEnvInCurrentTerminal": true,
     "[python]": {
         "editor.defaultFormatter": "ms-python.python",
         "editor.formatOnSave": true
-    }
+    },
+    "code-runner.executorMap": {
+        "python": "cd $workspaceRoot && export PYTHONPATH=$workspaceRoot && $workspaceRoot/.venv/bin/python -m pytest $fileName -v -s"
+    },
+    "code-runner.runInTerminal": true,
+    "code-runner.preserveFocus": false,
+    "code-runner.clearPreviousOutput": true,
+    "python.testing.pytestPath": "${workspaceFolder}/.venv/bin/pytest"
 }
 

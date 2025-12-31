@@ -6,7 +6,6 @@
 
 import os
 import pytest
-from openpyxl.styles.builtins import total
 
 from common.ding_talk import send_ding_talk
 from common.process_redis import Process
