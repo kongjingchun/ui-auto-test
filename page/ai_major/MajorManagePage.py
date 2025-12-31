@@ -1,8 +1,8 @@
 # encoding: utf-8
-# @File  : MajorManagePage.py.py
+# @File  : MajorManagePage.py
 # @Author: 孔敬淳
 # @Date  : 2025/12/30/16:23
-# @Desc  :
+# @Desc  : 专业管理页面对象类，封装专业管理相关的页面操作方法
 from time import sleep
 
 from selenium.webdriver.common.by import By
@@ -108,7 +108,7 @@ class MajorManagePage(MajorManageBase, ObjectMap):
 
         Args:
             driver: WebDriver实例
-            level:建设层次
+            level: 建设层次
         Returns:
             点击操作结果
         """
@@ -202,6 +202,7 @@ class MajorManagePage(MajorManageBase, ObjectMap):
 
         # 断言创建成功提示框是否出现
         result = self.is_create_success_alert_display(driver)
+        sleep(1)
 
         # 切出iframe
         self.switch_out_iframe(driver)

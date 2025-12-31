@@ -8,8 +8,8 @@ from time import sleep
 
 from selenium.webdriver.common.by import By
 
-from base.ai_major.TrainingProgramManageBase import TrainingProgramManageBase
 from base.ObjectMap import ObjectMap
+from base.ai_major.TrainingProgramManageBase import TrainingProgramManageBase
 from logs.log import log
 
 
@@ -367,6 +367,7 @@ class TrainingProgramManagePage(TrainingProgramManageBase, ObjectMap):
 
         # 点击创建按钮
         self.click_new_training_program_create_button(driver)
+        sleep(1)
 
         # 断言创建成功提示框是否出现
         result = self.is_create_success_alert_display(driver)
