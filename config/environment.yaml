@@ -53,6 +53,15 @@ admin_class:
   年级: 2025级
   行政班描述: 行政班描述
 
+course:
+  课程名称: Auto_course{suffix}
+  课程代码: Auto_course_code{suffix}
+  所属学院: *dept_name
+  课程负责人: *prof_name
+  是否一流课程: true
+  课程描述: 课程描述
+
+
 mysql:
   db: trading_system
   host: 120.53.230.254

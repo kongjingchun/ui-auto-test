@@ -10,6 +10,7 @@ from common.report_add_img import add_img_2_report
 from common.yaml_config import GetConf
 from logs.log import log
 from page.LeftMenuPage import LeftMenuPage
+from page.dean_manage.RoleManagePage import RoleManagePage
 from page.login.LoginPage import LoginPage
 from page.TopMenuPage import TopMenuPage
 from page.dean_manage.UserManagePage import UserManagePage
@@ -79,7 +80,7 @@ class TestCreateUser:
             add_img_2_report(driver, "切换为机构管理员")
             assert result is True, "切换为机构管理员失败"
 
-        with allure.step("点击用户管理"):
+        with allure.step("点击菜单用户管理"):
             result = LeftMenuPage().click_two_level_menu(driver, "用户管理")
             add_img_2_report(driver, "点击用户管理")
             assert result is True, "点击用户管理失败"
@@ -99,3 +100,12 @@ class TestCreateUser:
             result = UserManagePage().bind_user(driver, prof_user_info["工号"], prof_user_id)
             add_img_2_report(driver, "专业负责人绑定")
             assert result is True, "专业负责人绑定失败"
+        with allure.step("点击左侧菜单角色管理"):
+            result = LeftMenuPage().click_two_level_menu(driver, "角色管理")
+            add_img_2_report(driver, "点击左侧菜单角色管理")
+            assert result is True, "点击左侧菜单角色管理失败"
+
+        with allure.step("专业管理员分配教师角色"):
+            result = RoleManagePage().assign_role_to_user(driver, role_name="教师", user_name=prof_user_info["姓名"])
+            add_img_2_report(driver, "专业管理员分配教师角色")
+            assert result is True, "专业管理员分配教师角色失败"

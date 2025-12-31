@@ -4,7 +4,6 @@
 # @Date  : 2025/12/26/14:11
 # @Desc  :
 import requests
-from flask import Config
 from selenium.webdriver.common.by import By
 
 from base.ObjectMap import ObjectMap
