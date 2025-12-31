@@ -10,3 +10,8 @@ report.html
 test.log
 common/__pycache__/*
 logs/all_logs/*
+# 忽略所有 .pyc 文件
+*.pyc
+**/*.pyc
+# 忽略所有 __pycache__ 目录
+**/__pycache__/
