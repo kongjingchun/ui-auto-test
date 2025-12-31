@@ -61,6 +61,13 @@ course:
   是否一流课程: true
   课程描述: 课程描述
 
+training_program:
+  方案名称: Auto_training_program{suffix}
+  关联专业: *major_name
+  培养类型: 主修
+  培养层次: 本科
+  学制: 4年
+  授予学位: 工学学士
 
 mysql:
   db: trading_system

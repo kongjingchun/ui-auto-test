@@ -17,7 +17,7 @@ class TestCreateCourse:
     """创建课程测试"""
 
     @allure.story("创建课程")
-    def test_001_initialize_course(self, driver):
+    def test_001_create_course(self, driver):
         """创建课程流程"""
         # 教务管理员账号
         dean_cms_user_info = GetConf().get_user_info("dean_cms")

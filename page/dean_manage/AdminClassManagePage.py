@@ -4,6 +4,8 @@
 # @Date  : 2025/12/31
 # @Desc  : 行政班管理页面对象类，封装行政班管理相关的页面操作方法
 
+from time import sleep
+
 from selenium.webdriver.common.by import By
 
 from base.ObjectMap import ObjectMap
@@ -72,8 +74,7 @@ class AdminClassManagePage(AdminClassManageBase, ObjectMap):
         log.info(f"点击所属学院下拉框选项：{dept_name}，xpath定位为：{xpath}")
         result = self.element_click(driver, By.XPATH, xpath, timeout=15)
         # 点击后等待下拉菜单关闭
-        import time
-        time.sleep(0.5)
+        sleep(0.5)
         return result
 
     def click_new_admin_class_major_dropdown(self, driver):
@@ -103,8 +104,7 @@ class AdminClassManagePage(AdminClassManageBase, ObjectMap):
         log.info(f"点击所属专业下拉框选项：{major_name}，xpath定位为：{xpath}")
         result = self.element_click(driver, By.XPATH, xpath, timeout=15)
         # 点击后等待下拉菜单关闭
-        import time
-        time.sleep(0.5)
+        sleep(0.5)
         return result
 
     def click_new_admin_class_grade_dropdown(self, driver):
@@ -134,8 +134,7 @@ class AdminClassManagePage(AdminClassManageBase, ObjectMap):
         log.info(f"点击年级下拉框选项：{grade}，xpath定位为：{xpath}")
         result = self.element_click(driver, By.XPATH, xpath, timeout=15)
         # 点击后等待下拉菜单关闭
-        import time
-        time.sleep(0.5)
+        sleep(0.5)
         return result
 
     def click_new_admin_class_confirm_button(self, driver):
@@ -174,19 +173,42 @@ class AdminClassManagePage(AdminClassManageBase, ObjectMap):
         Returns:
             bool: True表示创建成功，False表示创建失败
         """
+        # 切换到iframe
         self.switch_into_iframe(driver, By.XPATH, self.admin_class_manage_iframe())
+
+        # 点击新建行政班按钮
         self.click_new_admin_class_button(driver)
+
+        # 从上到下设置新建信息
+        # 1. 行政班名称
         self.input_new_admin_class_input(driver, "名称", admin_class_info['行政班名称'])
+
+        # 2. 行政班编号
         self.input_new_admin_class_input(driver, "编号", admin_class_info['行政班编号'])
+
+        # 3. 所属学院
         self.click_new_admin_class_dept_dropdown(driver)
         self.click_new_admin_class_dept_dropdown_option(driver, admin_class_info['所属学院'])
+
+        # 4. 所属专业
         self.click_new_admin_class_major_dropdown(driver)
         self.click_new_admin_class_major_dropdown_option(driver, admin_class_info['所属专业'])
+
+        # 5. 年级
         self.click_new_admin_class_grade_dropdown(driver)
         self.click_new_admin_class_grade_dropdown_option(driver, admin_class_info['年级'])
+
+        # 6. 行政班描述
         self.input_new_admin_class_input(driver, "描述", admin_class_info['行政班描述'])
+
+        # 点击确定按钮
         self.click_new_admin_class_confirm_button(driver)
+
+        # 断言创建成功提示框是否出现
         result = self.is_create_success_alert_display(driver)
+
+        # 切出iframe
         self.switch_out_iframe(driver)
+
         log.info(f"创建行政班结果：{result}")
         return result

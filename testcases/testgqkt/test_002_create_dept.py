@@ -16,7 +16,7 @@ class TestInitializeDeptMajor:
     """创建院系测试"""
 
     @allure.story("创建院系")
-    def test_001_initialize_dept(self, driver):
+    def test_001_create_dept(self, driver):
         """创建院系流程"""
         # 教务管理员账号
         dean_cms_user_info = GetConf().get_user_info("dean_cms")

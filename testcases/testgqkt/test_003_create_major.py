@@ -16,7 +16,7 @@ class TestCreateMajor:
     """创建专业测试"""
 
     @allure.story("创建专业")
-    def test_001_initialize_major(self, driver):
+    def test_001_create_major(self, driver):
         """创建专业流程"""
         # 教务管理员账号
         dean_cms_user_info = GetConf().get_user_info("dean_cms")

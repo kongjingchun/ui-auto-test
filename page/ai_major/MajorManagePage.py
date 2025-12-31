@@ -8,7 +8,7 @@ from time import sleep
 from selenium.webdriver.common.by import By
 
 from base.ObjectMap import ObjectMap
-from base.major.MajorManageBase import MajorManageBase
+from base.ai_major.MajorManageBase import MajorManageBase
 from logs.log import log
 
 
@@ -20,6 +20,9 @@ class MajorManagePage(MajorManageBase, ObjectMap):
 
     def click_new_major_button(self, driver):
         """点击新建专业按钮
+
+        Args:
+            driver: WebDriver实例
 
         Returns:
             点击操作结果
@@ -45,6 +48,9 @@ class MajorManagePage(MajorManageBase, ObjectMap):
     def click_new_major_belong_dep_dropdown(self, driver):
         """点击所属院系下拉框
 
+        Args:
+            driver: WebDriver实例
+
         Returns:
             点击操作结果
         """
@@ -62,15 +68,17 @@ class MajorManagePage(MajorManageBase, ObjectMap):
             点击操作结果
         """
         xpath = self.new_major_belong_dep_dropdown_option(dep_name)
-        log.info(f"点击所属院系下拉框选项：{dep_name},xpath定位为：{xpath}")
+        log.info(f"点击所属院系下拉框选项：{dep_name}，xpath定位为：{xpath}")
         result = self.element_click(driver, By.XPATH, xpath, timeout=15)
         # 点击后等待下拉菜单关闭
-        import time
-        time.sleep(0.5)
+        sleep(0.5)
         return result
 
     def click_new_major_belong_prof_dropdown(self, driver):
         """点击专业负责人下拉框
+
+        Args:
+            driver: WebDriver实例
 
         Returns:
             点击操作结果
@@ -92,8 +100,7 @@ class MajorManagePage(MajorManageBase, ObjectMap):
         log.info(f"点击专业负责人下拉框选项：{prof_name}，xpath定位为：{xpath}")
         result = self.element_click(driver, By.XPATH, xpath, timeout=15)
         # 点击后等待下拉菜单关闭
-        import time
-        time.sleep(0.5)
+        sleep(0.5)
         return result
 
     def click_new_major_build_level_radio(self, driver, level):
@@ -125,6 +132,9 @@ class MajorManagePage(MajorManageBase, ObjectMap):
     def click_new_major_confirm_button(self, driver):
         """点击新建专业确认按钮
 
+        Args:
+            driver: WebDriver实例
+
         Returns:
             点击操作结果
         """
@@ -135,8 +145,11 @@ class MajorManagePage(MajorManageBase, ObjectMap):
     def is_create_success_alert_display(self, driver):
         """查看创建成功提示框是否出现
 
+        Args:
+            driver: WebDriver实例
+
         Returns:
-            提示框是否出现
+            bool: True表示创建成功提示框出现，False表示未出现
         """
         xpath = self.create_success_alert()
         log.info(f"查看创建成功提示框是否出现，xpath定位为：{xpath}")
@@ -147,31 +160,51 @@ class MajorManagePage(MajorManageBase, ObjectMap):
 
         Args:
             driver: WebDriver实例
-            major_name: 专业名称
-            dep_name: 所属院系名称
-            prof_name: 专业负责人名称
-            level:建设层次
-            feature: 特色专业
-        Returns:
-            创建操作结果
-        """
+            major_info: 专业信息
 
+        Returns:
+            bool: True表示创建成功，False表示创建失败
+        """
+        # 切换到iframe
         self.switch_into_iframe(driver, By.XPATH, self.major_manage_iframe())
+
+        # 点击新建专业按钮
         self.click_new_major_button(driver)
+
+        # 从上到下设置新建信息
+        # 1. 专业名称
         self.input_new_major_input(driver, "名称", major_info['专业名称'])
+
+        # 2. 学校专业代码
         self.input_new_major_input(driver, "学校专业代码", major_info['学校专业代码'])
+
+        # 3. 国家专业代码
         self.input_new_major_input(driver, "国家专业代码", major_info['国家专业代码'])
+
+        # 4. 所属院系
         self.click_new_major_belong_dep_dropdown(driver)
-        sleep(1)
-        log.info("_________________________"+major_info['所属院系'])
+        sleep(0.5)
         self.click_new_major_belong_dep_dropdown_option(driver, major_info['所属院系'])
+
+        # 5. 专业负责人
         self.click_new_major_belong_prof_dropdown(driver)
         self.click_new_major_belong_prof_dropdown_option(driver, major_info['专业负责人'])
+
+        # 6. 专业建设层次
         self.click_new_major_build_level_radio(driver, major_info['专业建设层次'])
+
+        # 7. 专业特色标签（循环选择多个特色标签）
         for feature in major_info['专业特色标签']:
             self.click_new_major_feature_checkbox(driver, feature)
+
+        # 点击确定按钮
         self.click_new_major_confirm_button(driver)
+
+        # 断言创建成功提示框是否出现
         result = self.is_create_success_alert_display(driver)
+
+        # 切出iframe
         self.switch_out_iframe(driver)
+
         log.info(f"创建专业结果：{result}")
         return result

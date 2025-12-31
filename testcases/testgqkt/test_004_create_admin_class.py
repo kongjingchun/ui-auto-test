@@ -17,7 +17,7 @@ class TestCreateAdminClass:
     """创建行政班测试"""
 
     @allure.story("创建行政班")
-    def test_001_initialize_admin_class(self, driver):
+    def test_001_create_admin_class(self, driver):
         """创建行政班流程"""
         # 教务管理员账号
         dean_cms_user_info = GetConf().get_user_info("dean_cms")

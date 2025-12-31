@@ -156,24 +156,46 @@ class CourseManagePage(CourseManageBase, ObjectMap):
         Returns:
             bool: True表示创建成功，False表示创建失败
         """
+        # 切换到iframe
         self.switch_into_iframe(driver, By.XPATH, self.course_manage_iframe())
+
+        # 点击新建课程按钮
         self.click_new_course_button(driver)
+
+        # 从上到下设置新建信息
+        # 1. 课程名称
         self.input_new_course_input(driver, "名称", course_info['课程名称'])
+
+        # 2. 课程代码
         self.input_new_course_input(driver, "代码", course_info['课程代码'])
-        # 如果存在课程描述，则输入
+
+        # 3. 课程描述（如果存在则输入）
         if course_info.get('课程描述'):
             self.input_new_course_input(driver, "描述", course_info['课程描述'])
+
+        # 4. 所属学院
         self.click_new_course_dept_dropdown(driver)
         self.click_new_course_dept_dropdown_option(driver, course_info['所属学院'])
+
+        # 5. 课程负责人
         self.click_new_course_responsible_person_dropdown(driver)
         self.click_new_course_responsible_person_dropdown_option(driver, course_info['课程负责人'])
-        # 如果是否一流课程为true，则打开开关
+
+        # 6. 是否一流课程（如果为true，则打开开关）
         if course_info.get('是否一流课程', False):
             self.click_new_course_first_class_switch(driver)
-        # 课程图片不上传，跳过
+
+        # 7. 课程图片不上传，跳过
+
+        # 点击确定按钮
         self.click_new_course_confirm_button(driver)
         sleep(1)
+
+        # 断言创建成功提示框是否出现
         result = self.is_create_success_alert_display(driver)
+
+        # 切出iframe
         self.switch_out_iframe(driver)
+
         log.info(f"创建课程结果：{result}")
         return result
