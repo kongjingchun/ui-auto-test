@@ -9,7 +9,7 @@ from common.report_add_img import add_img_2_report
 from common.yaml_config import GetConf
 from page.LeftMenuPage import LeftMenuPage
 from page.login.LoginPage import LoginPage
-from page.major.MajorManagePage import MajorManagePage
+from page.ai_major.MajorManagePage import MajorManagePage
 
 
 class TestCreateMajor:
