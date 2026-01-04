@@ -1,9 +1,10 @@
 # encoding: utf-8
-# @File  : test_002_create_dept.py
+# @File  : test_002_dept.py
 # @Author: 孔敬淳
 # @Date  : 2025/12/29/16:34
 # @Desc  :
 import allure
+import pytest
 
 from common.report_add_img import add_img_2_report
 from common.yaml_config import GetConf
@@ -15,6 +16,7 @@ from page.department_manage.DeptListManagePage import DeptListManagePage
 class TestInitializeDeptMajor:
     """创建院系测试"""
 
+    @pytest.mark.run(order=120)
     @allure.story("创建院系")
     def test_001_create_dept(self, driver):
         """创建院系流程"""

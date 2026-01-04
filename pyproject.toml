@@ -1,0 +1,18 @@
+[project]
+name = "XuetangUI"
+version = "1.0.0"
+requires-python = ">=3.8"
+description = "学堂UI自动化测试项目"
+
+[tool.pytest.ini_options]
+testpaths = ["testcases"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-s -q -n 4 --html=report.html"
+log_cli = true
+log_date_format = "%Y-%m-%d %H:%M:%S"
+log_level = "INFO"
+log_format = "%(asctime)s - %(filename)s - %(module)s - %(funcName)s - %(lineno)d - %(levelname)s - %(message)s"
+log_file = "test.log"
+

@@ -1,10 +1,11 @@
 # encoding: utf-8
-# @File  : test_004_admin_class_manage.py
+# @File  : test_004_admin_class.py
 # @Author: 孔敬淳
 # @Date  : 2025/12/31
 # @Desc  :
 
 import allure
+import pytest
 
 from common.report_add_img import add_img_2_report
 from common.yaml_config import GetConf
@@ -13,9 +14,10 @@ from page.login.LoginPage import LoginPage
 from page.dean_manage.AdminClassManagePage import AdminClassManagePage
 
 
-class TestCreateAdminClass:
+class TestAdminClass:
     """创建行政班测试"""
 
+    @pytest.mark.run(order=140)
     @allure.story("创建行政班")
     def test_001_create_admin_class(self, driver):
         """创建行政班流程"""

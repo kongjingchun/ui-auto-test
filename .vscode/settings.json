@@ -1,35 +1,27 @@
 {
+    "python.defaultInterpreterPath": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+    "python.analysis.typeCheckingMode": "basic",
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": false,
+    "python.linting.flake8Enabled": true,
+    "python.formatting.provider": "autopep8",
+    "editor.formatOnSave": true,
+    "[python]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "ms-python.autopep8",
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": false
+        }
+    },
     "python.testing.pytestEnabled": true,
     "python.testing.unittestEnabled": false,
     "python.testing.pytestArgs": [
-        "testcases",
-        "-v",
-        "-s"
+        "testcases"
     ],
-    "python.testing.autoTestDiscoverOnSaveEnabled": true,
-    "python.defaultInterpreterPath": "${workspaceFolder}",
-    "python.terminal.activateEnvironment": true,
-    "python.envFile": "${workspaceFolder}/.env",
-    "python.analysis.extraPaths": [
-        "${workspaceFolder}"
-    ],
-    "python.testing.cwd": "${workspaceFolder}",
-    "python.terminal.executeInFileDir": false,
-    "python.terminal.activateEnvInCurrentTerminal": true,
-    "[python]": {
-        "editor.defaultFormatter": "ms-python.autopep8",
-        "editor.formatOnSave": true
-    },
-    "autopep8.args": [
-        "--max-line-length=120",
-        "--ignore=E501"
-    ],
-    "code-runner.executorMap": {
-        "python": "cd $workspaceRoot && export PYTHONPATH=$workspaceRoot && $workspaceRoot/.venv/bin/python -m pytest $fileName -v -s"
-    },
-    "code-runner.runInTerminal": true,
-    "code-runner.preserveFocus": false,
-    "code-runner.clearPreviousOutput": true,
-    "python.testing.pytestPath": "${workspaceFolder}/.venv/bin/pytest"
+    "cursor.chat.enableCodeReview": false,
+    "cursor.general.enableCodeReview": false,
+    "problems.autoReveal": "off",
+    "problems.showCurrentInStatus": false,
+    "workbench.panel.defaultLocation": "bottom",
+    "workbench.panel.opens": false
 }
-

@@ -1,10 +1,11 @@
 # encoding: utf-8
-# @File  : test_001_create_user.py
+# @File  : test_001_user.py
 # @Author: 孔敬淳
 # @Date  : 2025/12/24/21:27
 # @Desc  :
 
 import allure
+import pytest
 
 from common.report_add_img import add_img_2_report
 from common.yaml_config import GetConf
@@ -17,8 +18,9 @@ from page.dean_manage.UserManagePage import UserManagePage
 from page.cms.CmsUserManagePage import CmsUserManage
 
 
-class TestCreateUser:
+class TestUser:
 
+    @pytest.mark.run(order=110)
     @allure.story("初始化账号")
     def test_001_initialize_user(self, driver):
         """

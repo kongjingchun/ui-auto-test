@@ -108,3 +108,11 @@ class TrainingProgramManageBase:
     def create_success_alert(self):
         """创建成功提示框"""
         return "//p[text()='创建培养方案成功']"
+
+    def training_program_revision_button(self, program_name):
+        """培养方案修订按钮定位（根据方案名称）
+        
+        Args:
+            program_name: 培养方案名称
+        """
+        return "//tr[.//td[contains(.,'" + program_name + "')]]//button[contains(.,'修订')]"

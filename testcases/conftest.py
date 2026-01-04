@@ -8,7 +8,7 @@ import os
 import pytest
 
 from common.ding_talk import send_ding_talk
-from common.process_redis import Process
+from common.process_file import Process  # 使用文件存储测试进度
 from common.report_add_img import add_img_2_report
 from common.yaml_config import GetConf
 from config.driver_config import DriverConfig
@@ -72,7 +72,7 @@ def pytest_runtest_makereport(item, call):
             Process().update_success()
         else:
             pass
-        process = Process().get_process()
+        process = Process().get_process()  # 获取测试进度
         webhook = GetConf().get_dingding_webhook()
         send_ding_talk(
             webhook,

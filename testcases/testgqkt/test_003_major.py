@@ -1,9 +1,10 @@
 # encoding: utf-8
-# @File  : test_003_create_major.py
+# @File  : test_003_major.py
 # @Author: 孔敬淳
 # @Date  : 2025/12/30/16:21
 # @Desc  :
 import allure
+import pytest
 
 from common.report_add_img import add_img_2_report
 from common.yaml_config import GetConf
@@ -12,9 +13,10 @@ from page.login.LoginPage import LoginPage
 from page.ai_major.MajorManagePage import MajorManagePage
 
 
-class TestCreateMajor:
+class TestMajor:
     """创建专业测试"""
 
+    @pytest.mark.run(order=130)
     @allure.story("创建专业")
     def test_001_create_major(self, driver):
         """创建专业流程"""

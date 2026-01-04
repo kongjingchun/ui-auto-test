@@ -317,6 +317,20 @@ class TrainingProgramManagePage(TrainingProgramManageBase, ObjectMap):
         xpath = self.create_success_alert()
         log.info(f"查看创建成功提示框是否出现，xpath定位为：{xpath}")
         return self.element_is_display(driver, By.XPATH, xpath)
+    
+    def click_revision_button_by_program_name(self, driver, program_name):
+        """根据方案名称点击修订按钮
+
+        Args:
+            driver: WebDriver实例
+            program_name: 培养方案名称
+
+        Returns:
+            点击操作结果
+        """
+        xpath = self.training_program_revision_button(program_name)
+        log.info(f"点击方案名称'{program_name}'后的修订按钮，xpath定位为：{xpath}")
+        return self.element_click(driver, By.XPATH, xpath, timeout=15)
 
     def create_training_program(self, driver, training_program_info=None):
         """创建培养方案
@@ -377,3 +391,5 @@ class TrainingProgramManagePage(TrainingProgramManageBase, ObjectMap):
 
         log.info(f"创建培养方案结果：{result}")
         return result
+
+

@@ -1,10 +1,11 @@
 # encoding: utf-8
-# @File  : test_005_create_course.py
+# @File  : test_005_course.py
 # @Author: 孔敬淳
 # @Date  : 2025/12/31
 # @Desc  :
 
 import allure
+import pytest
 
 from common.report_add_img import add_img_2_report
 from common.yaml_config import GetConf
@@ -13,9 +14,10 @@ from page.login.LoginPage import LoginPage
 from page.dean_manage.CourseManagePage import CourseManagePage
 
 
-class TestCreateCourse:
+class TestCourse:
     """创建课程测试"""
 
+    @pytest.mark.run(order=150)
     @allure.story("创建课程")
     def test_001_create_course(self, driver):
         """创建课程流程"""
