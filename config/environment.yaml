@@ -3,6 +3,10 @@ test_suffix: 13 # 测试环境序号
 
 school_name: 智慧大学
 url: https://www.gqkt.cn/
+
+# ChromeDriver配置
+driver:
+  use_local_driver_only: true  # true: 只使用本地driver，false: 本地不存在时尝试网络下载
 user:
   # 超级管理员
   superadmin:

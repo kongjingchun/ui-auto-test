@@ -11,6 +11,7 @@ from selenium.webdriver.remote.webdriver import WebDriver
 from webdriver_manager.chrome import ChromeDriverManager
 
 from common.tools import get_project_path, sep
+from common.yaml_config import GetConf
 
 
 class DriverConfig:
@@ -62,7 +63,7 @@ class DriverConfig:
     @staticmethod
     def _get_chromedriver_path() -> str:
         """
-        获取ChromeDriver路径，优先使用本地路径，无外网环境友好
+        获取ChromeDriver路径，根据配置文件决定是否只使用本地路径
 
         Returns:
             str: ChromeDriver可执行文件路径
@@ -70,12 +71,34 @@ class DriverConfig:
         Raises:
             FileNotFoundError: 当本地和网络都无法获取chromedriver时抛出异常
         """
-        # 优先使用本地chromedriver（适用于无外网环境）
+        # 读取配置文件，判断是否只使用本地driver
+        try:
+            driver_config = GetConf().get_info("driver")
+            use_local_only = driver_config.get("use_local_driver_only", False) if driver_config else False
+        except Exception:
+            # 如果读取配置失败，默认使用本地优先策略
+            use_local_only = False
+
+        # 优先使用本地chromedriver
         local_path = DriverConfig.LOCAL_CHROMEDRIVER_PATH
         if os.path.exists(local_path) and os.access(local_path, os.X_OK):
             return local_path
 
-        # 如果本地不存在，尝试使用webdriver-manager（需要网络）
+        # 如果配置为只使用本地driver，直接抛出异常
+        if use_local_only:
+            error_msg = (
+                f"无法找到本地ChromeDriver！\n"
+                f"配置为只使用本地driver（use_local_driver_only: true）\n"
+                f"本地路径不存在: {local_path}\n"
+                f"解决方案：\n"
+                f"1. 将匹配的chromedriver文件放置到: {local_path}\n"
+                f"2. 确保chromedriver有执行权限: chmod +x {local_path}\n"
+                f"3. 确保chromedriver版本与Chrome浏览器版本匹配\n"
+                f"4. 如需允许网络下载，请在environment.yaml中设置 use_local_driver_only: false"
+            )
+            raise FileNotFoundError(error_msg)
+
+        # 如果本地不存在且允许网络下载，尝试使用webdriver-manager（需要网络）
         try:
             driver_manager = ChromeDriverManager(
                 url=DriverConfig.CHROMEDRIVER_URL,

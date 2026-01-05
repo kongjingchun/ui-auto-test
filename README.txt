@@ -19,7 +19,7 @@ project_root/
 │  ├──major_dashboard.py  # 专业大屏管理
 │  ├──major_portal.py  # 专业门户管理
 │  ├──training_program.py  # 培养方案管理
-│  ├──quality_control.py  # 专业质量管控
+│  ├──quality_control.py  # 专业质量管控∏
 │  ├──exhibition_center.py  # 专业建设展示中心
 │  ├──major_settings.py  # 专业设置
 │  └──__init__.py
@@ -37,3 +37,11 @@ project_root/
 │  └──__init__.py
 └──base_page.py  # PageObject公共基类
 
+二、测试Linux准备工作
+    依赖：
+        Python      3.13.5
+        pip         25.3
+        git
+    步骤：
+        
+        
