@@ -19,6 +19,31 @@ class TrainingProgramManagePage(TrainingProgramManageBase, ObjectMap):
     继承TrainingProgramManageBase和ObjectMap类，提供培养方案管理页面的元素操作方法
     """
 
+    def switch_into_training_program_manage_iframe(self, driver):
+        """切换到培养方案管理iframe
+
+        Args:
+            driver: WebDriver实例
+
+        Returns:
+            切换操作结果
+        """
+        xpath = self.training_program_manage_iframe()
+        log.info(f"切换到培养方案管理iframe，xpath定位为：{xpath}")
+        return self.switch_into_iframe(driver, By.XPATH, xpath)
+
+    def switch_out_training_program_manage_iframe(self, driver):
+        """从培养方案管理iframe切出
+
+        Args:
+            driver: WebDriver实例
+
+        Returns:
+            切换操作结果
+        """
+        log.info("从培养方案管理iframe切出")
+        return self.switch_out_iframe(driver)
+
     def input_search_keyword(self, driver, keyword):
         """输入搜索关键词
 
@@ -317,7 +342,7 @@ class TrainingProgramManagePage(TrainingProgramManageBase, ObjectMap):
         xpath = self.create_success_alert()
         log.info(f"查看创建成功提示框是否出现，xpath定位为：{xpath}")
         return self.element_is_display(driver, By.XPATH, xpath)
-    
+
     def click_revision_button_by_program_name(self, driver, program_name):
         """根据方案名称点击修订按钮
 
@@ -328,9 +353,19 @@ class TrainingProgramManagePage(TrainingProgramManageBase, ObjectMap):
         Returns:
             点击操作结果
         """
+        # 切换到iframe
+        self.switch_into_training_program_manage_iframe(driver)
+
+        # 根据方案名称点击修订按钮
         xpath = self.training_program_revision_button(program_name)
         log.info(f"点击方案名称'{program_name}'后的修订按钮，xpath定位为：{xpath}")
-        return self.element_click(driver, By.XPATH, xpath, timeout=15)
+        result = self.element_click(driver, By.XPATH, xpath, timeout=15)
+
+        # 切出iframe
+        self.switch_out_training_program_manage_iframe(driver)
+
+        log.info(f"点击方案名称'{program_name}'后的修订按钮结果：{result}")
+        return result
 
     def create_training_program(self, driver, training_program_info=None):
         """创建培养方案
@@ -343,7 +378,7 @@ class TrainingProgramManagePage(TrainingProgramManageBase, ObjectMap):
             bool: True表示创建成功，False表示创建失败
         """
         # 切换到iframe
-        self.switch_into_iframe(driver, By.XPATH, self.training_program_manage_iframe())
+        self.switch_into_training_program_manage_iframe(driver)
 
         # 点击新建培养方案按钮
         self.click_new_training_program_button(driver)
@@ -387,9 +422,7 @@ class TrainingProgramManagePage(TrainingProgramManageBase, ObjectMap):
         result = self.is_create_success_alert_display(driver)
 
         # 切出iframe
-        self.switch_out_iframe(driver)
+        self.switch_out_training_program_manage_iframe(driver)
 
         log.info(f"创建培养方案结果：{result}")
         return result
-
-

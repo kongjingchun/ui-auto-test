@@ -6,11 +6,12 @@
 
 import allure
 import pytest
+from selenium.webdriver.common.by import By
 
 from common.report_add_img import add_img_2_report
 from common.yaml_config import GetConf
 from page.LeftMenuPage import LeftMenuPage
-from page.ai_major import TrainingProgramRevisionPage
+from page.ai_major.TrainingProgramRevisionPage import TrainingProgramRevisionPage
 from page.login.LoginPage import LoginPage
 from page.ai_major.TrainingProgramManagePage import TrainingProgramManagePage
 
@@ -50,6 +51,8 @@ class TestTrainingProgram:
         prof_cms_user_info = GetConf().get_user_info("prof_cms")
         # 新建的培养方案信息
         training_program_info = GetConf().get_info("training_program")
+        # 课程信息
+        course_info = GetConf().get_info("course")
 
         with allure.step("登录专业管理员"):
             result = LoginPage().user_login(driver, prof_cms_user_info)
@@ -60,10 +63,6 @@ class TestTrainingProgram:
             result = LeftMenuPage().click_two_level_menu(driver, "培养方案管理")
             add_img_2_report(driver, "点击左侧培养方案管理菜单")
             assert result is True, "点击左侧培养方案管理菜单失败"
-        with allure.step("切换到培养方案管理iframe"):
-            result = TrainingProgramManagePage().switch_into_iframe(driver, By.XPATH, TrainingProgramManagePage().training_program_manage_iframe())
-            add_img_2_report(driver, "切换到培养方案管理iframe")
-            assert result is True, "切换到培养方案管理iframe失败"
 
         with allure.step("根据方案名称点击修订按钮"):
             result = TrainingProgramManagePage().click_revision_button_by_program_name(driver, training_program_info['方案名称'])
@@ -71,7 +70,7 @@ class TestTrainingProgram:
             assert result is True, "根据方案名称点击修订按钮失败"
 
         with allure.step("更新专业信息"):
-            result = TrainingProgramRevisionPage().update_major_info(driver, "专业描述")
+            result = TrainingProgramRevisionPage().update_major_info(driver, description="专业描述")
             add_img_2_report(driver, "更新专业信息")
             assert result is True, "更新专业信息失败"
 
@@ -97,18 +96,31 @@ class TestTrainingProgram:
                 indicator_index=2,
                 indicator_name="指标点名称2",
                 indicator_description="指标点描述2",
-                decomposed_indicator_index=2,
+                decomposed_indicator_index=1,
                 decomposed_indicator_name="分解指标点名称2.1",
                 decomposed_indicator_description="分解指标点描述2.1")
             assert result2 is True, "更新毕业要求2失败"
             add_img_2_report(driver, "更新毕业要求")
+
         with allure.step("更新目标支撑"):
             result1 = TrainingProgramRevisionPage().update_target_support(driver, index=1, level="高支撑")
             assert result1 is True, "更新目标支撑1失败"
-            result2 = TrainingProgramRevisionPage().update_target_support(driver, index=2, level="中支撑")
+            result2 = TrainingProgramRevisionPage().update_target_support(driver, index=1, level="中支撑")
             assert result2 is True, "更新目标支撑2失败"
-            result3 = TrainingProgramRevisionPage().update_target_support(driver, index=3, level="低支撑")
+            result3 = TrainingProgramRevisionPage().update_target_support(driver, index=1, level="低支撑")
             assert result3 is True, "更新目标支撑3失败"
-            result4 = TrainingProgramRevisionPage().update_target_support(driver, index=4, level="无支撑")
+            result4 = TrainingProgramRevisionPage().update_target_support(driver, index=1, level="中支撑")
             assert result4 is True, "更新目标支撑4失败"
             add_img_2_report(driver, "更新目标支撑")
+
+        with allure.step("更新课程体系"):
+            result = TrainingProgramRevisionPage().update_course_system(driver, course_name=course_info['课程名称'])
+            add_img_2_report(driver, "更新课程体系")
+            assert result is True, "更新课程体系失败"
+
+        with allure.step("更新课程支撑"):
+            result = TrainingProgramRevisionPage().update_course_support(driver, index=1, course_name=course_info['课程名称'], level="H")
+            assert result is True, "更新课程支撑失败"
+            result = TrainingProgramRevisionPage().update_course_support(driver, index=2, course_name=course_info['课程名称'], level="M")
+            assert result is True, "更新课程支撑失败"
+            add_img_2_report(driver, "更新课程支撑")

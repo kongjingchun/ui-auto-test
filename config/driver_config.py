@@ -4,16 +4,22 @@
 # @Date  : 2025/12/01/17:52
 # @Desc  : Chrome 浏览器驱动配置类
 
+import os
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.remote.webdriver import WebDriver
 from webdriver_manager.chrome import ChromeDriverManager
+
+from common.tools import get_project_path, sep
 
 
 class DriverConfig:
     # ChromeDriver 镜像配置
     CHROMEDRIVER_URL = "https://mirrors.huaweicloud.com/chromedriver"
     CHROMEDRIVER_LATEST_URL = "https://mirrors.huaweicloud.com/chromedriver/LATEST_RELEASE"
+
+    # 本地ChromeDriver路径（优先使用）
+    LOCAL_CHROMEDRIVER_PATH = os.path.join(get_project_path(), "driver_files", "chromedriver")
 
     @staticmethod
     def _configure_chrome_options() -> webdriver.ChromeOptions:
@@ -54,6 +60,42 @@ class DriverConfig:
         return options
 
     @staticmethod
+    def _get_chromedriver_path() -> str:
+        """
+        获取ChromeDriver路径，优先使用本地路径，无外网环境友好
+
+        Returns:
+            str: ChromeDriver可执行文件路径
+
+        Raises:
+            FileNotFoundError: 当本地和网络都无法获取chromedriver时抛出异常
+        """
+        # 优先使用本地chromedriver（适用于无外网环境）
+        local_path = DriverConfig.LOCAL_CHROMEDRIVER_PATH
+        if os.path.exists(local_path) and os.access(local_path, os.X_OK):
+            return local_path
+
+        # 如果本地不存在，尝试使用webdriver-manager（需要网络）
+        try:
+            driver_manager = ChromeDriverManager(
+                url=DriverConfig.CHROMEDRIVER_URL,
+                latest_release_url=DriverConfig.CHROMEDRIVER_LATEST_URL
+            )
+            return driver_manager.install()
+        except Exception as e:
+            # 无外网环境下的友好提示
+            error_msg = (
+                f"无法获取ChromeDriver！\n"
+                f"本地路径不存在: {local_path}\n"
+                f"网络下载失败（可能是无外网环境）: {str(e)}\n"
+                f"解决方案：\n"
+                f"1. 将匹配的chromedriver文件放置到: {local_path}\n"
+                f"2. 确保chromedriver有执行权限: chmod +x {local_path}\n"
+                f"3. 确保chromedriver版本与Chrome浏览器版本匹配"
+            )
+            raise FileNotFoundError(error_msg) from e
+
+    @staticmethod
     def _create_chrome_service() -> ChromeService:
         """
         创建 ChromeDriver 服务实例
@@ -61,11 +103,8 @@ class DriverConfig:
         Returns:
             ChromeService: ChromeDriver 服务对象
         """
-        driver_manager = ChromeDriverManager(
-            url=DriverConfig.CHROMEDRIVER_URL,
-            latest_release_url=DriverConfig.CHROMEDRIVER_LATEST_URL
-        )
-        return ChromeService(driver_manager.install())
+        chromedriver_path = DriverConfig._get_chromedriver_path()
+        return ChromeService(chromedriver_path)
 
     @staticmethod
     def driver_config() -> WebDriver:
