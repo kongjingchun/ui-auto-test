@@ -248,14 +248,71 @@ class ObjectMap:
                 except Exception:
                     pass  # 清除失败不影响后续操作
 
-                # 输入值
-                element.send_keys(fill_value)
-                if need_enter:
-                    element.send_keys(Keys.RETURN)
+                # 尝试普通输入，如果失败则使用JavaScript输入
+                try:
+                    # 先尝试点击元素确保获得焦点
+                    try:
+                        element.click()
+                        time.sleep(0.1)
+                    except Exception:
+                        pass  # 点击失败不影响后续操作
 
-                # 等待页面就绪
-                self.wait_for_ready_state_complete(driver=driver)
-                return True
+                    # 输入值
+                    element.send_keys(fill_value)
+                    if need_enter:
+                        element.send_keys(Keys.RETURN)
+
+                    # 等待页面就绪
+                    self.wait_for_ready_state_complete(driver=driver)
+                    return True
+
+                except Exception as send_error:
+                    # 普通输入失败，尝试使用JavaScript输入
+                    log.info(f"元素 {locator_expression} 普通输入失败，尝试使用JavaScript输入")
+                    try:
+                        # 如果元素可能过期，重新定位元素
+                        try:
+                            # 尝试使用现有元素
+                            driver.execute_script("arguments[0].value = arguments[1];", element, "")
+                        except (StaleElementReferenceException, Exception):
+                            # 元素过期，重新定位
+                            log.info(f"元素 {locator_expression} 在JavaScript输入时过期，重新定位元素")
+                            element = wait.until(
+                                EC.presence_of_element_located((locate_type, locator_expression))
+                            )
+                            driver.execute_script("arguments[0].value = arguments[1];", element, "")
+
+                        # 触发input事件，确保页面响应
+                        driver.execute_script("arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", element)
+                        # 触发change事件
+                        driver.execute_script("arguments[0].dispatchEvent(new Event('change', { bubbles: true }));", element)
+                        # 触发click事件
+                        try:
+                            driver.execute_script("arguments[0].click();", element)
+                            time.sleep(0.1)
+                            # 使用send_keys输入值
+                            element.send_keys(fill_value)
+                        except Exception:
+                            pass  # click事件触发失败不影响后续操作
+
+                        if need_enter:
+                            # 如果元素过期，重新定位后再发送回车
+                            try:
+                                element.send_keys(Keys.RETURN)
+                            except (StaleElementReferenceException, Exception):
+                                element = wait.until(
+                                    EC.presence_of_element_located((locate_type, locator_expression))
+                                )
+                                element.send_keys(Keys.RETURN)
+
+                        # 等待页面就绪
+                        self.wait_for_ready_state_complete(driver=driver)
+                        log.info(f"元素 {locator_expression} 使用JavaScript输入成功")
+                        return True
+                    except Exception as js_error:
+                        # JavaScript输入也失败
+                        log.info(f"元素 {locator_expression} JavaScript输入也失败：{str(js_error)}")
+                        raise Exception(f"元素 {locator_expression} JavaScript输入也失败：{str(js_error)}")
 
             except StaleElementReferenceException:
                 if attempt == 0:
@@ -265,8 +322,10 @@ class ObjectMap:
                     time.sleep(0.1)
                     continue
                 else:
+                    # 重试后仍然失败
                     raise Exception(f"元素 {locator_expression} 填值失败：页面元素过期（已重试{attempt + 1}次）")
             except TimeoutException as e:
+                # 超时失败
                 raise Exception(f"元素 {locator_expression} 填值失败：元素超时未出现或不可交互 - {str(e)}")
             except Exception as e:
                 if attempt == 0:
@@ -274,6 +333,7 @@ class ObjectMap:
                     time.sleep(0.2)
                     continue
                 else:
+                    # 重试后仍然失败
                     raise Exception(f"元素 {locator_expression} 填值失败：{str(e)}")
 
     def element_click(
@@ -429,7 +489,7 @@ class ObjectMap:
             driver.switch_to.parent_frame()
         return True
 
-    def switch_window_2_latest_handle(self, driver):
+    def switch_to_new_window(self, driver):
         """
         切换到最新打开的窗口
         :param driver: 浏览器驱动
@@ -437,6 +497,46 @@ class ObjectMap:
         """
         window_handles = driver.window_handles
         driver.switch_to.window(window_handles[-1])
+
+    def close_current_window(self, driver, switch_to_first=True):
+        """
+        关闭当前窗口
+        :param driver: 浏览器驱动
+        :param switch_to_first: 关闭后是否切换到第一个窗口，True切换到第一个窗口，False切换到上一个窗口，默认为True
+        :return: True成功，False失败
+        """
+        try:
+            # 获取当前窗口句柄
+            current_handle = driver.current_window_handle
+            # 获取所有窗口句柄
+            all_handles = driver.window_handles
+
+            log.info(f"关闭当前窗口，当前窗口句柄：{current_handle}，总窗口数：{len(all_handles)}")
+
+            # 如果只有一个窗口，不能关闭
+            if len(all_handles) <= 1:
+                log.warning("只有一个窗口，无法关闭")
+                return False
+
+            # 关闭当前窗口
+            driver.close()
+
+            # 切换到其他窗口
+            remaining_handles = [handle for handle in all_handles if handle != current_handle]
+            if remaining_handles:
+                if switch_to_first:
+                    # 切换到第一个窗口
+                    driver.switch_to.window(remaining_handles[0])
+                    log.info(f"已切换到第一个窗口，窗口句柄：{remaining_handles[0]}")
+                else:
+                    # 切换到最后一个窗口（通常是上一个打开的窗口）
+                    driver.switch_to.window(remaining_handles[-1])
+                    log.info(f"已切换到上一个窗口，窗口句柄：{remaining_handles[-1]}")
+
+            return True
+        except Exception as e:
+            log.error(f"关闭窗口失败：{str(e)}")
+            return False
 
     def find_img_in_source(self, driver, img_name):
         """
@@ -528,3 +628,89 @@ class ObjectMap:
         attr_value = element.get_attribute(attribute_name)
         log.info(f"获取元素 {locator_expression} 的属性 {attribute_name}: {attr_value}")
         return attr_value
+
+    def page_contains_text(self, driver, text, case_sensitive=False):
+        """
+        判断当前页面是否包含指定文字
+        :param driver: 浏览器驱动
+        :param text: 要查找的文字
+        :param case_sensitive: 是否区分大小写，True区分大小写，False不区分（默认）
+        :return: True表示页面包含该文字，False表示不包含
+        """
+        try:
+            # 获取页面源码
+            page_source = driver.page_source
+
+            if case_sensitive:
+                # 区分大小写
+                contains = text in page_source
+            else:
+                # 不区分大小写
+                contains = text.lower() in page_source.lower()
+
+            log.info(f"检查页面是否包含文字'{text}'（区分大小写：{case_sensitive}）：{contains}")
+            return contains
+        except Exception as e:
+            log.error(f"判断页面是否包含文字失败：{str(e)}")
+            return False
+
+    def diagnose_input_element(self, driver, locate_type, locator_expression, timeout=10):
+        """
+        诊断输入框元素状态，帮助排查输入失败的原因
+        :param driver: 浏览器驱动
+        :param locate_type: 定位方式
+        :param locator_expression: 定位表达式
+        :param timeout: 超时时间(秒)
+        :return: 诊断信息字典
+        """
+        diagnosis = {
+            "element_found": False,
+            "element_visible": False,
+            "element_enabled": False,
+            "is_readonly": False,
+            "is_disabled": False,
+            "tag_name": None,
+            "error": None
+        }
+
+        try:
+            # 尝试定位元素
+            element = self.element_get(driver, locate_type, locator_expression, timeout)
+            diagnosis["element_found"] = True
+            diagnosis["tag_name"] = element.tag_name
+
+            # 检查元素是否可见
+            try:
+                is_displayed = element.is_displayed()
+                diagnosis["element_visible"] = is_displayed
+            except Exception as e:
+                diagnosis["error"] = f"检查可见性失败：{str(e)}"
+
+            # 检查元素是否启用
+            try:
+                is_enabled = element.is_enabled()
+                diagnosis["element_enabled"] = is_enabled
+            except Exception as e:
+                diagnosis["error"] = f"检查启用状态失败：{str(e)}"
+
+            # 检查readonly属性
+            try:
+                readonly = element.get_attribute("readonly")
+                diagnosis["is_readonly"] = readonly is not None and readonly != "false"
+            except Exception as e:
+                pass
+
+            # 检查disabled属性
+            try:
+                disabled = element.get_attribute("disabled")
+                diagnosis["is_disabled"] = disabled is not None and disabled != "false"
+            except Exception as e:
+                pass
+
+            log.info(f"元素诊断结果：{diagnosis}")
+            return diagnosis
+
+        except Exception as e:
+            diagnosis["error"] = f"元素定位失败：{str(e)}"
+            log.error(f"元素诊断失败：{str(e)}")
+            return diagnosis
