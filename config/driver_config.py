@@ -71,10 +71,10 @@ class DriverConfig:
         Raises:
             FileNotFoundError: 当本地和网络都无法获取chromedriver时抛出异常
         """
-        # 读取配置文件，判断是否只使用本地driver
+        # 读取配置文件，判断是否本地部署
         try:
-            driver_config = GetConf().get_info("driver")
-            use_local_only = driver_config.get("use_local_driver_only", False) if driver_config else False
+            deploy_config = GetConf().get_info("部署环境")
+            use_local_only = deploy_config.get("是否本地部署", False) if deploy_config else False
         except Exception:
             # 如果读取配置失败，默认使用本地优先策略
             use_local_only = False
@@ -84,17 +84,17 @@ class DriverConfig:
         if os.path.exists(local_path) and os.access(local_path, os.X_OK):
             return local_path
 
-        # 如果配置为只使用本地driver，直接抛出异常
+        # 如果配置为本地部署（只使用本地driver），直接抛出异常
         if use_local_only:
             error_msg = (
                 f"无法找到本地ChromeDriver！\n"
-                f"配置为只使用本地driver（use_local_driver_only: true）\n"
+                f"配置为本地部署（是否本地部署: true）\n"
                 f"本地路径不存在: {local_path}\n"
                 f"解决方案：\n"
                 f"1. 将匹配的chromedriver文件放置到: {local_path}\n"
                 f"2. 确保chromedriver有执行权限: chmod +x {local_path}\n"
                 f"3. 确保chromedriver版本与Chrome浏览器版本匹配\n"
-                f"4. 如需允许网络下载，请在environment.yaml中设置 use_local_driver_only: false"
+                f"4. 如需允许网络下载，请在environment.yaml中设置 是否本地部署: false"
             )
             raise FileNotFoundError(error_msg)
 

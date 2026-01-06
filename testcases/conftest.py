@@ -18,6 +18,29 @@ from logs.log import log
 os.environ.setdefault('ALLURE_LANG', 'zh-CN')
 
 
+def pytest_configure(config):
+    """注册自定义marker"""
+    config.addinivalue_line(
+        "markers", "skip_local: 标记在本地部署环境下需要跳过的测试用例"
+    )
+    config.addinivalue_line(
+        "markers", "skip_remote: 标记在网络部署环境下需要跳过的测试用例"
+    )
+
+
+def pytest_collection_modifyitems(config, items):
+    """在收集测试用例时，根据部署环境自动跳过标记的用例"""
+    is_local = GetConf().is_local_deploy()
+    
+    for item in items:
+        # 如果标记了 skip_local 且是本地部署，则跳过
+        if item.get_closest_marker("skip_local") and is_local:
+            item.add_marker(pytest.mark.skip(reason="本地部署环境，跳过该测试用例"))
+        # 如果标记了 skip_remote 且是网络部署，则跳过
+        elif item.get_closest_marker("skip_internet") and not is_local:
+            item.add_marker(pytest.mark.skip(reason="网络部署环境，跳过该测试用例"))
+
+
 def pytest_collection_finish(session):
     """pytest收集完测试用例后执行，初始化测试进度"""
     total = len(session.items)

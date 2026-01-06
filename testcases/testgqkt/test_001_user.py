@@ -20,26 +20,20 @@ from page.cms.CmsUserManagePage import CmsUserManage
 
 class TestUser:
 
-    @pytest.mark.run(order=110)
-    @allure.story("初始化账号")
-    def test_001_initialize_user(self, driver):
+    @pytest.mark.skip_local  # 本地部署环境下跳过
+    @pytest.mark.run(order=100)
+    @allure.story("api注册cms账户")
+    def test_001_register_cms_user(self, driver):
         """
-        测试初始化教务账号流程
+        测试api注册cms账户流程
         :param driver: WebDriver实例
         :return: None
         """
-        # 学校名称
-        school_name = GetConf().get_school_name()
-        # 超级管理员信息（账密）
-        superadmin = GetConf().get_user_info("superadmin")
+
         # 创建的CMS教务管理员信息
         dean_cms_user_info = GetConf().get_user_info("dean_cms")
-        # 创建的教务管理员信息
-        dean_user_info = GetConf().get_user_info("dean")
         # 创建的CMS专业负责人信息
         prof_cms_user_info = GetConf().get_user_info("prof_cms")
-        # 创建的专业负责人信息
-        prof_user_info = GetConf().get_user_info("prof")
 
         with allure.step("api注册cms账户"):
             result = CmsUserManage().register_cms_user(dean_cms_user_info)
@@ -47,8 +41,116 @@ class TestUser:
             result = CmsUserManage().register_cms_user(prof_cms_user_info)
             assert result is True, "api注册专业负责人账户失败"
 
+    @pytest.mark.run(order=110)
+    @allure.story("创建用户")
+    def test_002_create_user(self, driver):
+        """
+        测试创建用户流程
+        :param driver: WebDriver实例
+        :return: None
+        """
+        # 学校名称
+        school_name = GetConf().get_school_name()
+        # 初始管理员信息（账密）
+        initial_admin = GetConf().get_user_info("initial_admin")
+        # 教务管理员信息
+        dean_user_info = GetConf().get_user_info("dean")
+        # 专业负责人信息
+        prof_user_info = GetConf().get_user_info("prof")
+
         with allure.step("登录管理员"):
-            result = LoginPage().user_login(driver, superadmin)
+            result = LoginPage().user_login(driver, initial_admin)
+            add_img_2_report(driver, "登录管理员")
+            assert result is True, "登录管理员失败"
+
+        with allure.step("切换学校"):
+            result = TopMenuPage().switch_school(driver, school_name)
+            add_img_2_report(driver, "切换学校")
+            assert result is True, f"切换到{school_name}学校失败"
+
+        with allure.step("切换为机构管理员"):
+            result = TopMenuPage().switch_role(driver, "机构管理员")
+            add_img_2_report(driver, "切换为机构管理员")
+            assert result is True, "切换为机构管理员失败"
+
+        with allure.step("点击菜单用户管理"):
+            result = LeftMenuPage().click_two_level_menu(driver, "用户管理")
+            add_img_2_report(driver, "点击用户管理")
+            assert result is True, "点击用户管理失败"
+
+        with allure.step("创建用户"):
+            result = UserManagePage().create_user(driver, role_name="创建教务管理员", user_info=dean_user_info)
+            add_img_2_report(driver, "创建教务管理员")
+            assert result is True, "创建教务管理员失败"
+            result = UserManagePage().create_user(driver, role_name="创建专业负责人", user_info=prof_user_info)
+            add_img_2_report(driver, "创建专业负责人")
+            assert result is True, "创建专业负责人失败"
+
+    @pytest.mark.skip_internet  # 网络部署环境下跳过
+    @pytest.mark.run(order=115)
+    @allure.story("初始化密码")
+    def test_003_init_password(self, driver):
+        """
+        测试初始化密码流程
+        :param driver: WebDriver实例
+        :return: None
+        """
+        # CMS教务管理员信息
+        dean_cms_user_info = GetConf().get_user_info("dean_cms")
+        # CMS专业负责人信息
+        prof_cms_user_info = GetConf().get_user_info("prof_cms")
+        # 教务管理员信息
+        dean_user_info = GetConf().get_user_info("dean")
+        # 专业负责人信息
+        prof_user_info = GetConf().get_user_info("prof")
+
+        with allure.step("初始化教务管理员密码"):
+            # 使用教务管理员工号作为账号，工号后6位作为密码
+            dean_work_number = dean_user_info["工号"]
+            dean_login_info = {
+                "username": dean_work_number,
+                "password": dean_work_number[-6:] if len(dean_work_number) >= 6 else dean_work_number
+            }
+            LoginPage().user_login(driver, dean_login_info)
+            result = LoginPage().init_password(driver, dean_cms_user_info["password"])
+            add_img_2_report(driver, "初始化教务管理员密码")
+            assert result is True, "初始化教务管理员密码失败"
+        with allure.step("初始化专业负责人密码"):
+            # 使用专业负责人员工号作为账号，工号后6位作为密码
+            prof_work_number = prof_user_info["工号"]
+            prof_login_info = {
+                "username": prof_work_number,
+                "password": prof_work_number[-6:] if len(prof_work_number) >= 6 else prof_work_number
+            }
+            LoginPage().user_login(driver, prof_login_info)
+            result = LoginPage().init_password(driver, prof_cms_user_info["password"])
+            add_img_2_report(driver, "初始化专业负责人密码")
+            assert result is True, "初始化专业负责人密码失败"
+
+    @pytest.mark.skip_local  # 本地部署环境下跳过
+    @pytest.mark.run(order=116)
+    @allure.story("绑定用户")
+    def test_003_bind_user(self, driver):
+        """
+        测试绑定用户流程
+        :param driver: WebDriver实例
+        :return: None
+        """
+        # 学校名称
+        school_name = GetConf().get_school_name()
+        # 初始管理员信息（账密）
+        initial_admin = GetConf().get_user_info("initial_admin")
+        # CMS教务管理员信息
+        dean_cms_user_info = GetConf().get_user_info("dean_cms")
+        # CMS专业负责人信息
+        prof_cms_user_info = GetConf().get_user_info("prof_cms")
+        # 教务管理员信息
+        dean_user_info = GetConf().get_user_info("dean")
+        # 专业负责人信息
+        prof_user_info = GetConf().get_user_info("prof")
+
+        with allure.step("登录管理员"):
+            result = LoginPage().user_login(driver, initial_admin)
             add_img_2_report(driver, "登录管理员")
             assert result is True, "登录管理员失败"
 
@@ -77,23 +179,10 @@ class TestUser:
             add_img_2_report(driver, "切换学校")
             assert result is True, f"切换到{school_name}学校失败"
 
-        with allure.step("切换为机构管理员"):
-            result = TopMenuPage().switch_role(driver, "机构管理员")
-            add_img_2_report(driver, "切换为机构管理员")
-            assert result is True, "切换为机构管理员失败"
-
         with allure.step("点击菜单用户管理"):
             result = LeftMenuPage().click_two_level_menu(driver, "用户管理")
             add_img_2_report(driver, "点击用户管理")
             assert result is True, "点击用户管理失败"
-
-        with allure.step("创建用户"):
-            result = UserManagePage().create_user(driver, role_name="创建教务管理员", user_info=dean_user_info)
-            add_img_2_report(driver, "创建教务管理员")
-            assert result is True, "创建教务管理员失败"
-            result = UserManagePage().create_user(driver, role_name="创建专业负责人", user_info=prof_user_info)
-            add_img_2_report(driver, "创建专业负责人")
-            assert result is True, "创建专业负责人失败"
 
         with allure.step("用户绑定"):
             result = UserManagePage().bind_user(driver, dean_user_info["工号"], dean_user_id)
@@ -102,6 +191,29 @@ class TestUser:
             result = UserManagePage().bind_user(driver, prof_user_info["工号"], prof_user_id)
             add_img_2_report(driver, "专业负责人绑定")
             assert result is True, "专业负责人绑定失败"
+
+# 分配角色
+
+    @pytest.mark.run(order=117)
+    @allure.story("分配角色")
+    def test_004_assign_role(self, driver):
+        """
+        测试分配角色流程
+        :param driver: WebDriver实例
+        :return: None
+        """
+        # CMS教务管理员信息
+        dean_cms_user_info = GetConf().get_user_info("dean_cms")
+        # 专业负责人信息
+        prof_user_info = GetConf().get_user_info("prof")
+        # 教务管理员信息
+        dean_user_info = GetConf().get_user_info("dean")
+
+        with allure.step("登录管理员"):
+            result = LoginPage().user_login(driver, dean_cms_user_info)
+            add_img_2_report(driver, "登录管理员")
+            assert result is True, "登录管理员失败"
+
         with allure.step("点击左侧菜单角色管理"):
             result = LeftMenuPage().click_two_level_menu(driver, "角色管理")
             add_img_2_report(driver, "点击左侧菜单角色管理")

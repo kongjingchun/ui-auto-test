@@ -1,37 +1,45 @@
 # 全局变量配置（只需修改这里的序号）
-test_suffix: 25 # 测试环境序号
+test_suffix: 32 # 测试环境序号
 
 school_name: 智慧大学
-url: https://www.gqkt.cn/
+# url: https://www.gqkt.cn/
+url: http://192.168.200.213/
+# 部署环境配置（控制浏览器驱动和用例执行）
+部署环境:
+  是否本地部署: True  # true: 本地部署，false: 网络部署
+  # 是否本地部署: false  # true: 本地部署，false: 网络部署
 
-# ChromeDriver配置
-driver:
-  use_local_driver_only: true  # true: 只使用本地driver，false: 本地不存在时尝试网络下载
 user:
-  # 超级管理员
-  superadmin:
+  # 初始管理员
+  initial_admin:
     username: superadmin
-    password: gqkt111!
-  # CMS 教务管理员
-  dean_cms:
-    username: Auto_dean_cms{suffix}
-    password: Autotest
+    password: 123
+
+  # 初始管理员
+  # initial_admin:
+  #   username: superadmin
+  #   password: gqkt111!
   # 教务管理员
   dean:
-    姓名: Auto_dean{suffix}
-    工号: Auto_dean_code{suffix}
+    姓名: &dean_name Auto_dean{suffix}
+    工号: &dean_code Auto_dean_code{suffix}
     手机: 15100000001
     邮箱: Autotest001@xuetangx.com
-  # CMS 专业管理员
-  prof_cms:
-    username: Auto_prof_cms{suffix}
-    password: Autotest
+  # CMS 教务管理员
+  dean_cms:
+    username: *dean_code
+    password: Autotest2026
   # 专业管理员
   prof:
     姓名: &prof_name Auto_prof{suffix}
-    工号: Auto_prof_code{suffix}
+    工号: &prof_code Auto_prof_code{suffix}
     手机: 15100000002
     邮箱: Autotest002@xuetangx.com
+  # CMS 专业管理员
+  prof_cms:
+    username: *prof_code
+    password: Autotest2026
+
 # 院系信息
 department:
   院系名称: &dept_name auto_dept{suffix}

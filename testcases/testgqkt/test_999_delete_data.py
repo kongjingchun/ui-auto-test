@@ -21,6 +21,7 @@ from page.login.LoginPage import LoginPage
 from page.TopMenuPage import TopMenuPage
 
 
+# @pytest.mark.skip(reason="跳过删除数据测试用例")
 class TestDeleteData:
     """删除数据测试"""
 
@@ -153,19 +154,15 @@ class TestDeleteData:
         """删除用户流程"""
         # 学校名称
         school_name = GetConf().get_school_name()
-        # 超级管理员信息（账密）
-        superadmin = GetConf().get_user_info("superadmin")
-        # CMS教务管理员信息
-        dean_cms_user_info = GetConf().get_user_info("dean_cms")
+        # 初始管理员信息（账密）
+        initial_admin = GetConf().get_user_info("initial_admin")
         # 教务管理员信息
         dean_user_info = GetConf().get_user_info("dean")
-        # CMS专业负责人信息
-        prof_cms_user_info = GetConf().get_user_info("prof_cms")
         # 专业负责人信息
         prof_user_info = GetConf().get_user_info("prof")
 
         with allure.step("登录管理员"):
-            result = LoginPage().user_login(driver, superadmin)
+            result = LoginPage().user_login(driver, initial_admin)
             add_img_2_report(driver, "登录管理员")
             assert result is True, "登录管理员失败"
 
@@ -188,6 +185,23 @@ class TestDeleteData:
             result = UserManagePage().delete_user_by_code(driver, dean_user_info['工号'])
             add_img_2_report(driver, "删除教务管理员")
             assert result is True, "删除教务管理员失败"
+
+    @pytest.mark.skip_local  # 本地部署环境下跳过
+    @pytest.mark.run(order=670)
+    @allure.story("删除cms用户")
+    def test_007_delete_prof_cms_user(self, driver):
+        """删除cms用户流程"""
+        # 初始管理员信息（账密）
+        initial_admin = GetConf().get_user_info("initial_admin")
+        # CMS教务管理员信息
+        dean_cms_user_info = GetConf().get_user_info("dean_cms")
+        # CMS专业负责人信息
+        prof_cms_user_info = GetConf().get_user_info("prof_cms")
+        with allure.step("登录管理员"):
+            result = LoginPage().user_login(driver, initial_admin)
+            add_img_2_report(driver, "登录管理员")
+            assert result is True, "登录管理员失败"
+
         with allure.step("切换到cms"):
             result = TopMenuPage().switch_school(driver, "CMS管理系统")
             add_img_2_report(driver, "切换到cms")

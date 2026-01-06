@@ -89,6 +89,16 @@ class GetConf:
         """获取jenkins地址"""
         return self.env["jenkins"]
 
+    def is_local_deploy(self) -> bool:
+        """
+        判断是否本地部署
+        :return: True表示本地部署，False表示网络部署
+        """
+        deploy_config = self.get_info("部署环境")
+        if deploy_config and isinstance(deploy_config, dict):
+            return deploy_config.get("是否本地部署", False)
+        return False
+
     def get_info(self, config_key: str, *fields: str) -> Any:
         """
         获取YAML配置信息
@@ -97,10 +107,10 @@ class GetConf:
         :return: 没有指定字段返回整个配置，单个字段返回值，多个字段返回元组
         """
         config_data = self.env.get(config_key)
-        
+
         if config_data is None:
             return None
-        
+
         if not fields:
             # 如果没有指定字段，返回整个配置
             return config_data

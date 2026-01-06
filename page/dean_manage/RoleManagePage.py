@@ -19,6 +19,15 @@ class RoleManagePage(RoleManageBase, ObjectMap):
     继承RoleManageBase和ObjectMap类，提供角色管理页面的元素操作方法
     """
 
+    def switch_into_role_manage_iframe(self, driver):
+        """切换到角色管理iframe
+        Args:
+            driver: WebDriver实例
+        Returns:
+            切换操作结果
+        """
+        return self.switch_into_iframe(driver, By.XPATH, self.role_manage_iframe())
+
     def click_assign_role_button(self, driver, role_name):
         """点击分配角色按钮
 
@@ -99,12 +108,19 @@ class RoleManagePage(RoleManageBase, ObjectMap):
         Returns:
             bool: True表示分配成功，False表示分配失败
         """
-        self.switch_into_iframe(driver, By.XPATH, self.role_manage_iframe())
+        # 切换到角色管理iframe
+        self.switch_into_role_manage_iframe(driver)
+        # 点击分配角色按钮
         self.click_assign_role_button(driver, role_name)
+        # 输入用户名称进行搜索
         self.input_user_search(driver, user_name)
+        # 勾选用户复选框
         self.click_user_checkbox(driver, user_name)
+        # 点击分配角色确认按钮
         self.click_assign_role_confirm_button(driver)
+        # 判断分配角色成功提示框是否出现
         result = self.is_assign_role_success_alert_display(driver)
+        # 切换出iframe，回到主页面
         self.switch_out_iframe(driver)
         log.info(f"分配角色 {role_name} 给用户 {user_name} 完成")
         return result
