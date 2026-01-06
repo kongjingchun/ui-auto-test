@@ -3,7 +3,7 @@ import os.path
 import time
 
 from selenium.common.exceptions import ElementNotVisibleException, WebDriverException, NoSuchElementException, \
-    StaleElementReferenceException, TimeoutException
+    StaleElementReferenceException, TimeoutException, InvalidSessionIdException
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
@@ -71,8 +71,16 @@ class ObjectMap:
             try:
                 # 获取页面的状态
                 ready_state = driver.execute_script("return document.readyState")
-            except WebDriverException:
-                # 如果有driver的错误，执行js会失败，就直接跳过
+            except InvalidSessionIdException:
+                # 浏览器会话已关闭，抛出异常
+                log.error("浏览器会话已关闭，无法等待页面加载完成")
+                raise InvalidSessionIdException("浏览器会话已关闭，无法继续操作")
+            except WebDriverException as e:
+                # 如果是其他driver错误，检查是否是浏览器关闭
+                if "invalid session id" in str(e).lower() or "session deleted" in str(e).lower():
+                    log.error("浏览器会话已关闭，无法等待页面加载完成")
+                    raise InvalidSessionIdException("浏览器会话已关闭，无法继续操作")
+                # 其他driver错误，执行js会失败，就直接跳过
                 time.sleep(0.03)
                 return True
             # 如果页面元素全部加载完成，返回True
