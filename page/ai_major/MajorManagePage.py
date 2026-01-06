@@ -209,3 +209,110 @@ class MajorManagePage(MajorManageBase, ObjectMap):
 
         log.info(f"创建专业结果：{result}")
         return result
+
+    def input_search_keyword(self, driver, keyword):
+        """输入搜索关键词
+
+        Args:
+            driver: WebDriver实例
+            keyword: 搜索关键词（专业名称或专业代码）
+
+        Returns:
+            输入操作结果
+        """
+        xpath = self.search_keyword_input()
+        log.info(f"输入搜索关键词：{keyword}，xpath定位为：{xpath}")
+        return self.element_input_value(driver, By.XPATH, xpath, keyword)
+
+    def hover_edit_button(self, driver, major_name):
+        """鼠标悬停编辑按钮
+
+        Args:
+            driver: WebDriver实例
+            major_name: 专业名称
+        """
+        xpath = self.edit_button_hover_location(major_name)
+        log.info(f"鼠标悬停编辑按钮，xpath定位为：{xpath}")
+        return self.element_hover(driver, By.XPATH, xpath)
+
+    def click_edit_button_by_major_name(self, driver, major_name):
+        """根据专业名称点击编辑按钮
+
+        Args:
+            driver: WebDriver实例
+            major_name: 专业名称
+
+        Returns:
+            点击操作结果
+        """
+        xpath = self.edit_button(major_name)
+        log.info(f"根据专业名称'{major_name}'点击编辑按钮，xpath定位为：{xpath}")
+        return self.element_click(driver, By.XPATH, xpath, timeout=15)
+
+    def click_delete_button(self, driver):
+        """点击删除专业按钮
+
+        Args:
+            driver: WebDriver实例
+
+        Returns:
+            点击操作结果
+        """
+        xpath = self.delete_button()
+        log.info(f"点击删除专业按钮，xpath定位为：{xpath}")
+        return self.element_click(driver, By.XPATH, xpath, timeout=15)
+
+    def click_delete_confirm_button(self, driver):
+        """点击删除确认按钮
+
+        Args:
+            driver: WebDriver实例
+
+        Returns:
+            点击操作结果
+        """
+        xpath = self.delete_confirm_button()
+        log.info(f"点击删除确认按钮，xpath定位为：{xpath}")
+        return self.element_click(driver, By.XPATH, xpath, timeout=15)
+
+    def is_delete_success_alert_display(self, driver):
+        """查看删除成功提示框是否出现
+
+        Args:
+            driver: WebDriver实例
+
+        Returns:
+            bool: True表示删除成功提示框出现，False表示未出现
+        """
+        xpath = self.delete_success_alert()
+        log.info(f"查看删除成功提示框是否出现，xpath定位为：{xpath}")
+        return self.element_is_display(driver, By.XPATH, xpath)
+
+    def delete_major_by_major_name(self, driver, major_name):
+        """根据专业名称删除专业
+
+        Args:
+            driver: WebDriver实例
+            major_name: 专业名称
+
+        Returns:
+            bool: True表示删除成功，False表示删除失败
+        """
+        # 切换到iframe
+        self.switch_into_iframe(driver, By.XPATH, self.major_manage_iframe())
+        # 输入搜索关键词
+        self.input_search_keyword(driver, major_name)
+        # 鼠标悬停编辑按钮
+        self.hover_edit_button(driver, major_name)
+        # 点击编辑按钮
+        self.click_edit_button_by_major_name(driver, major_name)
+        # 点击删除按钮
+        self.click_delete_button(driver)
+        # 点击删除确认按钮
+        self.click_delete_confirm_button(driver)
+        # 断言删除成功提示框是否出现
+        result = self.is_delete_success_alert_display(driver)
+        # 切出iframe
+        self.switch_out_iframe(driver)
+        log.info(f"删除专业结果：{result}")
+        return result

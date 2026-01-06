@@ -111,8 +111,32 @@ class TrainingProgramManageBase:
 
     def training_program_revision_button(self, program_name):
         """培养方案修订按钮定位（根据方案名称）
-        
+
         Args:
             program_name: 培养方案名称
         """
         return "//tr[.//td[contains(.,'" + program_name + "')]]//button[contains(.,'修订')]"
+
+    def training_program_more_button(self, program_name):
+        """培养方案更多按钮定位（根据方案名称）
+
+        Args:
+            program_name: 培养方案名称
+        """
+        return "//tr[.//td[contains(.,'" + program_name + "')]]//button[contains(.,'更多')]"
+
+    def training_program_edit_property_button(self):
+        """培养方案编辑属性按钮定位"""
+        return "//div[@aria-hidden='false']//span[contains(.,'编辑属性')]/parent::li | //div[@aria-hidden='false']//li[contains(.,'编辑属性')]"
+
+    def delete_training_program_button(self):
+        """删除培养方案按钮定位"""
+        return "//button[contains(.,'删除培养方案')]"
+
+    def delete_confirm_button(self):
+        """删除确认按钮定位"""
+        return "//button[contains(.,'确定')]"
+
+    def delete_success_alert(self):
+        """删除成功提示框"""
+        return "//p[contains(.,'删除成功')]"

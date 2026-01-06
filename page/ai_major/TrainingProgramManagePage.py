@@ -367,6 +367,75 @@ class TrainingProgramManagePage(TrainingProgramManageBase, ObjectMap):
         log.info(f"点击方案名称'{program_name}'后的修订按钮结果：{result}")
         return result
 
+    def click_more_button_by_program_name(self, driver, program_name):
+        """根据方案名称点击更多按钮
+
+        Args:
+            driver: WebDriver实例
+            program_name: 培养方案名称
+
+        Returns:
+            点击操作结果
+        """
+        # 根据方案名称点击更多按钮
+        xpath = self.training_program_more_button(program_name)
+        log.info(f"点击方案名称'{program_name}'后的更多按钮，xpath定位为：{xpath}")
+        return self.element_click(driver, By.XPATH, xpath, timeout=15)
+
+    def click_edit_property_button_by_program_name(self, driver, program_name):
+        """根据方案名称点击编辑属性按钮
+
+        先点击更多按钮，然后在下拉菜单中点击编辑属性按钮
+        Args:
+            driver: WebDriver实例
+            program_name: 培养方案名称
+
+        Returns:
+            点击操作结果
+        """
+        edit_property_xpath = self.training_program_edit_property_button()
+        log.info(f"点击编辑属性按钮，xpath定位为：{edit_property_xpath}")
+        return self.element_click(driver, By.XPATH, edit_property_xpath, timeout=15)
+
+    def click_delete_training_program_button(self, driver):
+        """点击删除培养方案按钮
+
+        Args:
+            driver: WebDriver实例
+
+        Returns:
+            点击操作结果
+        """
+        xpath = self.delete_training_program_button()
+        log.info(f"点击删除培养方案按钮，xpath定位为：{xpath}")
+        return self.element_click(driver, By.XPATH, xpath, timeout=15)
+
+    def click_delete_confirm_button(self, driver):
+        """点击删除确认按钮
+
+        Args:
+            driver: WebDriver实例
+
+        Returns:
+            点击操作结果
+        """
+        xpath = self.delete_confirm_button()
+        log.info(f"点击删除确认按钮，xpath定位为：{xpath}")
+        return self.element_click(driver, By.XPATH, xpath, timeout=15)
+
+    def is_delete_success_alert_display(self, driver):
+        """断言删除成功提示框是否出现
+
+        Args:
+            driver: WebDriver实例
+
+        Returns:
+            bool: True表示删除成功提示框出现，False表示未出现
+        """
+        xpath = self.delete_success_alert()
+        log.info(f"断言删除成功提示框是否出现，xpath定位为：{xpath}")
+        return self.element_is_display(driver, By.XPATH, xpath)
+
     def create_training_program(self, driver, training_program_info=None):
         """创建培养方案
 
@@ -425,4 +494,33 @@ class TrainingProgramManagePage(TrainingProgramManageBase, ObjectMap):
         self.switch_out_training_program_manage_iframe(driver)
 
         log.info(f"创建培养方案结果：{result}")
+        return result
+
+    def delete_training_program_by_program_name(self, driver, program_name):
+        """根据方案名称删除培养方案
+
+        Args:
+            driver: WebDriver实例
+            program_name: 培养方案名称
+
+        Returns:
+            bool: True表示删除成功，False表示删除失败
+        """
+        # 切换到iframe
+        self.switch_into_training_program_manage_iframe(driver)
+        # 输入搜索关键词
+        self.input_search_keyword(driver, program_name)
+        # 点击更多按钮
+        self.click_more_button_by_program_name(driver, program_name)
+        # 点击编辑属性按钮
+        self.click_edit_property_button_by_program_name(driver, program_name)
+        # 根据方案名称点击删除按钮
+        self.click_delete_training_program_button(driver)
+        # 点击删除确认按钮
+        self.click_delete_confirm_button(driver)
+        # 断言删除成功提示框是否出现
+        result = self.is_delete_success_alert_display(driver)
+        # 切出iframe
+        self.switch_out_training_program_manage_iframe(driver)
+        log.info(f"删除培养方案结果：{result}")
         return result

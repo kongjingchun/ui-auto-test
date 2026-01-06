@@ -192,24 +192,25 @@ class ObjectMap:
         except (NoSuchElementException, TimeoutException):
             return False
 
-    def action_move_to_element(self, driver, locate_type, locator_expression, timeout=10):
+    def element_hover(self, driver, locate_type, locator_expression, timeout=10):
         """
         鼠标悬停到指定元素
         :param driver: 浏览器驱动对象
         :param locate_type: 元素定位方式
         :param locator_expression: 元素定位表达式
         :param timeout: 等待元素出现的超时时间(秒)，默认10秒
-        :param auto_search_iframes: 是否自动在iframe中查找元素，默认True
         :return: True 表示悬停操作成功执行
         """
         # 获取目标元素
+        log.info(f"鼠标悬停到元素 {locator_expression} ")
         element = self.element_get(driver, locate_type, locator_expression, timeout=timeout)
         # 创建 ActionChains 对象并执行鼠标悬停
         actions = ActionChains(driver)
         actions.move_to_element(element).perform()
+        time.sleep(0.5)
         return True
 
-    def element_input_value(self, driver, locate_type, locator_expression, fill_value, timeout=10):
+    def element_input_value(self, driver, locate_type, locator_expression, fill_value, timeout=10, need_enter=False):
         """
         向元素输入文本
         :param driver: 浏览器驱动
@@ -217,14 +218,15 @@ class ObjectMap:
         :param locator_expression: 定位表达式
         :param fill_value: 输入值
         :param timeout: 超时时间(秒)
+        :param need_enter: 是否需要回车，默认False（不回车）
         :return: True成功
         """
         # 将输入值转换为字符串
         fill_value = str(fill_value) if isinstance(fill_value, (int, float)) else fill_value
 
-        # 判断是否需要回车
-        need_enter = fill_value.endswith("\n")
-        if need_enter:
+        # 如果输入值以\n结尾，则自动设置need_enter为True（兼容旧代码）
+        if fill_value.endswith("\n"):
+            need_enter = True
             fill_value = fill_value[:-1]
 
         log.info(f"向元素 {locator_expression} 输入值 {fill_value}")

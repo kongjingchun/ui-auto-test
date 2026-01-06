@@ -146,6 +146,84 @@ class CourseManagePage(CourseManageBase, ObjectMap):
         log.info(f"查看创建成功提示框是否出现，xpath定位为：{xpath}")
         return self.element_is_display(driver, By.XPATH, xpath)
 
+    def input_search_keyword(self, driver, keyword):
+        """输入搜索关键词
+
+        Args:
+            driver: WebDriver实例
+            keyword: 搜索关键词（课程代码或课程名称）
+
+        Returns:
+            输入操作结果
+        """
+        xpath = self.search_keyword_input()
+        log.info(f"输入搜索关键词：{keyword}，xpath定位为：{xpath}")
+        return self.element_input_value(driver, By.XPATH, xpath, keyword)
+
+    def hover_edit_button(self, driver, course_code):
+        """鼠标悬停编辑按钮
+
+        Args:
+            driver: WebDriver实例
+            course_code: 课程代码
+        """
+        xpath = self.edit_button_hover_location(course_code)
+        log.info(f"鼠标悬停编辑按钮，xpath定位为：{xpath}")
+        return self.element_hover(driver, By.XPATH, xpath)
+
+    def click_edit_button_by_course_code(self, driver, course_code):
+        """根据课程代码点击编辑按钮
+
+        Args:
+            driver: WebDriver实例
+            course_code: 课程代码
+
+        Returns:
+            点击操作结果
+        """
+        xpath = self.edit_button(course_code)
+        log.info(f"根据课程代码'{course_code}'点击编辑按钮，xpath定位为：{xpath}")
+        return self.element_click(driver, By.XPATH, xpath, timeout=15)
+
+    def click_delete_button(self, driver):
+        """点击删除课程按钮
+
+        Args:
+            driver: WebDriver实例
+
+        Returns:
+            点击操作结果
+        """
+        xpath = self.delete_button()
+        log.info(f"点击删除课程按钮，xpath定位为：{xpath}")
+        return self.element_click(driver, By.XPATH, xpath, timeout=15)
+
+    def click_delete_confirm_button(self, driver):
+        """点击删除确认按钮
+
+        Args:
+            driver: WebDriver实例
+
+        Returns:
+            点击操作结果
+        """
+        xpath = self.delete_confirm_button()
+        log.info(f"点击删除确认按钮，xpath定位为：{xpath}")
+        return self.element_click(driver, By.XPATH, xpath, timeout=15)
+
+    def is_delete_success_alert_display(self, driver):
+        """查看删除成功提示框是否出现
+
+        Args:
+            driver: WebDriver实例
+
+        Returns:
+            bool: True表示删除成功提示框出现，False表示未出现
+        """
+        xpath = self.delete_success_alert()
+        log.info(f"查看删除成功提示框是否出现，xpath定位为：{xpath}")
+        return self.element_is_display(driver, By.XPATH, xpath)
+
     def create_course(self, driver, course_info=None):
         """创建课程
 
@@ -198,4 +276,33 @@ class CourseManagePage(CourseManageBase, ObjectMap):
         self.switch_out_iframe(driver)
 
         log.info(f"创建课程结果：{result}")
+        return result
+
+    def delete_course_by_course_code(self, driver, course_code):
+        """根据课程代码删除课程
+
+        Args:
+            driver: WebDriver实例
+            course_code: 课程代码
+
+        Returns:
+            bool: True表示删除成功，False表示删除失败
+        """
+        # 切换到iframe
+        self.switch_into_iframe(driver, By.XPATH, self.course_manage_iframe())
+        # 输入搜索关键词
+        self.input_search_keyword(driver, course_code)
+        # 鼠标悬停编辑按钮
+        self.hover_edit_button(driver, course_code)
+        # 点击编辑按钮
+        self.click_edit_button_by_course_code(driver, course_code)
+        # 点击删除按钮
+        self.click_delete_button(driver)
+        # 点击删除确认按钮
+        self.click_delete_confirm_button(driver)
+        # 断言删除成功提示框是否出现
+        result = self.is_delete_success_alert_display(driver)
+        # 切出iframe
+        self.switch_out_iframe(driver)
+        log.info(f"删除课程结果：{result}")
         return result

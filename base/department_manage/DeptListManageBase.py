@@ -34,3 +34,35 @@ class DeptListManageBase:
     def create_success_alert(self):
         """创建成功提示框"""
         return "//p[text()='创建成功']"
+
+    def search_keyword_input(self):
+        """搜索关键词输入框"""
+        return "//input[@placeholder='院系名称 ｜ 院系代码']"
+
+    def edit_button_hover_location(self, dept_code):
+        """编辑悬停位置定位（根据院系代码）
+
+        Args:
+            dept_code: 院系代码
+        """
+        return "//tr[contains(.,'" + dept_code + "')]//i[contains(@class,'action-icon')]"
+
+    def edit_button(self, dept_code):
+        """编辑按钮定位（根据院系代码）
+
+        Args:
+            dept_code: 院系代码
+        """
+        return "//tr[contains(.,'" + dept_code + "')]//button"
+
+    def delete_button(self):
+        """删除院系按钮定位"""
+        return "//button[contains(.,'删除院系')]"
+
+    def delete_confirm_button(self):
+        """删除确认按钮定位"""
+        return "//div[contains(.,'警告')]//button[contains(.,'确定')]"
+
+    def delete_success_alert(self):
+        """删除成功提示框"""
+        return "//p[contains(.,'删除成功')]"

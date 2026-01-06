@@ -11,6 +11,10 @@ class MajorManageBase:
         """专业管理iframe"""
         return "//iframe[@id='app-iframe-2101']"
 
+    def search_keyword_input(self):
+        """搜索关键词输入框"""
+        return "//input[@placeholder='专业名称 ｜ 专业代码']"
+
     def new_major_button(self):
         """新建专业按钮"""
         return "//button[contains(.,'新建专业')]"
@@ -62,3 +66,31 @@ class MajorManageBase:
     def create_success_alert(self):
         """创建成功提示框"""
         return "//p[text()='新建成功']"
+
+    def edit_button_hover_location(self, major_name):
+        """编辑悬停位置定位（根据专业名称）
+
+        Args:
+            major_name: 专业名称
+        """
+        return "//tr[contains(.,'" + major_name + "')]//i[contains(@class,'action-icon')]"
+
+    def edit_button(self, major_name):
+        """编辑按钮定位（根据专业名称）
+
+        Args:
+            major_name: 专业名称
+        """
+        return "//tr[contains(.,'" + major_name + "')]//button"
+
+    def delete_button(self):
+        """删除专业按钮定位"""
+        return "//button[contains(.,'删除专业')]"
+
+    def delete_confirm_button(self):
+        """删除确认按钮定位"""
+        return "//div[contains(.,'警告')]//button[contains(.,'确定')]"
+
+    def delete_success_alert(self):
+        """删除成功提示框"""
+        return "//p[contains(.,'删除成功')]"

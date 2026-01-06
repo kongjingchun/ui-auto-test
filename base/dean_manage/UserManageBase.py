@@ -40,9 +40,9 @@ class UserManageBase:
 
         return "//input[contains(@placeholder,'" + input_name + "')]"
 
-    def user_bind_button(self, user_name):
+    def user_bind_button(self, user_code):
         """用户绑定按钮的Xpath定位表达式"""
-        return "//span[contains(text(),'" + user_name + "')]/ancestor::td/following-sibling ::td//div[@class='action-buttons']//button[contains(.,'绑定')]"
+        return "//tr[contains(.,'" + user_code + "')]//button[contains(.,'绑定')]"
 
     def user_bind_input(self):
         """绑定用户平台ID输入框的Xpath定位表达式"""
@@ -56,3 +56,27 @@ class UserManageBase:
     def bind_success_alert(self):
         """绑定成功提示框的Xpath定位表达式"""
         return "//p[contains(text(),'绑定用户成功')]"
+
+    def search_code_input(self):
+        """工号筛选输入框的Xpath定位表达式"""
+        return "//input[contains(@placeholder,'请输入工号/学号')]"
+
+    def edit_button_by_code(self, code):
+        """根据工号/学号定位编辑按钮的Xpath定位表达式
+
+        Args:
+            code: 工号/学号
+        """
+        return "//tr[.//td[contains(.,'" + code + "')]]//button[contains(.,'编辑')]"
+
+    def delete_user_button(self):
+        """删除用户按钮的Xpath定位表达式"""
+        return "//button[contains(.,'删除用户')]"
+
+    def delete_confirm_button(self):
+        """删除确认按钮的Xpath定位表达式"""
+        return "//div[contains(@aria-label,'确认删除') or contains(@aria-label,'删除')]//button[contains(.,'删除')]"
+
+    def delete_success_alert(self):
+        """删除成功提示框的Xpath定位表达式（p标签）"""
+        return "//p[contains(text(),'删除成功')]"

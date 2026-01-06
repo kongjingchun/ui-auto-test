@@ -14,6 +14,34 @@ class CourseManageBase:
         """课程管理iframe定位"""
         return "//iframe[@id='app-iframe-2001']"
 
+    def search_keyword_input(self):
+        """搜索关键词输入框"""
+        return "//input[@placeholder='课程代码 ｜ 课程名称']"
+
+    def edit_button_hover_location(self, course_code):
+        """编辑悬停位置定位"""
+        return "//tr[contains(.,'" + course_code + "')]//i[contains(@class,'action-icon')]"
+
+    def edit_button(self, course_code):
+        """编辑按钮定位（根据课程代码）
+
+        Args:
+            course_code: 课程代码
+        """
+        return "//tr[contains(.,'" + course_code + "')]//button"
+
+    def delete_button(self):
+        """删除课程按钮定位"""
+        return "//button[contains(.,'删除课程')]"
+
+    def delete_confirm_button(self):
+        """删除确认按钮定位"""
+        return "//div[contains(.,'警告')]//button[contains(.,'确定')]"
+
+    def delete_success_alert(self):
+        """删除成功提示框"""
+        return "//p[contains(.,'删除成功')]"
+
     def new_course_button(self):
         """新建课程按钮"""
         return "//button[contains(.,'新建课程')]"

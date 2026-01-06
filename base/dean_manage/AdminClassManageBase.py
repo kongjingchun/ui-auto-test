@@ -14,6 +14,22 @@ class AdminClassManageBase:
         """行政班管理iframe定位"""
         return "//iframe[@id='app-iframe-2005']"
 
+    def search_keyword_input(self):
+        """搜索关键词输入框"""
+        return "//input[@placeholder='行政班名称 ｜ 行政班编号']"
+
+    def search_button(self):
+        """搜索按钮"""
+        return "//button[contains(.,'搜索')]"
+
+    def operation_button_by_admin_class_name(self, admin_class_name):
+        """根据行政班名称定位操作按钮
+
+        Args:
+            admin_class_name: 行政班名称
+        """
+        return "//tr[.//td[contains(.,'" + admin_class_name + "')]]//button"
+
     def new_admin_class_button(self):
         """新建行政班按钮"""
         return "//button[contains(.,'新建行政班')]"
@@ -64,3 +80,15 @@ class AdminClassManageBase:
     def create_success_alert(self):
         """创建成功提示框"""
         return "//p[@class='el-message__content' and text()='创建成功']"
+
+    def delete_li(self):
+        """删除下拉选项"""
+        return "//div[@aria-hidden='false']//li[contains(.,'删除')]"
+
+    def delete_confirm_button(self):
+        """删除确认按钮"""
+        return "//div[@aria-label='确认删除']//button[contains(.,'确定')]"
+
+    def delete_success_alert(self):
+        """删除成功提示框"""
+        return "//p[contains(.,'删除成功')]"

@@ -47,10 +47,10 @@ class TestUser:
             result = CmsUserManage().register_cms_user(prof_cms_user_info)
             assert result is True, "api注册专业负责人账户失败"
 
-        with allure.step("登录"):
+        with allure.step("登录管理员"):
             result = LoginPage().user_login(driver, superadmin)
-            add_img_2_report(driver, "登录")
-            assert result is True, "登录失败"
+            add_img_2_report(driver, "登录管理员")
+            assert result is True, "登录管理员失败"
 
         with allure.step("切换到cms"):
             result = TopMenuPage().switch_school(driver, "CMS管理系统")
