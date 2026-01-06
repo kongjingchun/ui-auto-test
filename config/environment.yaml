@@ -1,5 +1,5 @@
 # 全局变量配置（只需修改这里的序号）
-test_suffix: 16 # 测试环境序号
+test_suffix: 22 # 测试环境序号
 
 school_name: 智慧大学
 url: https://www.gqkt.cn/

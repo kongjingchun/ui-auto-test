@@ -10,7 +10,7 @@
         "editor.formatOnSave": true,
         "editor.defaultFormatter": "ms-python.autopep8",
         "editor.codeActionsOnSave": {
-            "source.organizeImports": false
+            "source.organizeImports": "never"
         }
     },
     "python.testing.pytestEnabled": true,

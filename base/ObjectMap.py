@@ -31,6 +31,8 @@ class ObjectMap:
         :param must_be_visible: 元素是否必须可见，True是必须可见，False是默认值
         :return: 返回的元素
         """
+        # 确保页面完全加载完成
+        self.wait_for_ready_state_complete(driver=driver, timeout=5)
         try:
             # Selenium 4推荐：使用WebDriverWait + expected_conditions
             wait = WebDriverWait(driver, timeout, poll_frequency=0.1)
@@ -97,6 +99,8 @@ class ObjectMap:
         if not locate_type:
             return True
 
+        # 确保页面完全加载完成
+        self.wait_for_ready_state_complete(driver=driver, timeout=5)
         try:
             # Selenium 4推荐：使用WebDriverWait + expected_conditions
             wait = WebDriverWait(driver, timeout, poll_frequency=0.1)
@@ -122,6 +126,8 @@ class ObjectMap:
         if not locate_type:
             return None
 
+        # 确保页面完全加载完成
+        self.wait_for_ready_state_complete(driver=driver, timeout=5)
         try:
             # Selenium 4推荐：使用WebDriverWait + expected_conditions
             element = self.element_get(driver, locate_type, locator_expression, timeout)
@@ -181,6 +187,8 @@ class ObjectMap:
         :param timeout: 超时时间(秒)，默认5秒
         :return: 元素存在且可见返回True，否则返回False
         """
+        # 确保页面完全加载完成
+        self.wait_for_ready_state_complete(driver=driver, timeout=5)
         try:
             # Selenium 4推荐：使用WebDriverWait检查元素可见性
             # self.element_get(driver, locate_type, locator_expression, timeout, must_be_visible=True)
@@ -201,6 +209,8 @@ class ObjectMap:
         :param timeout: 等待元素出现的超时时间(秒)，默认10秒
         :return: True 表示悬停操作成功执行
         """
+        # 确保页面完全加载完成
+        self.wait_for_ready_state_complete(driver=driver, timeout=5)
         # 获取目标元素
         log.info(f"鼠标悬停到元素 {locator_expression} ")
         element = self.element_get(driver, locate_type, locator_expression, timeout=timeout)
@@ -221,6 +231,8 @@ class ObjectMap:
         :param need_enter: 是否需要回车，默认False（不回车）
         :return: True成功
         """
+        # 确保页面完全加载完成
+        self.wait_for_ready_state_complete(driver=driver, timeout=5)
         # 将输入值转换为字符串
         fill_value = str(fill_value) if isinstance(fill_value, (int, float)) else fill_value
 
@@ -290,6 +302,8 @@ class ObjectMap:
                         driver.execute_script("arguments[0].dispatchEvent(new Event('change', { bubbles: true }));", element)
                         # 触发click事件
                         try:
+                            # 确保页面完全加载完成后再点击
+                            self.wait_for_ready_state_complete(driver=driver, timeout=5)
                             driver.execute_script("arguments[0].click();", element)
                             time.sleep(0.1)
                             # 使用send_keys输入值
@@ -350,7 +364,7 @@ class ObjectMap:
             timeout=10
     ):
         """
-        点击元素
+        点击元素（增强版，支持多种点击策略）
         :param driver: 浏览器驱动
         :param locate_type: 定位方式
         :param locator_expression: 定位表达式
@@ -358,9 +372,13 @@ class ObjectMap:
         :param locator_expression_disappear: 等待消失的元素定位表达式
         :param locate_type_appear: 等待出现的元素定位方式
         :param locator_expression_appear: 等待出现的元素定位表达式
-        :param timeout: 超时时间(秒)，默认30秒
+        :param timeout: 超时时间(秒)，默认10秒
         :return: True成功，False失败
         """
+        # 确保页面完全加载完成
+        self.wait_for_ready_state_complete(driver=driver, timeout=5)
+        log.info(f"准备点击元素：{locator_expression}，定位方式：{locate_type}")
+
         # 最多重试3次，处理stale element和click intercepted异常
         for attempt in range(3):
             try:
@@ -370,44 +388,120 @@ class ObjectMap:
                     EC.element_to_be_clickable((locate_type, locator_expression))
                 )
 
-                # 滚动元素到可视区域中心位置
-                driver.execute_script("arguments[0].scrollIntoView({block: 'center', behavior: 'smooth'});", element)
-                time.sleep(0.3)  # 等待滚动完成
+                # 等待元素稳定（避免动画或加载中的元素）
+                time.sleep(0.2)
 
+                # 滚动元素到可视区域中心位置
                 try:
-                    element.click()
-                except Exception as click_error:
-                    # 如果普通点击失败，尝试使用JavaScript点击
-                    if "click intercepted" in str(click_error).lower() or "not clickable" in str(click_error).lower():
-                        log.warning(f"元素 {locator_expression} 被遮挡或不可点击，尝试使用JavaScript点击")
-                        driver.execute_script("arguments[0].click();", element)
-                    else:
-                        raise
+                    driver.execute_script(
+                        "arguments[0].scrollIntoView({block: 'center', behavior: 'smooth'});",
+                        element
+                    )
+                    time.sleep(0.3)  # 等待滚动完成
+                except Exception as scroll_error:
+                    log.warning(f"滚动元素失败，继续尝试点击：{scroll_error}")
+
+                # 确保元素在视口中
+                try:
+                    # 检查元素是否在视口中
+                    is_in_viewport = driver.execute_script(
+                        "var rect = arguments[0].getBoundingClientRect();"
+                        "return (rect.top >= 0 && rect.left >= 0 && "
+                        "rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) && "
+                        "rect.right <= (window.innerWidth || document.documentElement.clientWidth));",
+                        element
+                    )
+                    if not is_in_viewport:
+                        log.warning(f"元素不在视口中，尝试滚动到元素位置")
+                        driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
+                        time.sleep(0.2)
+                except Exception:
+                    pass  # 检查视口失败不影响后续操作
+
+                # 尝试多种点击方式
+                click_success = False
+                click_methods = [
+                    ("普通点击", lambda: element.click()),
+                    ("ActionChains点击", lambda: ActionChains(driver).move_to_element(element).click().perform()),
+                    ("JavaScript点击", lambda: driver.execute_script("arguments[0].click();", element)),
+                ]
+
+                for method_name, click_func in click_methods:
+                    try:
+                        log.info(f"尝试使用{method_name}点击元素 {locator_expression}")
+                        click_func()
+                        time.sleep(0.1)  # 等待点击响应
+                        click_success = True
+                        log.info(f"{method_name}成功")
+                        break
+                    except Exception as click_error:
+                        error_msg = str(click_error).lower()
+                        # 如果是最后一次尝试的方法，记录错误
+                        if method_name == click_methods[-1][0]:
+                            log.warning(f"{method_name}失败：{click_error}")
+                        # 如果是被遮挡或不可点击，尝试下一种方法
+                        if any(keyword in error_msg for keyword in [
+                            "click intercepted", "not clickable", "element not interactable",
+                            "element click intercepted", "is not clickable"
+                        ]):
+                            log.warning(f"{method_name}失败（元素被遮挡或不可点击），尝试下一种方法")
+                            continue
+                        # 其他错误也尝试下一种方法
+                        else:
+                            log.warning(f"{method_name}失败：{click_error}，尝试下一种方法")
+                            continue
+
+                if not click_success:
+                    raise Exception("所有点击方式都失败了")
+
+                # 点击后等待页面稳定
+                self.wait_for_ready_state_complete(driver=driver, timeout=2)
+                time.sleep(0.2)
 
                 # 点击后等待元素出现或消失
                 if locate_type_appear:
-                    self.element_appear(driver, locate_type_appear, locator_expression_appear)
-                if locate_type_disappear:
-                    self.element_disappear(driver, locate_type_disappear, locator_expression_disappear)
+                    try:
+                        self.element_appear(driver, locate_type_appear, locator_expression_appear)
+                    except Exception as e:
+                        log.warning(f"等待元素出现失败（可能已成功点击）：{e}")
 
+                if locate_type_disappear:
+                    try:
+                        self.element_disappear(driver, locate_type_disappear, locator_expression_disappear)
+                    except Exception as e:
+                        log.warning(f"等待元素消失失败（可能已成功点击）：{e}")
+
+                log.info(f"元素 {locator_expression} 点击成功")
                 return True
+
             except StaleElementReferenceException:
                 if attempt < 2:
                     # 前两次失败，等待页面刷新后重试
                     log.warning(f"元素 {locator_expression} 点击时发生stale element异常，等待页面刷新后重试（第{attempt + 1}次）")
                     self.wait_for_ready_state_complete(driver=driver)
-                    time.sleep(0.2)
+                    time.sleep(0.3)
                     continue
                 else:
                     log.error(f"元素 {locator_expression} 点击失败：页面元素过期（已重试{attempt + 1}次）")
                     return False
-            except (TimeoutException, Exception) as e:
+            except TimeoutException as e:
                 if attempt < 2:
-                    log.warning(f"元素点击失败（第{attempt + 1}次尝试）: {e}")
+                    log.warning(f"元素点击超时（第{attempt + 1}次尝试）: {e}，将重试")
                     time.sleep(0.3)
                     continue
-                log.error(f"元素点击失败（已重试{attempt + 1}次）: {e}")
+                log.error(f"元素 {locator_expression} 点击失败：元素超时未出现或不可点击（已重试{attempt + 1}次）")
                 return False
+            except Exception as e:
+                if attempt < 2:
+                    log.warning(f"元素点击失败（第{attempt + 1}次尝试）: {e}，将重试")
+                    time.sleep(0.3)
+                    continue
+                log.error(f"元素 {locator_expression} 点击失败（已重试{attempt + 1}次）: {e}")
+                return False
+
+        # 所有重试都失败
+        log.error(f"元素 {locator_expression} 点击失败：已重试3次均失败")
+        return False
 
     def element_double_click(
             self,
@@ -432,6 +526,8 @@ class ObjectMap:
         :param timeout: 超时时间(秒)，默认30秒
         :return: True成功，False失败
         """
+        # 确保页面完全加载完成
+        self.wait_for_ready_state_complete(driver=driver, timeout=5)
         try:
             # Selenium 4推荐：使用WebDriverWait等待元素可点击
             wait = WebDriverWait(driver, timeout, poll_frequency=0.1)
@@ -460,6 +556,8 @@ class ObjectMap:
         :param file_path: 文件路径
         :return: 上传结果
         """
+        # 确保页面完全加载完成
+        self.wait_for_ready_state_complete(driver=driver, timeout=5)
         element = self.element_get(driver, locate_type, locator_expression)
         return element.send_keys(file_path)
 
@@ -471,6 +569,8 @@ class ObjectMap:
         :param locate_iframe_expression: iframe定位表达式
         :return: None
         """
+        # 确保页面完全加载完成
+        self.wait_for_ready_state_complete(driver=driver, timeout=5)
         log.info(f"切换到iframe：{locate_iframe_expression}")
         iframe = self.element_get(driver, locate_iframe_type, locate_iframe_expression)
         driver.switch_to.frame(iframe)
@@ -483,6 +583,8 @@ class ObjectMap:
         :param to_root: True切回顶层文档，False切回上一层
         :return: None
         """
+        # 确保页面完全加载完成
+        self.wait_for_ready_state_complete(driver=driver, timeout=5)
         # Selenium 4改进：提供更灵活的iframe切换
         log.info("从iframe切回主文档")
         if to_root:
@@ -497,6 +599,8 @@ class ObjectMap:
         :param driver: 浏览器驱动
         :return: None
         """
+        # 确保页面完全加载完成
+        self.wait_for_ready_state_complete(driver=driver, timeout=5)
         window_handles = driver.window_handles
         driver.switch_to.window(window_handles[-1])
 
@@ -507,6 +611,8 @@ class ObjectMap:
         :param switch_to_first: 关闭后是否切换到第一个窗口，True切换到第一个窗口，False切换到上一个窗口，默认为True
         :return: True成功，False失败
         """
+        # 确保页面完全加载完成
+        self.wait_for_ready_state_complete(driver=driver, timeout=5)
         try:
             # 获取当前窗口句柄
             current_handle = driver.current_window_handle
@@ -547,6 +653,8 @@ class ObjectMap:
         :param img_name: 图片文件名
         :return: 匹配置信度
         """
+        # 确保页面完全加载完成
+        self.wait_for_ready_state_complete(driver=driver, timeout=5)
         # 截图后图片保存的路径
         source_img_path = get_project_path() + sep(["img", "source_img", img_name], add_sep_before=True)
         print("source_img_path:", source_img_path)
@@ -570,6 +678,8 @@ class ObjectMap:
         :param locator_expression: 定位表达式
         :return: 截图文件路径
         """
+        # 确保页面完全加载完成
+        self.wait_for_ready_state_complete(driver=driver, timeout=5)
         ele_name = datetime.datetime.now().strftime("%Y%m%d%H%M%S") + ".png"
         ele_img_dir_path = get_project_path() + sep(["img", "ele_img"], add_sep_before=True, add_sep_after=True)
         if not os.path.exists(ele_img_dir_path):
@@ -586,6 +696,8 @@ class ObjectMap:
         :param locator_expression: 定位表达式
         :return: True成功
         """
+        # 确保页面完全加载完成
+        self.wait_for_ready_state_complete(driver=driver, timeout=5)
         ele = self.element_get(driver, locate_type, locator_expression)
         driver.execute_script("arguments[0].scrollIntoView()", ele)
         return True
@@ -599,6 +711,8 @@ class ObjectMap:
         :param locator_expression: 定位表达式
         :return: 元素的value属性值
         """
+        # 确保页面完全加载完成
+        self.wait_for_ready_state_complete(driver=driver, timeout=5)
         element = self.element_get(driver, locate_type, locator_expression)
         return element.get_attribute("value")
 
@@ -611,6 +725,8 @@ class ObjectMap:
         :param timeout: 超时时间(秒)
         :return: 元素的文本内容
         """
+        # 确保页面完全加载完成
+        self.wait_for_ready_state_complete(driver=driver, timeout=5)
         element = self.element_get(driver, locate_type, locator_expression, timeout=timeout)
         text = element.text.strip()
         log.info(f"获取元素 {locator_expression} 的文本内容: {text}")
@@ -626,6 +742,8 @@ class ObjectMap:
         :param timeout: 超时时间(秒)
         :return: 属性值
         """
+        # 确保页面完全加载完成
+        self.wait_for_ready_state_complete(driver=driver, timeout=5)
         element = self.element_get(driver, locate_type, locator_expression, timeout=timeout)
         attr_value = element.get_attribute(attribute_name)
         log.info(f"获取元素 {locator_expression} 的属性 {attribute_name}: {attr_value}")
@@ -639,6 +757,8 @@ class ObjectMap:
         :param case_sensitive: 是否区分大小写，True区分大小写，False不区分（默认）
         :return: True表示页面包含该文字，False表示不包含
         """
+        # 确保页面完全加载完成
+        self.wait_for_ready_state_complete(driver=driver, timeout=5)
         try:
             # 获取页面源码
             page_source = driver.page_source
@@ -665,6 +785,8 @@ class ObjectMap:
         :param timeout: 超时时间(秒)
         :return: 诊断信息字典
         """
+        # 确保页面完全加载完成
+        self.wait_for_ready_state_complete(driver=driver, timeout=5)
         diagnosis = {
             "element_found": False,
             "element_visible": False,

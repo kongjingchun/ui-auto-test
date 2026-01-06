@@ -103,6 +103,19 @@ class MajorManagePage(MajorManageBase, ObjectMap):
         sleep(0.5)
         return result
 
+    def click_close_dropdown(self, driver):
+        """点击关闭下拉框
+
+        Args:
+            driver: WebDriver实例
+
+        Returns:
+            点击操作结果
+        """
+        xpath = self.close_dropdown()
+        log.info(f"点击关闭下拉框，xpath定位为：{xpath}")
+        return self.element_click(driver, By.XPATH, xpath)
+
     def click_new_major_build_level_radio(self, driver, level):
         """点击建设层次单选框
 
@@ -189,7 +202,8 @@ class MajorManagePage(MajorManageBase, ObjectMap):
         # 5. 专业负责人
         self.click_new_major_belong_prof_dropdown(driver)
         self.click_new_major_belong_prof_dropdown_option(driver, major_info['专业负责人'])
-
+        # 关闭下拉框
+        self.click_close_dropdown(driver)
         # 6. 专业建设层次
         self.click_new_major_build_level_radio(driver, major_info['专业建设层次'])
 

@@ -44,6 +44,11 @@ class MajorManageBase:
         """专业负责人下拉框选项"""
         return "//span[text()='" + prof_name + "']/parent::li"
 
+    # 关闭下拉框
+    def close_dropdown(self):
+        """关闭下拉框"""
+        return "//label[text()='专业负责人']/following-sibling ::div"
+
     def new_major_build_level_radio(self, level="国家一流本科专业"):
         """建设层次单选框"""
         if "国" in level:
