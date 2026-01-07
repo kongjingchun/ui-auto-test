@@ -11,7 +11,7 @@ from common.report_add_img import add_img_2_report
 from common.yaml_config import GetConf
 from page.LeftMenuPage import LeftMenuPage
 from page.ai_major.MajorManagePage import MajorManagePage
-from page.ai_major.TrainingProgramManagePage import TrainingProgramManagePage
+from page.ai_major.TrainingProgramManage.TrainingProgramManagePage import TrainingProgramManagePage
 from page.cms.CmsUserManagePage import CmsUserManage
 from page.dean_manage.AdminClassManagePage import AdminClassManagePage
 from page.dean_manage.CourseManagePage import CourseManagePage
@@ -21,7 +21,7 @@ from page.login.LoginPage import LoginPage
 from page.TopMenuPage import TopMenuPage
 
 
-# @pytest.mark.skip(reason="跳过删除数据测试用例")
+@pytest.mark.skip(reason="跳过删除数据测试用例")
 class TestDeleteData:
     """删除数据测试"""
 

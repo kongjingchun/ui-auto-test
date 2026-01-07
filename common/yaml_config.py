@@ -129,4 +129,4 @@ class GetConf:
 
 
 if __name__ == '__main__':
-    print(GetConf().get_info("major").get("专业名称"))
+    print(GetConf().get_info("major"))

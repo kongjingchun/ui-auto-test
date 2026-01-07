@@ -8,7 +8,7 @@
 /UIreport/*
 report.html
 test.log
-logs/all_logs/*
+logs/*
 
 # Python 缓存文件
 *.pyc

@@ -7,8 +7,8 @@
 from selenium.webdriver.common.by import By
 
 from base.ObjectMap import ObjectMap
-from base.ai_major.TrainingProgramManageBase import TrainingProgramManageBase
-from base.ai_major.TrainingProgramRevisionBase import TrainingProgramRevisionBase
+from base.ai_major.TrainingProgramManage.TrainingProgramManageBase import TrainingProgramManageBase
+from base.ai_major.TrainingProgramManage.TrainingProgramRevisionBase import TrainingProgramRevisionBase
 from logs.log import log
 
 

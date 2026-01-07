@@ -13,7 +13,7 @@ from common.yaml_config import GetConf
 from page.LeftMenuPage import LeftMenuPage
 from page.ai_major.TrainingProgramRevisionPage import TrainingProgramRevisionPage
 from page.login.LoginPage import LoginPage
-from page.ai_major.TrainingProgramManagePage import TrainingProgramManagePage
+from page.ai_major.TrainingProgramManage.TrainingProgramManagePage import TrainingProgramManagePage
 
 
 class TestTrainingProgram:

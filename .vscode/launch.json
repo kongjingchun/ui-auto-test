@@ -9,15 +9,16 @@
             "args": [
                 "${file}",
                 "-v",
-                "-s"
+                "-s",
+                "-n",
+                "0"
             ],
             "console": "integratedTerminal",
             "justMyCode": false,
             "cwd": "${workspaceFolder}",
             "env": {
                 "PYTHONPATH": "${workspaceFolder}"
-            },
-            "purpose": ["debug-test"]
+            }
         },
         {
             "name": "Python: Pytest - All Tests",
@@ -27,7 +28,9 @@
             "args": [
                 "testcases",
                 "-v",
-                "-s"
+                "-s",
+                "-n",
+                "0"
             ],
             "console": "integratedTerminal",
             "justMyCode": false,
@@ -45,6 +48,8 @@
                 "${file}",
                 "-v",
                 "-s",
+                "-n",
+                "0",
                 "-k",
                 "${selectedText}"
             ],
@@ -57,4 +62,3 @@
         }
     ]
 }
-

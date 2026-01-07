@@ -5,17 +5,39 @@
 # @Desc  : pytest配置文件，用于定义测试用例的fixture和全局配置
 
 import os
+import shutil
 import pytest
 
 from common.ding_talk import send_ding_talk
 from common.process_file import Process  # 使用文件存储测试进度
 from common.report_add_img import add_img_2_report
+from common.tools import get_project_path
 from common.yaml_config import GetConf
 from config.driver_config import DriverConfig
 from logs.log import log
 
 # 配置Allure测试报告默认语言为中文
 os.environ.setdefault('ALLURE_LANG', 'zh-CN')
+
+
+def pytest_sessionstart(session):
+    """pytest会话开始时执行，删除并重新创建UIreport目录"""
+    uireport_path = os.path.join(get_project_path(), "UIreport")
+    if os.path.exists(uireport_path):
+        try:
+            shutil.rmtree(uireport_path)
+            log.info(f"已删除UIreport目录: {uireport_path}")
+        except Exception as e:
+            log.warning(f"删除UIreport目录失败: {e}")
+    else:
+        log.info(f"UIreport目录不存在，无需删除: {uireport_path}")
+
+    # 重新创建UIreport目录，确保后续测试可以正常写入报告
+    try:
+        os.makedirs(uireport_path, exist_ok=True)
+        log.info(f"已创建UIreport目录: {uireport_path}")
+    except Exception as e:
+        log.warning(f"创建UIreport目录失败: {e}")
 
 
 def pytest_configure(config):
@@ -31,7 +53,7 @@ def pytest_configure(config):
 def pytest_collection_modifyitems(config, items):
     """在收集测试用例时，根据部署环境自动跳过标记的用例"""
     is_local = GetConf().is_local_deploy()
-    
+
     for item in items:
         # 如果标记了 skip_local 且是本地部署，则跳过
         if item.get_closest_marker("skip_local") and is_local:

@@ -251,7 +251,7 @@ class ObjectMap:
 
         log.info(f"向元素 {locator_expression} 输入值 {fill_value}")
 
-        # 获取并操作元素，最多重试2次
+        # 获取并操作元素，最多重试1次
         for attempt in range(2):
             try:
                 # 等待元素出现并可见
@@ -340,25 +340,25 @@ class ObjectMap:
 
             except StaleElementReferenceException:
                 if attempt == 0:
-                    # 第一次失败，等待页面刷新后重试
-                    log.warning(f"元素 {locator_expression} 输入时发生stale element异常，等待页面刷新后重试")
+                    # 第一次失败，等待页面刷新后重试1次
+                    log.warning(f"元素 {locator_expression} 输入时发生stale element异常，等待页面刷新后重试1次")
                     self.wait_for_ready_state_complete(driver=driver)
                     time.sleep(0.1)
                     continue
                 else:
                     # 重试后仍然失败
-                    raise Exception(f"元素 {locator_expression} 填值失败：页面元素过期（已重试{attempt + 1}次）")
+                    raise Exception(f"元素 {locator_expression} 填值失败：页面元素过期（已重试1次）")
             except TimeoutException as e:
-                # 超时失败
+                # 超时失败，不重试
                 raise Exception(f"元素 {locator_expression} 填值失败：元素超时未出现或不可交互 - {str(e)}")
             except Exception as e:
                 if attempt == 0:
-                    log.warning(f"元素 {locator_expression} 输入失败（第{attempt + 1}次尝试），将重试：{str(e)}")
+                    log.warning(f"元素 {locator_expression} 输入失败（第{attempt + 1}次尝试），将重试1次：{str(e)}")
                     time.sleep(0.2)
                     continue
                 else:
                     # 重试后仍然失败
-                    raise Exception(f"元素 {locator_expression} 填值失败：{str(e)}")
+                    raise Exception(f"元素 {locator_expression} 填值失败（已重试1次）：{str(e)}")
 
     def element_click(
             self,
@@ -387,8 +387,8 @@ class ObjectMap:
         self.wait_for_ready_state_complete(driver=driver, timeout=5)
         log.info(f"准备点击元素：{locator_expression}，定位方式：{locate_type}")
 
-        # 最多重试3次，处理stale element和click intercepted异常
-        for attempt in range(3):
+        # 最多重试1次，处理stale element和click intercepted异常
+        for attempt in range(2):
             try:
                 # Selenium 4推荐：使用WebDriverWait等待元素可点击
                 wait = WebDriverWait(driver, timeout, poll_frequency=0.1)
@@ -483,33 +483,37 @@ class ObjectMap:
                 return True
 
             except StaleElementReferenceException:
-                if attempt < 2:
-                    # 前两次失败，等待页面刷新后重试
-                    log.warning(f"元素 {locator_expression} 点击时发生stale element异常，等待页面刷新后重试（第{attempt + 1}次）")
+                if attempt < 1:
+                    # 第一次失败，等待页面刷新后重试1次
+                    log.warning(f"元素 {locator_expression} 点击时发生stale element异常，等待页面刷新后重试1次")
                     self.wait_for_ready_state_complete(driver=driver)
                     time.sleep(0.3)
                     continue
                 else:
-                    log.error(f"元素 {locator_expression} 点击失败：页面元素过期（已重试{attempt + 1}次）")
-                    return False
+                    error_msg = f"元素 {locator_expression} 点击失败：页面元素过期（已重试1次）"
+                    log.error(error_msg)
+                    raise Exception(error_msg)
             except TimeoutException as e:
-                if attempt < 2:
-                    log.warning(f"元素点击超时（第{attempt + 1}次尝试）: {e}，将重试")
+                if attempt < 1:
+                    log.warning(f"元素点击超时（第{attempt + 1}次尝试）: 将重试1次")
                     time.sleep(0.3)
                     continue
-                log.error(f"元素 {locator_expression} 点击失败：元素超时未出现或不可点击（已重试{attempt + 1}次）")
-                return False
+                error_msg = f"元素 {locator_expression} 点击失败：元素超时未出现或不可点击（已重试1次）"
+                log.error(error_msg)
+                raise Exception(error_msg)
             except Exception as e:
-                if attempt < 2:
-                    log.warning(f"元素点击失败（第{attempt + 1}次尝试）: {e}，将重试")
+                if attempt < 1:
+                    log.warning(f"元素点击失败（第{attempt + 1}次尝试）: {e}，将重试1次")
                     time.sleep(0.3)
                     continue
-                log.error(f"元素 {locator_expression} 点击失败（已重试{attempt + 1}次）: {e}")
-                return False
+                error_msg = f"元素 {locator_expression} 点击失败（已重试1次）: {e}"
+                log.error(error_msg)
+                raise Exception(error_msg)
 
         # 所有重试都失败
-        log.error(f"元素 {locator_expression} 点击失败：已重试3次均失败")
-        return False
+        error_msg = f"元素 {locator_expression} 点击失败：已重试1次均失败"
+        log.error(error_msg)
+        raise Exception(error_msg)
 
     def element_double_click(
             self,
