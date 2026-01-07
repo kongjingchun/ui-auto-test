@@ -17,7 +17,6 @@ class MyTeachingCoursesBase:
     def course_search_input(self):
         """课程搜索输入框"""
         return "//input[@placeholder='搜索课程代码或名称']"
-    # 根据课程名称定位课程卡片
 
     def course_card_by_name(self, course_name):
         """根据课程名称定位课程卡片"""

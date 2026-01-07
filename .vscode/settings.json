@@ -5,7 +5,7 @@
     "python.analysis.completeFunctionParens": true,
     "python.analysis.autoSearchPaths": true,
     "python.analysis.diagnosticMode": "workspace",
-    "python.languageServer": "Pylance",
+    "python.languageServer": "None",
     "python.linting.enabled": true,
     "python.linting.pylintEnabled": false,
     "python.linting.flake8Enabled": true,
