@@ -22,6 +22,9 @@ xc-autotest-ui/
 │  │  └──DeptListManageBase.py  # 院系列表管理基础类
 │  ├──teacher_workbench/  # 教师工作台基础类
 │  │  ├──__init__.py  # 教师工作台基础类模块
+│  │  ├──course_construction/  # 课程建设基础类
+│  │  │  ├──__init__.py  # 课程建设基础类模块
+│  │  │  └──AIVerticalModelBase.py  # AI垂直模型基础类
 │  │  └──my_teaching_courses/  # 我教的课基础类
 │  │     ├──__init__.py  # 我教的课基础类模块
 │  │     └──MyTeachingCoursesBase.py  # 我教的课基础类
@@ -52,6 +55,9 @@ xc-autotest-ui/
 │  │  └──DeptListManagePage.py  # 院系列表管理页面
 │  ├──teacher_workbench/  # 教师工作台页面
 │  │  ├──__init__.py  # 教师工作台页面对象模块
+│  │  ├──course_construction/  # 课程建设页面
+│  │  │  ├──__init__.py  # 课程建设页面对象模块
+│  │  │  └──AIVerticalModelPage.py  # AI垂直模型页面
 │  │  └──my_teaching_courses/  # 我教的课页面
 │  │     ├──__init__.py  # 我教的课页面对象模块
 │  │     └──MyTeachingCoursesPage.py  # 我教的课页面
@@ -71,6 +77,7 @@ xc-autotest-ui/
 │     ├──test_006_training_program.py  # 培养方案管理测试用例
 │     ├──test_007_major_portal.py  # 专业门户管理测试用例
 │     ├──test_008_ai_model.py  # AI模型测试用例
+│     ├──test_009_my_teaching_courses.py  # 我教的课测试用例
 │     └──test_999_delete_data.py  # 数据清理测试用例
 │
 ├──common/  # 公共工具目录

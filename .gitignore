@@ -29,3 +29,6 @@ ENV/
 logs/test_process.json
 page/__pycache__/__init__.cpython-313.pyc
 page/__pycache__/LeftMenuPage.cpython-313.pyc
+.vscode/settings.json
+pyrightconfig.json
+.vscode/settings.json
