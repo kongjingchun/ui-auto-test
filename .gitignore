@@ -1,34 +1,65 @@
-# 保留文件夹结构，但忽略 assert_img 内的所有内容
-/img/assert_img/*
-# 保留文件夹结构，但忽略 source_img 内的所有内容
-/img/source_img/*
-/img/ele_img/*
-/img/diff_img/*
-/UIreport
+# 测试报告和输出
+/UIreport/
 /UIreport/*
 report.html
 test.log
-logs/*
+
+# 日志文件（保留 logs 目录结构和源代码，只忽略日志文件）
+logs/*.log
+logs/all_logs/
+logs/test_process.json
+logs/failed_testcases.json
+
+# 图片目录（保留文件夹结构，忽略内容）
+/img/assert_img/*
+/img/source_img/*
+/img/ele_img/*
+/img/diff_img/*
 
 # Python 缓存文件
 *.pyc
 *.pyo
 *.pyd
-__pycache__/**
-**/__pycache__/**
+__pycache__/
+**/__pycache__/
 *.cpython-*.pyc
-
-# IDE 配置文件（.pythonpath 是个人配置，不需要提交）
-.pythonpath
+.pytest_cache/
+*.egg-info/
+dist/
+build/
 
 # 虚拟环境
 .venv/
 venv/
 env/
 ENV/
-logs/test_process.json
-page/__pycache__/__init__.cpython-313.pyc
-page/__pycache__/LeftMenuPage.cpython-313.pyc
+
+# IDE 配置文件
+# PyCharm/IntelliJ IDEA
+.idea/
+*.iml
+
+# VS Code（忽略个人配置，保留项目配置）
 .vscode/settings.json
-pyrightconfig.json
-.vscode/settings.json
+
+# 其他 IDE
+.pythonpath
+*.swp
+*.swo
+*~
+
+# 操作系统文件
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# 临时文件
+*.tmp
+*.bak
+*.cache
+

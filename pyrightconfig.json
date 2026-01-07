@@ -1,0 +1,19 @@
+{
+    "include": [
+        "base",
+        "page",
+        "testcases",
+        "common",
+        "config"
+    ],
+    "exclude": [
+        "**/__pycache__",
+        "**/node_modules",
+        ".venv",
+        "venv"
+    ],
+    "reportMissingImports": true,
+    "reportMissingTypeStubs": false,
+    "pythonVersion": "3.13",
+    "typeCheckingMode": "basic"
+}
