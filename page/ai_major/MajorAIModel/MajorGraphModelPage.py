@@ -217,7 +217,7 @@ class MajorGraphModelPage(MajorGraphModelBase, ObjectMap):
         self.input_create_major_graph_input(driver, "测试图谱")
         # 点击创建确认按钮
         self.click_create_major_graph_confirm_button(driver)
-        点击专业能力节点添加按钮
+        # 点击专业能力节点添加按钮
         self.click_add_major_node_button(driver, "能力")
         # 输入节点标题
         self.input_node_title_input(driver, "测试能力节点")

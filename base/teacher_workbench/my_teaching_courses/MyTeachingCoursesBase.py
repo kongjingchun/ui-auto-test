@@ -12,36 +12,13 @@ class MyTeachingCoursesBase:
 
     def my_teaching_courses_iframe(self):
         """我教的课iframe定位"""
-        return "//iframe[@id='app-iframe-xxx']"
+        return "//iframe[@id='app-iframe-4003']"
 
-    def search_keyword_input(self):
-        """搜索关键词输入框"""
-        return "//input[@placeholder='课程代码 ｜ 课程名称']"
+    def course_search_input(self):
+        """课程搜索输入框"""
+        return "//input[@placeholder='搜索课程代码或名称']"
+    # 根据课程名称定位课程卡片
 
-    def course_list_table(self):
-        """课程列表表格"""
-        return "//table[@class='course-list-table']"
-
-    def course_name_link(self, course_name):
-        """课程名称链接定位（根据课程名称）
-
-        Args:
-            course_name: 课程名称
-        """
-        return f"//a[contains(text(),'{course_name}')]"
-
-    def view_button(self, course_code):
-        """查看按钮定位（根据课程代码）
-
-        Args:
-            course_code: 课程代码
-        """
-        return f"//tr[contains(.,'{course_code}')]//button[contains(text(),'查看')]"
-
-    def edit_button(self, course_code):
-        """编辑按钮定位（根据课程代码）
-
-        Args:
-            course_code: 课程代码
-        """
-        return f"//tr[contains(.,'{course_code}')]//button[contains(text(),'编辑')]"
+    def course_card_by_name(self, course_name):
+        """根据课程名称定位课程卡片"""
+        return "//div[@class='course-card' and contains(.,'" + course_name + "')]"

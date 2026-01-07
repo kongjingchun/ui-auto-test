@@ -5,6 +5,7 @@
 # @Desc  : Chrome 浏览器驱动配置类
 
 import os
+import sys
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.remote.webdriver import WebDriver
@@ -20,7 +21,9 @@ class DriverConfig:
     CHROMEDRIVER_LATEST_URL = "https://mirrors.huaweicloud.com/chromedriver/LATEST_RELEASE"
 
     # 本地ChromeDriver路径（优先使用）
-    LOCAL_CHROMEDRIVER_PATH = os.path.join(get_project_path(), "driver_files", "chromedriver")
+    # Windows系统需要.exe扩展名，Linux/Mac不需要
+    _chromedriver_name = "chromedriver.exe" if sys.platform == "win32" else "chromedriver"
+    LOCAL_CHROMEDRIVER_PATH = os.path.join(get_project_path(), "driver_files", _chromedriver_name)
 
     @staticmethod
     def _configure_chrome_options() -> webdriver.ChromeOptions:
@@ -81,8 +84,19 @@ class DriverConfig:
 
         # 优先使用本地chromedriver
         local_path = DriverConfig.LOCAL_CHROMEDRIVER_PATH
-        if os.path.exists(local_path) and os.access(local_path, os.X_OK):
-            return local_path
+
+        # 检查文件是否存在（Windows上不检查执行权限，因为Windows不使用Unix权限系统）
+        if os.path.exists(local_path):
+            # 在Windows上，必须使用.exe扩展名的文件
+            if sys.platform == "win32":
+                # Windows系统：确保文件有.exe扩展名
+                if local_path.endswith('.exe'):
+                    return local_path
+                # 如果没有.exe扩展名，忽略该文件（可能是其他平台的版本）
+            else:
+                # 在非Windows系统上检查执行权限
+                if os.access(local_path, os.X_OK):
+                    return local_path
 
         # 如果配置为本地部署（只使用本地driver），直接抛出异常
         if use_local_only:

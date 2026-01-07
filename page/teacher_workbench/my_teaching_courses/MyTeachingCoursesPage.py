@@ -18,3 +18,9 @@ class MyTeachingCoursesPage(MyTeachingCoursesBase, ObjectMap):
 
     继承MyTeachingCoursesBase和ObjectMap类，提供我教的课页面的元素操作方法
     """
+
+    def switch_into_my_teaching_courses_iframe(self, driver):
+        """切换到我教的课iframe"""
+        xpath = self.my_teaching_courses_iframe()
+        log.info(f"切换到我教的课iframe，xpath定位为：{xpath}")
+        return self.switch_into_iframe(driver, By.XPATH, xpath)
