@@ -1,5 +1,5 @@
 一、项目结构说明
-# 项目根目录结构
+#项目根目录结构
 xc-autotest-ui/
 ├──base/  # 基础类目录（PageObject基类）
 │  ├──ai_major/  # AI专业建设系统基础类
