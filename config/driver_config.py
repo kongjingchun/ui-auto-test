@@ -19,6 +19,9 @@ class DriverConfig:
     # ChromeDriver 镜像配置
     CHROMEDRIVER_URL = "https://mirrors.huaweicloud.com/chromedriver"
     CHROMEDRIVER_LATEST_URL = "https://mirrors.huaweicloud.com/chromedriver/LATEST_RELEASE"
+    
+    # 添加日志导入
+    from logs.log import log
 
     # 本地ChromeDriver路径（优先使用）
     # 根据操作系统选择对应的driver文件
@@ -100,6 +103,18 @@ class DriverConfig:
 
         # 优先使用本地chromedriver
         local_path = DriverConfig.get_local_chromedriver_path()
+        
+        # 添加日志，方便调试
+        from logs.log import log
+        log.info(f"当前操作系统: {sys.platform}")
+        log.info(f"期望的ChromeDriver路径: {local_path}")
+        log.info(f"文件是否存在: {os.path.exists(local_path)}")
+        
+        # 检查是否存在旧的chromedriver文件（可能是macOS版本）
+        old_chromedriver_path = os.path.join(get_project_path(), "driver_files", "chromedriver")
+        if os.path.exists(old_chromedriver_path) and sys.platform.startswith("linux"):
+            log.warning(f"检测到旧的chromedriver文件: {old_chromedriver_path}")
+            log.warning(f"Linux系统应使用chromedriver_linux，请确保 {local_path} 文件存在")
 
         # 检查文件是否存在（Windows上不检查执行权限，因为Windows不使用Unix权限系统）
         if os.path.exists(local_path):
@@ -126,8 +141,11 @@ class DriverConfig:
                         # 如果执行成功（返回码为0），说明文件可用
                         if result.returncode == 0:
                             return local_path
-                    except (OSError, subprocess.TimeoutExpired, subprocess.SubprocessError):
+                    except (OSError, subprocess.TimeoutExpired, subprocess.SubprocessError) as e:
                         # 文件格式错误或无法执行，跳过本地文件，使用webdriver-manager下载
+                        log.warning(f"本地ChromeDriver文件格式错误或无法执行: {local_path}")
+                        log.warning(f"错误信息: {str(e)}")
+                        log.warning(f"将尝试使用webdriver-manager下载")
                         pass
 
         # 如果配置为本地部署（只使用本地driver），直接抛出异常
@@ -165,11 +183,45 @@ class DriverConfig:
 
         # 如果本地不存在且允许网络下载，尝试使用webdriver-manager（需要网络）
         try:
+            log.info(f"本地ChromeDriver不存在或不可用，尝试使用webdriver-manager下载...")
             driver_manager = ChromeDriverManager(
                 url=DriverConfig.CHROMEDRIVER_URL,
                 latest_release_url=DriverConfig.CHROMEDRIVER_LATEST_URL
             )
-            return driver_manager.install()
+            downloaded_path = driver_manager.install()
+            log.info(f"webdriver-manager下载的ChromeDriver路径: {downloaded_path}")
+            
+            # 验证下载的文件是否可用
+            if os.path.exists(downloaded_path):
+                try:
+                    import subprocess
+                    result = subprocess.run(
+                        [downloaded_path, "--version"],
+                        capture_output=True,
+                        timeout=5,
+                        stderr=subprocess.DEVNULL
+                    )
+                    if result.returncode == 0:
+                        log.info(f"下载的ChromeDriver验证成功")
+                        return downloaded_path
+                    else:
+                        log.warning(f"下载的ChromeDriver验证失败，返回码: {result.returncode}")
+                except (OSError, subprocess.TimeoutExpired, subprocess.SubprocessError) as e:
+                    log.warning(f"下载的ChromeDriver无法执行: {str(e)}")
+                    # 如果下载的文件不可用，尝试复制到期望的位置
+                    try:
+                        import shutil
+                        if os.path.exists(local_path):
+                            os.remove(local_path)
+                        shutil.copy2(downloaded_path, local_path)
+                        os.chmod(local_path, 0o755)
+                        log.info(f"已将下载的ChromeDriver复制到期望位置: {local_path}")
+                        return local_path
+                    except Exception as copy_error:
+                        log.error(f"复制ChromeDriver失败: {str(copy_error)}")
+                        return downloaded_path
+            
+            return downloaded_path
         except Exception as e:
             # 无外网环境下的友好提示
             error_msg = (
