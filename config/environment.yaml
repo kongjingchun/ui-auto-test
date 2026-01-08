@@ -3,8 +3,8 @@ test_suffix: 39 # 测试环境序号
 
 # 部署环境配置（控制浏览器驱动和用例执行）
 部署环境:
-  是否本地部署: True  # true: 本地部署，false: 网络部署
-  # 是否本地部署: false  # true: 本地部署，false: 网络部署
+  # 是否本地部署: True  # true: 本地部署，false: 网络部署
+  是否本地部署: false  # true: 本地部署，false: 网络部署
 school_name: 智慧大学
 url: https://www.gqkt.cn/
 # url: http://192.168.200.213/
