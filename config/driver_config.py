@@ -75,7 +75,7 @@ class DriverConfig:
             "--no-sandbox",  # 禁用沙箱模式，适用于容器化环境或权限受限的系统
             "--disable-dev-shm-usage",  # 禁用devshm使用，解决内存不足问题
         ]
-        
+
         # Linux无头环境专用配置（仅在Linux系统上启用headless模式）
         linux_args = []
         if sys.platform.startswith("linux"):
@@ -105,7 +105,7 @@ class DriverConfig:
         # 应用所有配置参数
         for arg in security_args + compatibility_args + linux_args:
             options.add_argument(arg)
-        
+
         # 设置用户数据目录（避免权限问题）
         if sys.platform.startswith("linux"):
             import tempfile
@@ -287,11 +287,65 @@ class DriverConfig:
         Returns:
             WebDriver: Chrome WebDriver 实例
         """
+        from selenium.common.exceptions import SessionNotCreatedException
+        
         options = DriverConfig._configure_chrome_options()
         service = DriverConfig._create_chrome_service()
 
         # 初始化 Chrome 浏览器实例
-        driver = webdriver.Chrome(service=service, options=options)
+        try:
+            driver = webdriver.Chrome(service=service, options=options)
+        except SessionNotCreatedException as e:
+            # 捕获版本不匹配错误，自动处理
+            error_msg = str(e)
+            if "version" in error_msg.lower() or "only supports" in error_msg.lower() or "supports Chrome version" in error_msg:
+                DriverConfig.log.warning(f"检测到ChromeDriver版本不匹配: {error_msg}")
+                DriverConfig.log.warning("将删除旧版本ChromeDriver，并使用webdriver-manager下载匹配版本")
+                
+                # 删除旧版本的chromedriver
+                local_path = DriverConfig.get_local_chromedriver_path()
+                if os.path.exists(local_path):
+                    try:
+                        os.remove(local_path)
+                        DriverConfig.log.info(f"已删除旧版本ChromeDriver: {local_path}")
+                    except Exception as remove_error:
+                        DriverConfig.log.warning(f"删除旧版本ChromeDriver失败: {str(remove_error)}")
+                
+                # 使用webdriver-manager下载匹配的版本
+                try:
+                    driver_manager = ChromeDriverManager(
+                        url=DriverConfig.CHROMEDRIVER_URL,
+                        latest_release_url=DriverConfig.CHROMEDRIVER_LATEST_URL
+                    )
+                    downloaded_path = driver_manager.install()
+                    DriverConfig.log.info(f"webdriver-manager下载的ChromeDriver路径: {downloaded_path}")
+                    
+                    # 将下载的文件复制到期望位置
+                    try:
+                        import shutil
+                        if os.path.exists(local_path):
+                            os.remove(local_path)
+                        shutil.copy2(downloaded_path, local_path)
+                        os.chmod(local_path, 0o755)
+                        DriverConfig.log.info(f"已将下载的ChromeDriver复制到期望位置: {local_path}")
+                    except Exception as copy_error:
+                        DriverConfig.log.warning(f"复制ChromeDriver失败: {str(copy_error)}")
+                    
+                    # 重新创建service并初始化driver
+                    service = ChromeService(local_path if os.path.exists(local_path) else downloaded_path)
+                    driver = webdriver.Chrome(service=service, options=options)
+                    DriverConfig.log.info("使用新下载的ChromeDriver成功启动浏览器")
+                except Exception as download_error:
+                    DriverConfig.log.error(f"使用webdriver-manager下载失败: {str(download_error)}")
+                    raise SessionNotCreatedException(
+                        f"ChromeDriver版本不匹配，且无法自动下载匹配版本。\n"
+                        f"原始错误: {error_msg}\n"
+                        f"下载错误: {str(download_error)}\n"
+                        f"请手动下载匹配Chrome浏览器版本的ChromeDriver到: {local_path}"
+                    ) from download_error
+            else:
+                # 其他SessionNotCreatedException，直接抛出
+                raise
 
         # 浏览器窗口设置
         driver.maximize_window()  # 设置浏览器全屏
