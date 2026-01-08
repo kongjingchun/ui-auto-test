@@ -9,7 +9,7 @@ from time import sleep
 from selenium.webdriver.common.by import By
 
 from base.ObjectMap import ObjectMap
-from base.teacher_workbench.my_teaching_courses.MyTeachingCoursesBase import MyTeachingCoursesBase
+from base.teacher_workbench.MyTeachingCoursesBase import MyTeachingCoursesBase
 from logs.log import log
 
 
