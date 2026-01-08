@@ -16,12 +16,14 @@ class Process:
         self.redis_client = RedisOperation().redis_client
         self.UI_AUTOTEST_PROCESS = "ui_autotest_process"      # 进度信息键
         self.FAILED_TESTCASES_NAMES = "failed_testcase_name"  # 失败用例键
+        self.SUCCESS_TESTCASES_NAMES = "success_testcase_name"  # 成功用例键
         self.RUNNING_STATUS = "running_status"                # 运行状态键
 
     def reset_all(self):
         """清空所有进度数据"""
         self.redis_client.delete(self.UI_AUTOTEST_PROCESS)
         self.redis_client.delete(self.FAILED_TESTCASES_NAMES)
+        self.redis_client.delete(self.SUCCESS_TESTCASES_NAMES)
 
     def init_process(self, total):
         """初始化测试进度
@@ -51,6 +53,14 @@ class Process:
             fail_testcase_name: 失败的测试用例名称
         """
         self.redis_client.lpush(self.FAILED_TESTCASES_NAMES, fail_testcase_name)
+    
+    def insert_into_success_testcase_names(self, success_testcase_name):
+        """记录成功用例名称
+        
+        Args:
+            success_testcase_name: 成功的测试用例名称
+        """
+        self.redis_client.lpush(self.SUCCESS_TESTCASES_NAMES, success_testcase_name)
 
     def get_result(self):
         """获取测试结果统计
@@ -92,6 +102,15 @@ class Process:
         """
         fail_testcase_names = self.redis_client.lrange(self.FAILED_TESTCASES_NAMES, 0, -1)
         return fail_testcase_names
+    
+    def get_success_testcase_names(self):
+        """获取所有成功用例名称列表
+        
+        Returns:
+            list: 成功用例名称列表
+        """
+        success_testcase_names = self.redis_client.lrange(self.SUCCESS_TESTCASES_NAMES, 0, -1)
+        return success_testcase_names
 
     def write_end_time(self):
         """记录测试结束时间"""

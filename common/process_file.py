@@ -70,8 +70,11 @@ class Process:
                 "running_status": 0
             }
             self._write_json_file(self.process_file, process_data)
-            # 清空失败用例列表
-            self._write_json_file(self.failed_file, {"failed_testcases": []})
+            # 清空失败和成功用例列表
+            self._write_json_file(self.failed_file, {
+                "failed_testcases": [],
+                "success_testcases": []
+            })
     
     def init_process(self, total):
         """初始化测试进度
@@ -122,6 +125,20 @@ class Process:
             failed_data["failed_testcases"].insert(0, fail_testcase_name)
             self._write_json_file(self.failed_file, failed_data)
     
+    def insert_into_success_testcase_names(self, success_testcase_name):
+        """记录成功用例名称
+        
+        Args:
+            success_testcase_name: 成功的测试用例名称
+        """
+        with self._lock:
+            failed_data = self._read_json_file(self.failed_file)
+            if "success_testcases" not in failed_data:
+                failed_data["success_testcases"] = []
+            # 添加到列表开头（模拟lpush行为）
+            failed_data["success_testcases"].insert(0, success_testcase_name)
+            self._write_json_file(self.failed_file, failed_data)
+    
     def get_result(self):
         """获取测试结果统计
         
@@ -156,6 +173,15 @@ class Process:
         """
         failed_data = self._read_json_file(self.failed_file)
         return failed_data.get("failed_testcases", [])
+    
+    def get_success_testcase_names(self):
+        """获取所有成功用例名称列表
+        
+        Returns:
+            list: 成功用例名称列表
+        """
+        failed_data = self._read_json_file(self.failed_file)
+        return failed_data.get("success_testcases", [])
     
     def write_end_time(self):
         """记录测试结束时间"""

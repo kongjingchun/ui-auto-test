@@ -141,16 +141,20 @@ def pytest_runtest_makereport(item, call):
             log.info("=" * 80)
             # 成功用例计数+1
             Process().update_success()
+            # 记录成功用例名称
+            Process().insert_into_success_testcase_names(report.description)
         else:
             pass
-        process = Process().get_process()  # 获取测试进度
-        webhook = GetConf().get_dingding_webhook()
-        send_ding_talk(
-            webhook,
-            "测试用例:"
-            + report.description
-            + "\n测试结果: "
-            + report.outcome
-            + "\n自动化测试进度: "
-            + process,
-        )
+        # 本地部署时不发送钉钉消息
+        if not GetConf().is_local_deploy():
+            process = Process().get_process()  # 获取测试进度
+            webhook = GetConf().get_dingding_webhook()
+            send_ding_talk(
+                webhook,
+                "测试用例:"
+                + report.description
+                + "\n测试结果: "
+                + report.outcome
+                + "\n自动化测试进度: "
+                + process,
+            )

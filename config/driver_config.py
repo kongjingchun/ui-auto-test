@@ -288,7 +288,7 @@ class DriverConfig:
             WebDriver: Chrome WebDriver 实例
         """
         from selenium.common.exceptions import SessionNotCreatedException
-        
+
         options = DriverConfig._configure_chrome_options()
         service = DriverConfig._create_chrome_service()
 
@@ -301,7 +301,7 @@ class DriverConfig:
             if "version" in error_msg.lower() or "only supports" in error_msg.lower() or "supports Chrome version" in error_msg:
                 DriverConfig.log.warning(f"检测到ChromeDriver版本不匹配: {error_msg}")
                 DriverConfig.log.warning("将删除旧版本ChromeDriver，并使用webdriver-manager下载匹配版本")
-                
+
                 # 删除旧版本的chromedriver
                 local_path = DriverConfig.get_local_chromedriver_path()
                 if os.path.exists(local_path):
@@ -310,7 +310,7 @@ class DriverConfig:
                         DriverConfig.log.info(f"已删除旧版本ChromeDriver: {local_path}")
                     except Exception as remove_error:
                         DriverConfig.log.warning(f"删除旧版本ChromeDriver失败: {str(remove_error)}")
-                
+
                 # 使用webdriver-manager下载匹配的版本
                 try:
                     driver_manager = ChromeDriverManager(
@@ -319,7 +319,7 @@ class DriverConfig:
                     )
                     downloaded_path = driver_manager.install()
                     DriverConfig.log.info(f"webdriver-manager下载的ChromeDriver路径: {downloaded_path}")
-                    
+
                     # 将下载的文件复制到期望位置
                     try:
                         import shutil
@@ -330,7 +330,7 @@ class DriverConfig:
                         DriverConfig.log.info(f"已将下载的ChromeDriver复制到期望位置: {local_path}")
                     except Exception as copy_error:
                         DriverConfig.log.warning(f"复制ChromeDriver失败: {str(copy_error)}")
-                    
+
                     # 重新创建service并初始化driver
                     service = ChromeService(local_path if os.path.exists(local_path) else downloaded_path)
                     driver = webdriver.Chrome(service=service, options=options)
