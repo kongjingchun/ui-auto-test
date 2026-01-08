@@ -11,7 +11,7 @@ from common.report_add_img import add_img_2_report
 from common.yaml_config import GetConf
 from page.LeftMenuPage import LeftMenuPage
 from page.login.LoginPage import LoginPage
-from page.teacher_workbench.my_teaching_courses.MyTeachingCoursesPage import MyTeachingCoursesPage
+from page.teacher_workbench.MyTeachingCoursesPage import MyTeachingCoursesPage
 from page.teacher_workbench.course_construction.AIVerticalModelPage import AIVerticalModelPage
 
 
