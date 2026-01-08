@@ -21,6 +21,107 @@ class ObjectMap:
     # 获取基础URL
     url = GetConf().get_url()
 
+    @staticmethod
+    def _is_headless_mode():
+        """
+        检查是否使用Headless模式
+        :return: True表示使用Headless模式，False表示使用有界面模式
+        """
+        try:
+            deploy_config = GetConf().get_info("部署环境")
+            is_headless = deploy_config.get("是否Headless模式", False) if deploy_config else False
+            return is_headless
+        except Exception:
+            # 如果读取配置失败，默认根据操作系统判断
+            # Linux系统默认使用headless，Mac和Windows默认不使用
+            import sys
+            return sys.platform.startswith("linux")
+
+    def _wait_for_headless_render(self, wait_time=0.3):
+        """
+        Headless模式下等待页面元素渲染完成
+        :param wait_time: 等待时间(秒)，默认0.3秒
+        """
+        if self._is_headless_mode():
+            time.sleep(wait_time)
+
+    def _get_headless_wait_config(self, timeout, min_timeout=15, poll_frequency=0.1):
+        """
+        获取Headless模式下的等待配置
+        :param timeout: 原始超时时间(秒)
+        :param min_timeout: Headless模式下的最小超时时间(秒)，默认15秒
+        :param poll_frequency: 非Headless模式下的轮询频率(秒)，默认0.1秒
+        :return: (实际超时时间, 轮询频率)
+        """
+        is_headless = self._is_headless_mode()
+        if is_headless:
+            actual_timeout = max(timeout, min_timeout)
+            actual_poll_frequency = 0.2  # Headless模式下降低轮询频率
+        else:
+            actual_timeout = timeout
+            actual_poll_frequency = poll_frequency
+        return actual_timeout, actual_poll_frequency
+
+    def _wait_for_element_with_headless_support(
+            self, driver, locate_type, locator_expression,
+            condition_type="visible", timeout=10,
+            min_timeout=15, poll_frequency=0.1
+    ):
+        """
+        等待元素出现（支持Headless模式优化）
+        :param driver: 浏览器驱动
+        :param locate_type: 定位方式
+        :param locator_expression: 定位表达式
+        :param condition_type: 等待条件类型，"visible"（可见）、"clickable"（可点击）、"presence"（存在）
+        :param timeout: 超时时间(秒)
+        :param min_timeout: Headless模式下的最小超时时间(秒)
+        :param poll_frequency: 非Headless模式下的轮询频率(秒)
+        :return: 找到的元素
+        """
+        is_headless = self._is_headless_mode()
+        actual_timeout, actual_poll_frequency = self._get_headless_wait_config(
+            timeout, min_timeout, poll_frequency
+        )
+
+        wait = WebDriverWait(driver, actual_timeout, poll_frequency=actual_poll_frequency)
+
+        # Headless模式下，先等待元素存在，再等待元素满足条件
+        if is_headless:
+            log.info(f"Headless模式：先等待元素存在于DOM中，定位表达式: {locator_expression}")
+            # 先等待元素存在于DOM中
+            element = wait.until(
+                EC.presence_of_element_located((locate_type, locator_expression))
+            )
+            log.info(f"元素已存在于DOM中，继续等待元素{condition_type}")
+
+            # 根据条件类型等待元素满足条件
+            if condition_type == "visible":
+                element = wait.until(
+                    EC.visibility_of_element_located((locate_type, locator_expression))
+                )
+            elif condition_type == "clickable":
+                element = wait.until(
+                    EC.element_to_be_clickable((locate_type, locator_expression))
+                )
+            # presence已经在上面处理了，不需要再次等待
+
+            log.info(f"元素已{condition_type}，可以继续操作")
+            return element
+        else:
+            # 非Headless模式直接等待元素满足条件
+            if condition_type == "visible":
+                return wait.until(
+                    EC.visibility_of_element_located((locate_type, locator_expression))
+                )
+            elif condition_type == "clickable":
+                return wait.until(
+                    EC.element_to_be_clickable((locate_type, locator_expression))
+                )
+            else:  # presence
+                return wait.until(
+                    EC.presence_of_element_located((locate_type, locator_expression))
+                )
+
     def element_get(self, driver, locate_type, locator_expression, timeout=10, must_be_visible=False):
         """
         单个元素获取（Selenium 4优化版本）
@@ -33,19 +134,22 @@ class ObjectMap:
         """
         # 确保页面完全加载完成
         self.wait_for_ready_state_complete(driver=driver, timeout=5)
-        try:
-            # Selenium 4推荐：使用WebDriverWait + expected_conditions
-            wait = WebDriverWait(driver, timeout, poll_frequency=0.1)
 
+        # Headless模式下等待元素渲染
+        self._wait_for_headless_render(wait_time=0.2)
+
+        try:
             if must_be_visible:
                 # 元素必须可见
-                element = wait.until(
-                    EC.visibility_of_element_located((locate_type, locator_expression))
+                element = self._wait_for_element_with_headless_support(
+                    driver, locate_type, locator_expression,
+                    condition_type="visible", timeout=timeout
                 )
             else:
                 # 元素存在即可，不需要可见
-                element = wait.until(
-                    EC.presence_of_element_located((locate_type, locator_expression))
+                element = self._wait_for_element_with_headless_support(
+                    driver, locate_type, locator_expression,
+                    condition_type="presence", timeout=timeout
                 )
 
             log.info(f"元素 {locator_expression} 已通过 {locate_type} 方式找到")
@@ -168,7 +272,15 @@ class ObjectMap:
         try:
             driver.get(self.url + url)
             # 等待页面元素都加载完成
-            self.wait_for_ready_state_complete(driver)
+            # Headless模式下增加超时时间
+            page_timeout = 15 if self._is_headless_mode() else 10
+            self.wait_for_ready_state_complete(driver, timeout=page_timeout)
+
+            # Headless模式下，页面readyState完成后可能还需要额外时间渲染
+            if self._is_headless_mode():
+                time.sleep(1)  # Headless模式下额外等待1秒，确保页面完全渲染
+                log.info("Headless模式：页面跳转后额外等待1秒，确保元素完全渲染")
+
             # 跳转地址后等待元素消失
             self.element_disappear(
                 driver,
@@ -219,9 +331,15 @@ class ObjectMap:
         """
         # 确保页面完全加载完成
         self.wait_for_ready_state_complete(driver=driver, timeout=5)
+
+        # Headless模式下等待元素渲染
+        self._wait_for_headless_render(wait_time=0.3)
+
         # 获取目标元素
         log.info(f"鼠标悬停到元素 {locator_expression} ")
-        element = self.element_get(driver, locate_type, locator_expression, timeout=timeout)
+        # Headless模式下增加超时时间
+        actual_timeout, _ = self._get_headless_wait_config(timeout)
+        element = self.element_get(driver, locate_type, locator_expression, timeout=actual_timeout)
         # 创建 ActionChains 对象并执行鼠标悬停
         actions = ActionChains(driver)
         actions.move_to_element(element).perform()
@@ -241,6 +359,10 @@ class ObjectMap:
         """
         # 确保页面完全加载完成
         self.wait_for_ready_state_complete(driver=driver, timeout=5)
+
+        # Headless模式下等待元素渲染
+        self._wait_for_headless_render(wait_time=0.5)
+
         # 将输入值转换为字符串
         fill_value = str(fill_value) if isinstance(fill_value, (int, float)) else fill_value
 
@@ -254,11 +376,23 @@ class ObjectMap:
         # 获取并操作元素，最多重试1次
         for attempt in range(2):
             try:
-                # 等待元素出现并可见
-                wait = WebDriverWait(driver, timeout, poll_frequency=0.1)
-                element = wait.until(
-                    EC.visibility_of_element_located((locate_type, locator_expression))
-                )
+                # 等待元素出现并可见（支持Headless模式优化）
+                try:
+                    element = self._wait_for_element_with_headless_support(
+                        driver, locate_type, locator_expression,
+                        condition_type="visible", timeout=timeout
+                    )
+                except TimeoutException as e:
+                    # 如果超时，尝试检查页面状态
+                    if self._is_headless_mode():
+                        current_url = driver.current_url
+                        page_source_length = len(driver.page_source)
+                        log.error(f"等待元素超时，当前URL: {current_url}, 页面源码长度: {page_source_length}")
+                        log.error(f"尝试在页面源码中搜索定位表达式: {locator_expression}")
+                        # 检查元素是否在页面源码中
+                        if locator_expression in driver.page_source:
+                            log.warning(f"定位表达式在页面源码中找到，但元素可能不可见")
+                    raise
 
                 # 滚动元素到可视区域中心位置
                 driver.execute_script("arguments[0].scrollIntoView({block: 'center', behavior: 'smooth'});", element)
@@ -299,8 +433,9 @@ class ObjectMap:
                         except (StaleElementReferenceException, Exception):
                             # 元素过期，重新定位
                             log.info(f"元素 {locator_expression} 在JavaScript输入时过期，重新定位元素")
-                            element = wait.until(
-                                EC.presence_of_element_located((locate_type, locator_expression))
+                            element = self._wait_for_element_with_headless_support(
+                                driver, locate_type, locator_expression,
+                                condition_type="presence", timeout=timeout
                             )
                             driver.execute_script("arguments[0].value = arguments[1];", element, "")
 
@@ -324,8 +459,9 @@ class ObjectMap:
                             try:
                                 element.send_keys(Keys.RETURN)
                             except (StaleElementReferenceException, Exception):
-                                element = wait.until(
-                                    EC.presence_of_element_located((locate_type, locator_expression))
+                                element = self._wait_for_element_with_headless_support(
+                                    driver, locate_type, locator_expression,
+                                    condition_type="presence", timeout=timeout
                                 )
                                 element.send_keys(Keys.RETURN)
 
@@ -369,7 +505,8 @@ class ObjectMap:
             locator_expression_disappear=None,
             locate_type_appear=None,
             locator_expression_appear=None,
-            timeout=10
+            timeout=10,
+            need_hover=False
     ):
         """
         点击元素（增强版，支持多种点击策略）
@@ -381,23 +518,36 @@ class ObjectMap:
         :param locate_type_appear: 等待出现的元素定位方式
         :param locator_expression_appear: 等待出现的元素定位表达式
         :param timeout: 超时时间(秒)，默认10秒
+        :param need_hover: 是否需要在点击前先hover，默认False（不hover）
         :return: True成功，False失败
         """
         # 确保页面完全加载完成
         self.wait_for_ready_state_complete(driver=driver, timeout=5)
+
+        # Headless模式下等待元素渲染
+        self._wait_for_headless_render(wait_time=0.3)
+
         log.info(f"准备点击元素：{locator_expression}，定位方式：{locate_type}")
 
         # 最多重试1次，处理stale element和click intercepted异常
         for attempt in range(2):
             try:
-                # Selenium 4推荐：使用WebDriverWait等待元素可点击
-                wait = WebDriverWait(driver, timeout, poll_frequency=0.1)
-                element = wait.until(
-                    EC.element_to_be_clickable((locate_type, locator_expression))
+                # 等待元素可点击（支持Headless模式优化）
+                element = self._wait_for_element_with_headless_support(
+                    driver, locate_type, locator_expression,
+                    condition_type="clickable", timeout=timeout
                 )
 
                 # 等待元素稳定（避免动画或加载中的元素）
                 time.sleep(0.2)
+
+                # 如果需要hover，先执行hover操作
+                if need_hover:
+                    try:
+                        log.info(f"点击前先hover到元素：{locator_expression}")
+                        self.element_hover(driver, locate_type, locator_expression, timeout=timeout)
+                    except Exception as hover_error:
+                        log.warning(f"hover操作失败，继续尝试点击：{hover_error}")
 
                 # 滚动元素到可视区域中心位置
                 try:
@@ -540,11 +690,15 @@ class ObjectMap:
         """
         # 确保页面完全加载完成
         self.wait_for_ready_state_complete(driver=driver, timeout=5)
+
+        # Headless模式下等待元素渲染
+        self._wait_for_headless_render(wait_time=0.3)
+
         try:
-            # Selenium 4推荐：使用WebDriverWait等待元素可点击
-            wait = WebDriverWait(driver, timeout, poll_frequency=0.1)
-            element = wait.until(
-                EC.element_to_be_clickable((locate_type, locator_expression))
+            # 等待元素可点击（支持Headless模式优化）
+            element = self._wait_for_element_with_headless_support(
+                driver, locate_type, locator_expression,
+                condition_type="clickable", timeout=timeout
             )
             element.click()
 
@@ -573,20 +727,42 @@ class ObjectMap:
         element = self.element_get(driver, locate_type, locator_expression)
         return element.send_keys(file_path)
 
-    def switch_into_iframe(self, driver, locate_iframe_type, locate_iframe_expression):
+    def switch_into_iframe(self, driver, locate_iframe_type, locate_iframe_expression, timeout=10):
         """
         切换到iframe
         :param driver: 浏览器驱动
         :param locate_iframe_type: iframe定位方式
         :param locate_iframe_expression: iframe定位表达式
-        :return: None
+        :param timeout: 超时时间(秒)，默认10秒
+        :return: True成功，False失败
         """
-        # 确保页面完全加载完成
-        self.wait_for_ready_state_complete(driver=driver, timeout=5)
-        log.info(f"切换到iframe：{locate_iframe_expression}")
-        iframe = self.element_get(driver, locate_iframe_type, locate_iframe_expression)
-        driver.switch_to.frame(iframe)
-        return True
+        try:
+            # 确保页面完全加载完成
+            self.wait_for_ready_state_complete(driver=driver, timeout=5)
+            log.info(f"切换到iframe：{locate_iframe_expression}")
+
+            # 获取iframe元素
+            iframe = self.element_get(driver, locate_iframe_type, locate_iframe_expression, timeout=timeout)
+
+            # 切换到iframe
+            driver.switch_to.frame(iframe)
+
+            # 等待iframe内容加载完成
+            self.wait_for_ready_state_complete(driver=driver, timeout=5)
+
+            # Headless模式下等待iframe内容渲染
+            self._wait_for_headless_render(wait_time=0.3)
+
+            log.info(f"成功切换到iframe：{locate_iframe_expression}")
+            return True
+        except TimeoutException as e:
+            error_msg = f"切换到iframe失败（超时{timeout}秒）：{locate_iframe_expression} - {str(e)}"
+            log.error(error_msg)
+            raise Exception(error_msg)
+        except Exception as e:
+            error_msg = f"切换到iframe失败：{locate_iframe_expression} - {str(e)}"
+            log.error(error_msg)
+            raise Exception(error_msg)
 
     def switch_out_iframe(self, driver, to_root=False):
         """

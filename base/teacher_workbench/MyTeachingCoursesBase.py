@@ -20,4 +20,4 @@ class MyTeachingCoursesBase:
 
     def course_card_by_name(self, course_name):
         """根据课程名称定位课程卡片"""
-        return "//div[@class='course-card' and contains(.,'" + course_name + "')]"
+        return "//span[text()='" + course_name + "']"
