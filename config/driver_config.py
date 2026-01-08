@@ -135,8 +135,8 @@ class DriverConfig:
                         result = subprocess.run(
                             [local_path, "--version"],
                             capture_output=True,
-                            timeout=5,
-                            stderr=subprocess.DEVNULL
+                            timeout=5
+                            # 注意：capture_output=True 已经会捕获stdout和stderr，不能再指定stderr参数
                         )
                         # 如果执行成功（返回码为0），说明文件可用
                         if result.returncode == 0:
@@ -198,8 +198,8 @@ class DriverConfig:
                     result = subprocess.run(
                         [downloaded_path, "--version"],
                         capture_output=True,
-                        timeout=5,
-                        stderr=subprocess.DEVNULL
+                        timeout=5
+                        # 注意：capture_output=True 已经会捕获stdout和stderr，不能再指定stderr参数
                     )
                     if result.returncode == 0:
                         log.info(f"下载的ChromeDriver验证成功")
