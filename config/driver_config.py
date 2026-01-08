@@ -21,9 +21,25 @@ class DriverConfig:
     CHROMEDRIVER_LATEST_URL = "https://mirrors.huaweicloud.com/chromedriver/LATEST_RELEASE"
 
     # 本地ChromeDriver路径（优先使用）
-    # Windows系统需要.exe扩展名，Linux/Mac不需要
-    _chromedriver_name = "chromedriver.exe" if sys.platform == "win32" else "chromedriver"
-    LOCAL_CHROMEDRIVER_PATH = os.path.join(get_project_path(), "driver_files", _chromedriver_name)
+    # 根据操作系统选择对应的driver文件
+    @staticmethod
+    def _get_chromedriver_filename():
+        """根据操作系统返回对应的chromedriver文件名"""
+        if sys.platform == "win32":
+            return "chromedriver.exe"
+        elif sys.platform.startswith("linux"):
+            return "chromedriver_linux"
+        elif sys.platform == "darwin":  # macOS
+            return "chromedriver"  # macOS版本使用chromedriver
+        else:
+            # 其他系统默认使用chromedriver
+            return "chromedriver"
+
+    @staticmethod
+    def get_local_chromedriver_path():
+        """获取本地ChromeDriver路径（根据操作系统）"""
+        filename = DriverConfig._get_chromedriver_filename()
+        return os.path.join(get_project_path(), "driver_files", filename)
 
     @staticmethod
     def _configure_chrome_options() -> webdriver.ChromeOptions:
@@ -83,7 +99,7 @@ class DriverConfig:
             use_local_only = False
 
         # 优先使用本地chromedriver
-        local_path = DriverConfig.LOCAL_CHROMEDRIVER_PATH
+        local_path = DriverConfig.get_local_chromedriver_path()
 
         # 检查文件是否存在（Windows上不检查执行权限，因为Windows不使用Unix权限系统）
         if os.path.exists(local_path):
@@ -94,22 +110,57 @@ class DriverConfig:
                     return local_path
                 # 如果没有.exe扩展名，忽略该文件（可能是其他平台的版本）
             else:
-                # 在非Windows系统上检查执行权限
+                # 在非Windows系统上检查执行权限和文件格式
                 if os.access(local_path, os.X_OK):
-                    return local_path
+                    # 尝试验证文件是否真的可以执行（检查文件格式）
+                    # 如果文件格式错误（比如macOS版本在Linux上），会抛出OSError
+                    try:
+                        import subprocess
+                        # 尝试执行 --version 命令来验证文件是否可用
+                        result = subprocess.run(
+                            [local_path, "--version"],
+                            capture_output=True,
+                            timeout=5,
+                            stderr=subprocess.DEVNULL
+                        )
+                        # 如果执行成功（返回码为0），说明文件可用
+                        if result.returncode == 0:
+                            return local_path
+                    except (OSError, subprocess.TimeoutExpired, subprocess.SubprocessError):
+                        # 文件格式错误或无法执行，跳过本地文件，使用webdriver-manager下载
+                        pass
 
         # 如果配置为本地部署（只使用本地driver），直接抛出异常
         if use_local_only:
-            error_msg = (
-                f"无法找到本地ChromeDriver！\n"
-                f"配置为本地部署（是否本地部署: true）\n"
-                f"本地路径不存在: {local_path}\n"
-                f"解决方案：\n"
-                f"1. 将匹配的chromedriver文件放置到: {local_path}\n"
-                f"2. 确保chromedriver有执行权限: chmod +x {local_path}\n"
-                f"3. 确保chromedriver版本与Chrome浏览器版本匹配\n"
-                f"4. 如需允许网络下载，请在environment.yaml中设置 是否本地部署: false"
-            )
+            if os.path.exists(local_path):
+                # 文件存在但无法使用（可能是格式错误）
+                error_msg = (
+                    f"本地ChromeDriver文件格式错误或无法执行！\n"
+                    f"配置为本地部署（是否本地部署: true）\n"
+                    f"本地路径: {local_path}\n"
+                    f"可能原因：\n"
+                    f"1. chromedriver文件与当前操作系统不匹配（如macOS版本在Linux上运行）\n"
+                    f"2. chromedriver文件已损坏\n"
+                    f"3. chromedriver文件架构不匹配（如x86_64版本在ARM系统上运行）\n"
+                    f"解决方案：\n"
+                    f"1. 删除错误的chromedriver文件: rm {local_path}\n"
+                    f"2. 下载匹配当前操作系统的chromedriver文件到: {local_path}\n"
+                    f"3. 确保chromedriver有执行权限: chmod +x {local_path}\n"
+                    f"4. 确保chromedriver版本与Chrome浏览器版本匹配\n"
+                    f"5. 如需允许网络下载，请在environment.yaml中设置 是否本地部署: false"
+                )
+            else:
+                # 文件不存在
+                error_msg = (
+                    f"无法找到本地ChromeDriver！\n"
+                    f"配置为本地部署（是否本地部署: true）\n"
+                    f"本地路径不存在: {local_path}\n"
+                    f"解决方案：\n"
+                    f"1. 将匹配的chromedriver文件放置到: {local_path}\n"
+                    f"2. 确保chromedriver有执行权限: chmod +x {local_path}\n"
+                    f"3. 确保chromedriver版本与Chrome浏览器版本匹配\n"
+                    f"4. 如需允许网络下载，请在environment.yaml中设置 是否本地部署: false"
+                )
             raise FileNotFoundError(error_msg)
 
         # 如果本地不存在且允许网络下载，尝试使用webdriver-manager（需要网络）
