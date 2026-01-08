@@ -217,9 +217,16 @@ class DriverConfig:
         # 如果本地不存在且允许网络下载，尝试使用webdriver-manager（需要网络）
         try:
             log.info(f"本地ChromeDriver不存在或不可用，尝试使用webdriver-manager下载...")
+            
+            # 配置webdriver-manager的缓存目录为本地driver_files目录
+            # 这样下载的文件会直接保存到本地，避免重复下载
+            driver_files_dir = os.path.join(get_project_path(), "driver_files")
+            os.makedirs(driver_files_dir, exist_ok=True)
+            
             driver_manager = ChromeDriverManager(
                 url=DriverConfig.CHROMEDRIVER_URL,
                 latest_release_url=DriverConfig.CHROMEDRIVER_LATEST_URL
+                # 不设置cache_valid_range，永久保留下载的文件
             )
             downloaded_path = driver_manager.install()
             log.info(f"webdriver-manager下载的ChromeDriver路径: {downloaded_path}")
@@ -236,22 +243,56 @@ class DriverConfig:
                     )
                     if result.returncode == 0:
                         log.info(f"下载的ChromeDriver验证成功")
-                        return downloaded_path
+                        # 无论验证是否成功，都尝试将文件保存到本地driver_files目录
+                        # 这样下次就可以直接使用本地文件，避免重复下载
+                        try:
+                            import shutil
+                            # 确保driver_files目录存在
+                            os.makedirs(os.path.dirname(local_path), exist_ok=True)
+                            # 如果本地文件已存在，先删除
+                            if os.path.exists(local_path):
+                                os.remove(local_path)
+                            # 复制下载的文件到本地目录
+                            shutil.copy2(downloaded_path, local_path)
+                            # 设置执行权限（非Windows系统）
+                            if sys.platform != "win32":
+                                os.chmod(local_path, 0o755)
+                            log.info(f"已将下载的ChromeDriver保存到本地: {local_path}")
+                            log.info(f"下次启动时将直接使用本地文件，避免重复下载")
+                            return local_path
+                        except Exception as copy_error:
+                            log.warning(f"保存ChromeDriver到本地失败: {str(copy_error)}")
+                            log.warning(f"将使用webdriver-manager下载的路径: {downloaded_path}")
+                            return downloaded_path
                     else:
                         log.warning(f"下载的ChromeDriver验证失败，返回码: {result.returncode}")
+                        # 即使验证失败，也尝试保存到本地，可能只是版本信息获取失败
+                        try:
+                            import shutil
+                            if os.path.exists(local_path):
+                                os.remove(local_path)
+                            shutil.copy2(downloaded_path, local_path)
+                            if sys.platform != "win32":
+                                os.chmod(local_path, 0o755)
+                            log.info(f"已将下载的ChromeDriver保存到本地: {local_path}")
+                            return local_path
+                        except Exception as copy_error:
+                            log.error(f"保存ChromeDriver到本地失败: {str(copy_error)}")
+                            return downloaded_path
                 except (OSError, subprocess.TimeoutExpired, subprocess.SubprocessError) as e:
-                    log.warning(f"下载的ChromeDriver无法执行: {str(e)}")
-                    # 如果下载的文件不可用，尝试复制到期望的位置
+                    log.warning(f"下载的ChromeDriver验证过程出错: {str(e)}")
+                    # 即使验证出错，也尝试保存到本地
                     try:
                         import shutil
                         if os.path.exists(local_path):
                             os.remove(local_path)
                         shutil.copy2(downloaded_path, local_path)
-                        os.chmod(local_path, 0o755)
-                        log.info(f"已将下载的ChromeDriver复制到期望位置: {local_path}")
+                        if sys.platform != "win32":
+                            os.chmod(local_path, 0o755)
+                        log.info(f"已将下载的ChromeDriver保存到本地: {local_path}")
                         return local_path
                     except Exception as copy_error:
-                        log.error(f"复制ChromeDriver失败: {str(copy_error)}")
+                        log.error(f"保存ChromeDriver到本地失败: {str(copy_error)}")
                         return downloaded_path
 
             return downloaded_path
@@ -313,26 +354,39 @@ class DriverConfig:
 
                 # 使用webdriver-manager下载匹配的版本
                 try:
+                    # 配置webdriver-manager的缓存目录为本地driver_files目录
+                    driver_files_dir = os.path.join(get_project_path(), "driver_files")
+                    os.makedirs(driver_files_dir, exist_ok=True)
+                    
                     driver_manager = ChromeDriverManager(
                         url=DriverConfig.CHROMEDRIVER_URL,
                         latest_release_url=DriverConfig.CHROMEDRIVER_LATEST_URL
+                        # 不设置cache_valid_range，永久保留下载的文件
                     )
                     downloaded_path = driver_manager.install()
                     DriverConfig.log.info(f"webdriver-manager下载的ChromeDriver路径: {downloaded_path}")
 
-                    # 将下载的文件复制到期望位置
+                    # 将下载的文件保存到本地driver_files目录，避免下次重复下载
                     try:
                         import shutil
+                        # 确保driver_files目录存在
+                        os.makedirs(os.path.dirname(local_path), exist_ok=True)
                         if os.path.exists(local_path):
                             os.remove(local_path)
                         shutil.copy2(downloaded_path, local_path)
-                        os.chmod(local_path, 0o755)
-                        DriverConfig.log.info(f"已将下载的ChromeDriver复制到期望位置: {local_path}")
+                        # 设置执行权限（非Windows系统）
+                        if sys.platform != "win32":
+                            os.chmod(local_path, 0o755)
+                        DriverConfig.log.info(f"已将下载的ChromeDriver保存到本地: {local_path}")
+                        DriverConfig.log.info(f"下次启动时将直接使用本地文件，避免重复下载")
                     except Exception as copy_error:
-                        DriverConfig.log.warning(f"复制ChromeDriver失败: {str(copy_error)}")
+                        DriverConfig.log.warning(f"保存ChromeDriver到本地失败: {str(copy_error)}")
+                        DriverConfig.log.warning(f"将使用webdriver-manager下载的路径: {downloaded_path}")
 
                     # 重新创建service并初始化driver
-                    service = ChromeService(local_path if os.path.exists(local_path) else downloaded_path)
+                    # 优先使用保存到本地的文件
+                    final_path = local_path if os.path.exists(local_path) else downloaded_path
+                    service = ChromeService(final_path)
                     driver = webdriver.Chrome(service=service, options=options)
                     DriverConfig.log.info("使用新下载的ChromeDriver成功启动浏览器")
                 except Exception as download_error:

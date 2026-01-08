@@ -167,8 +167,14 @@ class ObjectMap:
         """
         try:
             driver.get(self.url + url)
-            # 等待页面元素都加载完成
-            self.wait_for_ready_state_complete(driver)
+            # 等待页面元素都加载完成，增加超时时间到15秒
+            self.wait_for_ready_state_complete(driver, timeout=15)
+            # 在Linux headless模式下，页面readyState完成后可能还需要额外时间渲染
+            import sys
+            if sys.platform.startswith("linux"):
+                import time
+                time.sleep(1)  # Linux headless模式下额外等待1秒，确保页面完全渲染
+                log.info("Linux headless模式：页面跳转后额外等待1秒，确保元素完全渲染")
             # 跳转地址后等待元素消失
             self.element_disappear(
                 driver,
@@ -241,6 +247,13 @@ class ObjectMap:
         """
         # 确保页面完全加载完成
         self.wait_for_ready_state_complete(driver=driver, timeout=5)
+
+        # 在Linux headless模式下，页面readyState完成后可能还需要额外时间渲染
+        import sys
+        if sys.platform.startswith("linux"):
+            import time
+            time.sleep(0.5)  # Linux headless模式下额外等待0.5秒，确保元素完全渲染
+
         # 将输入值转换为字符串
         fill_value = str(fill_value) if isinstance(fill_value, (int, float)) else fill_value
 
@@ -254,8 +267,13 @@ class ObjectMap:
         # 获取并操作元素，最多重试1次
         for attempt in range(2):
             try:
+                # 在Linux headless模式下增加超时时间
+                actual_timeout = timeout
+                if sys.platform.startswith("linux"):
+                    actual_timeout = max(timeout, 15)  # Linux headless模式下至少等待15秒
+
                 # 等待元素出现并可见
-                wait = WebDriverWait(driver, timeout, poll_frequency=0.1)
+                wait = WebDriverWait(driver, actual_timeout, poll_frequency=0.2)
                 element = wait.until(
                     EC.visibility_of_element_located((locate_type, locator_expression))
                 )
