@@ -169,12 +169,21 @@ class ObjectMap:
             driver.get(self.url + url)
             # 等待页面元素都加载完成，增加超时时间到15秒
             self.wait_for_ready_state_complete(driver, timeout=15)
-            # 在Linux headless模式下，页面readyState完成后可能还需要额外时间渲染
-            import sys
-            if sys.platform.startswith("linux"):
+
+            # 检查是否使用Headless模式
+            try:
+                deploy_config = GetConf().get_info("部署环境")
+                is_headless = deploy_config.get("是否Headless模式", False) if deploy_config else False
+            except Exception:
+                # 如果读取配置失败，默认根据操作系统判断
+                import sys
+                is_headless = sys.platform.startswith("linux")
+
+            # 在Headless模式下，页面readyState完成后可能还需要额外时间渲染
+            if is_headless:
                 import time
-                time.sleep(1)  # Linux headless模式下额外等待1秒，确保页面完全渲染
-                log.info("Linux headless模式：页面跳转后额外等待1秒，确保元素完全渲染")
+                time.sleep(1)  # Headless模式下额外等待1秒，确保页面完全渲染
+                log.info("Headless模式：页面跳转后额外等待1秒，确保元素完全渲染")
             # 跳转地址后等待元素消失
             self.element_disappear(
                 driver,
@@ -248,11 +257,20 @@ class ObjectMap:
         # 确保页面完全加载完成
         self.wait_for_ready_state_complete(driver=driver, timeout=5)
 
-        # 在Linux headless模式下，页面readyState完成后可能还需要额外时间渲染
-        import sys
-        if sys.platform.startswith("linux"):
+        # 检查是否使用Headless模式
+        from common.yaml_config import GetConf
+        try:
+            deploy_config = GetConf().get_info("部署环境")
+            is_headless = deploy_config.get("是否Headless模式", False) if deploy_config else False
+        except Exception:
+            # 如果读取配置失败，默认根据操作系统判断
+            import sys
+            is_headless = sys.platform.startswith("linux")
+
+        # 在Headless模式下，页面readyState完成后可能还需要额外时间渲染
+        if is_headless:
             import time
-            time.sleep(0.5)  # Linux headless模式下额外等待0.5秒，确保元素完全渲染
+            time.sleep(0.5)  # Headless模式下额外等待0.5秒，确保元素完全渲染
 
         # 将输入值转换为字符串
         fill_value = str(fill_value) if isinstance(fill_value, (int, float)) else fill_value
@@ -267,16 +285,44 @@ class ObjectMap:
         # 获取并操作元素，最多重试1次
         for attempt in range(2):
             try:
-                # 在Linux headless模式下增加超时时间
+                # 在Headless模式下增加超时时间
                 actual_timeout = timeout
-                if sys.platform.startswith("linux"):
-                    actual_timeout = max(timeout, 15)  # Linux headless模式下至少等待15秒
+                if is_headless:
+                    actual_timeout = max(timeout, 15)  # Headless模式下至少等待15秒
 
                 # 等待元素出现并可见
                 wait = WebDriverWait(driver, actual_timeout, poll_frequency=0.2)
-                element = wait.until(
-                    EC.visibility_of_element_located((locate_type, locator_expression))
-                )
+
+                # 在Headless模式下，先等待元素存在，再等待元素可见
+                # 因为headless模式下元素可能存在但不可见，或者页面渲染较慢
+                if is_headless:
+                    log.info(f"Headless模式：先等待元素存在于DOM中，定位表达式: {locator_expression}")
+                    try:
+                        # 先等待元素存在于DOM中（不要求可见）
+                        element = wait.until(
+                            EC.presence_of_element_located((locate_type, locator_expression))
+                        )
+                        log.info(f"元素已存在于DOM中，继续等待元素可见")
+                        # 再等待元素可见（可交互）
+                        element = wait.until(
+                            EC.visibility_of_element_located((locate_type, locator_expression))
+                        )
+                        log.info(f"元素已可见，可以继续操作")
+                    except TimeoutException as e:
+                        # 如果超时，尝试检查页面状态
+                        current_url = driver.current_url
+                        page_source_length = len(driver.page_source)
+                        log.error(f"等待元素超时，当前URL: {current_url}, 页面源码长度: {page_source_length}")
+                        log.error(f"尝试在页面源码中搜索定位表达式: {locator_expression}")
+                        # 检查元素是否在页面源码中
+                        if locator_expression in driver.page_source:
+                            log.warning(f"定位表达式在页面源码中找到，但元素可能不可见")
+                        raise
+                else:
+                    # 非Linux系统直接等待元素可见
+                    element = wait.until(
+                        EC.visibility_of_element_located((locate_type, locator_expression))
+                    )
 
                 # 滚动元素到可视区域中心位置
                 driver.execute_script("arguments[0].scrollIntoView({block: 'center', behavior: 'smooth'});", element)

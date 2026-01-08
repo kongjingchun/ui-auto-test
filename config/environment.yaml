@@ -5,6 +5,7 @@ test_suffix: 41 # 测试环境序号
 部署环境:
   # 是否本地部署: True  # true: 本地部署，false: 网络部署
   是否本地部署: false  # true: 本地部署，false: 网络部署
+  是否Headless模式: true  # true: 使用Headless模式（无界面），false: 使用有界面模式（需要显示环境）
 school_name: 智慧大学
 url: https://www.gqkt.cn/
 # url: http://192.168.200.213/

@@ -76,11 +76,20 @@ class DriverConfig:
             "--disable-dev-shm-usage",  # 禁用devshm使用，解决内存不足问题
         ]
 
-        # Linux无头环境专用配置（仅在Linux系统上启用headless模式）
-        linux_args = []
-        if sys.platform.startswith("linux"):
-            linux_args = [
-                "--headless=new",  # 使用新的无头模式（仅在Linux上启用）
+        # 读取配置，判断是否使用Headless模式
+        try:
+            deploy_config = GetConf().get_info("部署环境")
+            use_headless = deploy_config.get("是否Headless模式", False) if deploy_config else False
+        except Exception:
+            # 如果读取配置失败，默认根据操作系统判断
+            # Linux系统默认使用headless，Mac和Windows默认不使用
+            use_headless = sys.platform.startswith("linux")
+        
+        # Headless模式相关配置（所有平台都支持）
+        headless_args = []
+        if use_headless:
+            headless_args = [
+                "--headless=new",  # 使用新的无头模式（支持Linux、Mac、Windows）
                 "--disable-software-rasterizer",  # 禁用软件光栅化
                 "--disable-extensions",  # 禁用扩展
                 "--disable-background-networking",  # 禁用后台网络
@@ -101,13 +110,22 @@ class DriverConfig:
                 "--password-store=basic",  # 使用基本密码存储
                 "--remote-debugging-port=0",  # 随机选择调试端口
             ]
+            DriverConfig.log.info(f"启用Headless模式（{sys.platform}）")
+        else:
+            DriverConfig.log.info(f"使用有界面模式（{sys.platform}）")
+        
+        # Linux系统专用配置（无论是否headless都需要）
+        linux_specific_args = []
+        if sys.platform.startswith("linux"):
+            linux_specific_args = []
 
         # 应用所有配置参数
-        for arg in security_args + compatibility_args + linux_args:
+        for arg in security_args + compatibility_args + headless_args + linux_specific_args:
             options.add_argument(arg)
 
         # 设置用户数据目录（避免权限问题）
-        if sys.platform.startswith("linux"):
+        # Linux系统或Headless模式下需要设置用户数据目录
+        if sys.platform.startswith("linux") or use_headless:
             import tempfile
             user_data_dir = os.path.join(tempfile.gettempdir(), "chrome_user_data")
             os.makedirs(user_data_dir, exist_ok=True)
