@@ -19,7 +19,7 @@ class DriverConfig:
     # ChromeDriver 镜像配置
     CHROMEDRIVER_URL = "https://mirrors.huaweicloud.com/chromedriver"
     CHROMEDRIVER_LATEST_URL = "https://mirrors.huaweicloud.com/chromedriver/LATEST_RELEASE"
-    
+
     # 添加日志导入
     from logs.log import log
 
@@ -75,10 +75,43 @@ class DriverConfig:
             "--no-sandbox",  # 禁用沙箱模式，适用于容器化环境或权限受限的系统
             "--disable-dev-shm-usage",  # 禁用devshm使用，解决内存不足问题
         ]
+        
+        # Linux无头环境专用配置（仅在Linux系统上启用headless模式）
+        linux_args = []
+        if sys.platform.startswith("linux"):
+            linux_args = [
+                "--headless=new",  # 使用新的无头模式（仅在Linux上启用）
+                "--disable-software-rasterizer",  # 禁用软件光栅化
+                "--disable-extensions",  # 禁用扩展
+                "--disable-background-networking",  # 禁用后台网络
+                "--disable-background-timer-throttling",  # 禁用后台定时器节流
+                "--disable-renderer-backgrounding",  # 禁用渲染器后台化
+                "--disable-backgrounding-occluded-windows",  # 禁用被遮挡窗口的后台化
+                "--disable-breakpad",  # 禁用崩溃报告
+                "--disable-component-extensions-with-background-pages",  # 禁用有后台页面的组件扩展
+                "--disable-default-apps",  # 禁用默认应用
+                "--disable-domain-reliability",  # 禁用域可靠性
+                "--disable-features=TranslateUI",  # 禁用翻译UI
+                "--disable-ipc-flooding-protection",  # 禁用IPC洪水保护
+                "--disable-sync",  # 禁用同步
+                "--metrics-recording-only",  # 仅记录指标
+                "--no-first-run",  # 不运行首次运行向导
+                "--safebrowsing-disable-auto-update",  # 禁用安全浏览自动更新
+                "--enable-automation",  # 启用自动化
+                "--password-store=basic",  # 使用基本密码存储
+                "--remote-debugging-port=0",  # 随机选择调试端口
+            ]
 
         # 应用所有配置参数
-        for arg in security_args + compatibility_args:
+        for arg in security_args + compatibility_args + linux_args:
             options.add_argument(arg)
+        
+        # 设置用户数据目录（避免权限问题）
+        if sys.platform.startswith("linux"):
+            import tempfile
+            user_data_dir = os.path.join(tempfile.gettempdir(), "chrome_user_data")
+            os.makedirs(user_data_dir, exist_ok=True)
+            options.add_argument(f"--user-data-dir={user_data_dir}")
 
         return options
 
@@ -103,13 +136,13 @@ class DriverConfig:
 
         # 优先使用本地chromedriver
         local_path = DriverConfig.get_local_chromedriver_path()
-        
+
         # 添加日志，方便调试
         from logs.log import log
         log.info(f"当前操作系统: {sys.platform}")
         log.info(f"期望的ChromeDriver路径: {local_path}")
         log.info(f"文件是否存在: {os.path.exists(local_path)}")
-        
+
         # 检查是否存在旧的chromedriver文件（可能是macOS版本）
         old_chromedriver_path = os.path.join(get_project_path(), "driver_files", "chromedriver")
         if os.path.exists(old_chromedriver_path) and sys.platform.startswith("linux"):
@@ -190,7 +223,7 @@ class DriverConfig:
             )
             downloaded_path = driver_manager.install()
             log.info(f"webdriver-manager下载的ChromeDriver路径: {downloaded_path}")
-            
+
             # 验证下载的文件是否可用
             if os.path.exists(downloaded_path):
                 try:
@@ -220,7 +253,7 @@ class DriverConfig:
                     except Exception as copy_error:
                         log.error(f"复制ChromeDriver失败: {str(copy_error)}")
                         return downloaded_path
-            
+
             return downloaded_path
         except Exception as e:
             # 无外网环境下的友好提示
