@@ -9,10 +9,9 @@ import pytest
 from selenium.webdriver.common.by import By
 
 from common.report_add_img import add_img_2_report
+from testcases.helpers.test_context_helper import TestContextHelper
 from common.yaml_config import GetConf
-from page.LeftMenuPage import LeftMenuPage
 from page.ai_major.TrainingProgramRevisionPage import TrainingProgramRevisionPage
-from page.login.LoginPage import LoginPage
 from page.ai_major.TrainingProgramManage.TrainingProgramManagePage import TrainingProgramManagePage
 
 
@@ -28,15 +27,15 @@ class TestTrainingProgram:
         # 新建的培养方案信息
         training_program_info = GetConf().get_info("training_program")
 
-        with allure.step("登录专业管理员"):
-            result = LoginPage().user_login(driver, prof_cms_user_info)
-            add_img_2_report(driver, "登录专业管理员")
-            assert result is True, "登录专业管理员失败"
+        # 使用TestContextHelper封装公共操作
+        helper = TestContextHelper(driver)
 
-        with allure.step("点击左侧培养方案管理菜单"):
-            result = LeftMenuPage().click_two_level_menu(driver, "培养方案管理")
-            add_img_2_report(driver, "点击左侧培养方案管理菜单")
-            assert result is True, "点击左侧培养方案管理菜单失败"
+        with allure.step("登录并进入培养方案管理"):
+            result = helper.setup_context(
+                user_info=prof_cms_user_info,
+                menu_name="培养方案管理"
+            )
+            assert result is True, "登录或导航失败"
 
         with allure.step("创建培养方案"):
             result = TrainingProgramManagePage().create_training_program(driver, training_program_info)
@@ -54,15 +53,15 @@ class TestTrainingProgram:
         # 课程信息
         course_info = GetConf().get_info("course")
 
-        with allure.step("登录专业管理员"):
-            result = LoginPage().user_login(driver, prof_cms_user_info)
-            add_img_2_report(driver, "登录专业管理员")
-            assert result is True, "登录专业管理员失败"
+        # 使用TestContextHelper封装公共操作
+        helper = TestContextHelper(driver)
 
-        with allure.step("点击左侧培养方案管理菜单"):
-            result = LeftMenuPage().click_two_level_menu(driver, "培养方案管理")
-            add_img_2_report(driver, "点击左侧培养方案管理菜单")
-            assert result is True, "点击左侧培养方案管理菜单失败"
+        with allure.step("登录并进入培养方案管理"):
+            result = helper.setup_context(
+                user_info=prof_cms_user_info,
+                menu_name="培养方案管理"
+            )
+            assert result is True, "登录或导航失败"
 
         with allure.step("根据方案名称点击修订按钮"):
             result = TrainingProgramManagePage().click_revision_button_by_program_name(driver, training_program_info['方案名称'])

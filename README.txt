@@ -68,6 +68,9 @@ xc-autotest-ui/
 │
 ├──testcases/  # 测试用例目录
 │  ├──conftest.py  # pytest配置文件（fixture定义）
+│  ├──helpers/  # 测试辅助工具目录
+│  │  ├──__init__.py  # 测试辅助工具模块
+│  │  └──test_context_helper.py  # 测试上下文辅助工具类（封装登录、切换身份、切换学校等公共操作）
 │  └──testgqkt/  # 测试用例集合
 │     ├──test_001_user.py  # 用户管理测试用例
 │     ├──test_002_dept.py  # 院系管理测试用例

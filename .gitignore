@@ -5,6 +5,7 @@ report.html
 test.log
 
 # 日志文件（保留 logs 目录结构和源代码，只忽略日志文件）
+logs/*
 logs/*.log
 logs/all_logs/
 logs/test_process.json
@@ -62,4 +63,5 @@ Desktop.ini
 *.tmp
 *.bak
 *.cache
+
 

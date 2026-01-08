@@ -8,12 +8,10 @@ import allure
 import pytest
 
 from common.report_add_img import add_img_2_report
+from testcases.helpers.test_context_helper import TestContextHelper
 from common.yaml_config import GetConf
 from logs.log import log
-from page.LeftMenuPage import LeftMenuPage
 from page.dean_manage.RoleManagePage import RoleManagePage
-from page.login.LoginPage import LoginPage
-from page.TopMenuPage import TopMenuPage
 from page.dean_manage.UserManagePage import UserManagePage
 from page.cms.CmsUserManagePage import CmsUserManage
 
@@ -58,25 +56,17 @@ class TestUser:
         # 专业负责人信息
         prof_user_info = GetConf().get_user_info("prof")
 
-        with allure.step("登录管理员"):
-            result = LoginPage().user_login(driver, initial_admin)
-            add_img_2_report(driver, "登录管理员")
-            assert result is True, "登录管理员失败"
+        # 使用TestContextHelper封装公共操作
+        helper = TestContextHelper(driver)
 
-        with allure.step("切换学校"):
-            result = TopMenuPage().switch_school(driver, school_name)
-            add_img_2_report(driver, "切换学校")
-            assert result is True, f"切换到{school_name}学校失败"
-
-        with allure.step("切换为机构管理员"):
-            result = TopMenuPage().switch_role(driver, "机构管理员")
-            add_img_2_report(driver, "切换为机构管理员")
-            assert result is True, "切换为机构管理员失败"
-
-        with allure.step("点击菜单用户管理"):
-            result = LeftMenuPage().click_two_level_menu(driver, "用户管理")
-            add_img_2_report(driver, "点击用户管理")
-            assert result is True, "点击用户管理失败"
+        with allure.step("登录、切换学校、切换角色并进入用户管理"):
+            result = helper.setup_context(
+                user_info=initial_admin,
+                school_name=school_name,
+                role_name="机构管理员",
+                menu_name="用户管理"
+            )
+            assert result is True, "设置用户上下文失败"
 
         with allure.step("创建用户"):
             result = UserManagePage().create_user(driver, role_name="创建教务管理员", user_info=dean_user_info)
@@ -104,6 +94,10 @@ class TestUser:
         # 专业负责人信息
         prof_user_info = GetConf().get_user_info("prof")
 
+        # 使用TestContextHelper封装公共操作
+        helper = TestContextHelper(driver)
+        login_page = helper.login_page
+
         with allure.step("初始化教务管理员密码"):
             # 使用教务管理员工号作为账号，工号后6位作为密码
             dean_work_number = dean_user_info["工号"]
@@ -111,8 +105,8 @@ class TestUser:
                 "username": dean_work_number,
                 "password": dean_work_number[-6:] if len(dean_work_number) >= 6 else dean_work_number
             }
-            LoginPage().user_login(driver, dean_login_info)
-            result = LoginPage().init_password(driver, dean_cms_user_info["password"])
+            helper.login(dean_login_info, step_description="登录教务管理员（初始化密码）")
+            result = login_page.init_password(driver, dean_cms_user_info["password"])
             add_img_2_report(driver, "初始化教务管理员密码")
             assert result is True, "初始化教务管理员密码失败"
         with allure.step("初始化专业负责人密码"):
@@ -122,8 +116,8 @@ class TestUser:
                 "username": prof_work_number,
                 "password": prof_work_number[-6:] if len(prof_work_number) >= 6 else prof_work_number
             }
-            LoginPage().user_login(driver, prof_login_info)
-            result = LoginPage().init_password(driver, prof_cms_user_info["password"])
+            helper.login(prof_login_info, step_description="登录专业负责人（初始化密码）")
+            result = login_page.init_password(driver, prof_cms_user_info["password"])
             add_img_2_report(driver, "初始化专业负责人密码")
             assert result is True, "初始化专业负责人密码失败"
 
@@ -149,20 +143,16 @@ class TestUser:
         # 专业负责人信息
         prof_user_info = GetConf().get_user_info("prof")
 
-        with allure.step("登录管理员"):
-            result = LoginPage().user_login(driver, initial_admin)
-            add_img_2_report(driver, "登录管理员")
-            assert result is True, "登录管理员失败"
+        # 使用TestContextHelper封装公共操作
+        helper = TestContextHelper(driver)
 
-        with allure.step("切换到cms"):
-            result = TopMenuPage().switch_school(driver, "CMS管理系统")
-            add_img_2_report(driver, "切换到cms")
-            assert result is True, "切换到CMS管理系统失败"
-
-        with allure.step("点击到全部用户管理"):
-            result = LeftMenuPage().click_two_level_menu(driver, "全部用户管理")
-            add_img_2_report(driver, "点击到全部用户管理")
-            assert result is True, "点击到全部用户管理失败"
+        with allure.step("登录并切换到CMS管理系统"):
+            result = helper.setup_context(
+                user_info=initial_admin,
+                school_name="CMS管理系统",
+                menu_name="全部用户管理"
+            )
+            assert result is True, "设置用户上下文失败"
 
         with allure.step("查询cms用户ID"):
             dean_user_id = CmsUserManage().search_cms_user(driver, dean_cms_user_info["username"])
@@ -174,14 +164,10 @@ class TestUser:
             assert prof_user_id is not None and prof_user_id != "", "查询专业负责人ID失败，未找到用户"
             log.info("专业负责人id为:" + prof_user_id)
 
-        with allure.step("切换学校"):
-            result = TopMenuPage().switch_school(driver, school_name)
-            add_img_2_report(driver, "切换学校")
+        with allure.step("切换学校并进入用户管理"):
+            result = helper.switch_school(school_name)
             assert result is True, f"切换到{school_name}学校失败"
-
-        with allure.step("点击菜单用户管理"):
-            result = LeftMenuPage().click_two_level_menu(driver, "用户管理")
-            add_img_2_report(driver, "点击用户管理")
+            result = helper.navigate_to_menu("用户管理")
             assert result is True, "点击用户管理失败"
 
         with allure.step("用户绑定"):
@@ -209,15 +195,15 @@ class TestUser:
         # 教务管理员信息
         dean_user_info = GetConf().get_user_info("dean")
 
-        with allure.step("登录管理员"):
-            result = LoginPage().user_login(driver, dean_cms_user_info)
-            add_img_2_report(driver, "登录管理员")
-            assert result is True, "登录管理员失败"
+        # 使用TestContextHelper封装公共操作
+        helper = TestContextHelper(driver)
 
-        with allure.step("点击左侧菜单角色管理"):
-            result = LeftMenuPage().click_two_level_menu(driver, "角色管理")
-            add_img_2_report(driver, "点击左侧菜单角色管理")
-            assert result is True, "点击左侧菜单角色管理失败"
+        with allure.step("登录并进入角色管理"):
+            result = helper.setup_context(
+                user_info=dean_cms_user_info,
+                menu_name="角色管理"
+            )
+            assert result is True, "登录或导航失败"
 
         with allure.step("专业管理员分配教师角色"):
             result = RoleManagePage().assign_role_to_user(driver, role_name="教师", user_name=prof_user_info["姓名"])

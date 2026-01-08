@@ -1,6 +1,19 @@
 {
   "failed_testcases": [
-    "添加知识图谱测试流程"
+    "\n测试api注册cms账户流程\n:param driver: WebDriver实例\n:return: None\n"
   ],
-  "success_testcases": []
+  "success_testcases": [
+    "添加知识图谱测试流程",
+    "专业图谱概览测试流程",
+    "专业门户管理流程",
+    "修订培养方案流程",
+    "创建培养方案流程",
+    "创建课程流程",
+    "创建行政班流程",
+    "创建专业流程",
+    "创建院系流程",
+    "\n测试分配角色流程\n:param driver: WebDriver实例\n:return: None\n",
+    "\n测试绑定用户流程\n:param driver: WebDriver实例\n:return: None\n",
+    "\n测试创建用户流程\n:param driver: WebDriver实例\n:return: None\n"
+  ]
 }

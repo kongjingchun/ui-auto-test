@@ -7,9 +7,8 @@ import allure
 import pytest
 
 from common.report_add_img import add_img_2_report
+from testcases.helpers.test_context_helper import TestContextHelper
 from common.yaml_config import GetConf
-from page.login.LoginPage import LoginPage
-from page.LeftMenuPage import LeftMenuPage
 from page.department_manage.DeptListManagePage import DeptListManagePage
 
 
@@ -25,15 +24,15 @@ class TestInitializeDeptMajor:
         # 新建的院系信息
         dept_info = GetConf().get_info("department")
 
-        with allure.step("登录教务管理员"):
-            result = LoginPage().user_login(driver, dean_cms_user_info)
-            add_img_2_report(driver, "登录教务管理员")
-            assert result is True, "登录教务管理员失败"
+        # 使用TestContextHelper封装公共操作
+        helper = TestContextHelper(driver)
 
-        with allure.step("进入院系列表管理"):
-            result = LeftMenuPage().click_two_level_menu(driver, "院系列表管理")
-            add_img_2_report(driver, "进入院系列表管理")
-            assert result is True, "进入院系列表管理失败"
+        with allure.step("登录并进入院系列表管理"):
+            result = helper.setup_context(
+                user_info=dean_cms_user_info,
+                menu_name="院系列表管理"
+            )
+            assert result is True, "登录或导航失败"
 
         with allure.step("创建院系"):
             result = DeptListManagePage().create_dept(driver, dept_info)

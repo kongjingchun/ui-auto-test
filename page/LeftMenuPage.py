@@ -12,7 +12,7 @@ from logs.log import log
 
 class LeftMenuPage(LeftMenuBase, ObjectMap):
     """左侧菜单页面类"""
-    
+
     def click_two_level_menu(self, driver, menu_name):
         """点击二级菜单"""
         log.info("点击二级菜单：" + menu_name)

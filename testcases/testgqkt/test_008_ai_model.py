@@ -8,9 +8,8 @@ import allure
 import pytest
 
 from common.report_add_img import add_img_2_report
+from testcases.helpers.test_context_helper import TestContextHelper
 from common.yaml_config import GetConf
-from page.LeftMenuPage import LeftMenuPage
-from page.login.LoginPage import LoginPage
 from page.ai_major.MajorAIModel.MajorAIModelPage import MajorAIModelPage
 from page.ai_major.MajorAIModel.MajorGraphModelPage import MajorGraphModelPage
 
@@ -25,15 +24,15 @@ class TestAIModel:
         # 专业管理员账号
         prof_cms_user_info = GetConf().get_user_info("prof_cms")
 
-        with allure.step("登录专业管理员"):
-            result = LoginPage().user_login(driver, prof_cms_user_info)
-            add_img_2_report(driver, "登录专业管理员")
-            assert result is True, "登录专业管理员失败"
+        # 使用TestContextHelper封装公共操作
+        helper = TestContextHelper(driver)
 
-        with allure.step("点击左侧专业AI模型菜单"):
-            result = LeftMenuPage().click_two_level_menu(driver, "专业AI模型")
-            add_img_2_report(driver, "点击左侧专业AI模型菜单")
-            assert result is True, "点击左侧专业AI模型菜单失败"
+        with allure.step("登录并进入专业AI模型"):
+            result = helper.setup_context(
+                user_info=prof_cms_user_info,
+                menu_name="专业AI模型"
+            )
+            assert result is True, "登录或导航失败"
         with allure.step("创建专业图谱概览"):
             result = MajorGraphModelPage().create_major_graph_overview(driver)
             add_img_2_report(driver, "创建专业图谱概览")

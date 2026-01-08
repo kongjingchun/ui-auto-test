@@ -7,9 +7,8 @@ import allure
 import pytest
 
 from common.report_add_img import add_img_2_report
+from testcases.helpers.test_context_helper import TestContextHelper
 from common.yaml_config import GetConf
-from page.LeftMenuPage import LeftMenuPage
-from page.login.LoginPage import LoginPage
 from page.ai_major.MajorManagePage import MajorManagePage
 
 
@@ -25,15 +24,15 @@ class TestMajor:
         # 新建的专业信息
         major_info = GetConf().get_info("major")
 
-        with allure.step("登录教务管理员"):
-            result = LoginPage().user_login(driver, dean_cms_user_info)
-            add_img_2_report(driver, "登录教务管理员")
-            assert result is True, "登录教务管理员失败"
+        # 使用TestContextHelper封装公共操作
+        helper = TestContextHelper(driver)
 
-        with allure.step("点击左侧专业管理菜单"):
-            result = LeftMenuPage().click_two_level_menu(driver, "专业管理")
-            add_img_2_report(driver, "点击左侧专业管理菜单")
-            assert result is True, "点击左侧专业管理菜单失败"
+        with allure.step("登录并进入专业管理"):
+            result = helper.setup_context(
+                user_info=dean_cms_user_info,
+                menu_name="专业管理"
+            )
+            assert result is True, "登录或导航失败"
 
         with allure.step("创建专业"):
             result = MajorManagePage().create_major(driver, major_info)
