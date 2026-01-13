@@ -19,7 +19,7 @@ from page.dean_manage.UserManagePage import UserManagePage
 from page.department_manage.DeptListManagePage import DeptListManagePage
 
 
-@pytest.mark.skip(reason="跳过删除数据测试用例")
+# @pytest.mark.skip(reason="跳过删除数据测试用例")
 class TestDeleteData:
     """删除数据测试"""
 
