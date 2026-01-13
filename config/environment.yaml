@@ -1,24 +1,24 @@
 # 全局变量配置（只需修改这里的序号）
-test_suffix: 10 # 测试环境序号
+test_suffix: 51 # 测试环境序号
 
 # 部署环境配置（控制浏览器驱动和用例执行）
 部署环境:
   是否本地部署: ture  # true: 本地部署，false: 网络部署
-  是否Headless模式: true  # true: 使用Headless模式（无界面），false: 使用有界面模式（需要显示环境）
+  是否Headless模式: false  # true: 使用Headless模式（无界面），false: 使用有界面模式（需要显示环境）
 school_name: 智慧大学
-# url: https://www.gqkt.cn/
-url: http://192.168.200.215/
+url: https://www.gqkt.cn/
+# url: http://192.168.200.215/
 
 user:
   # 初始管理员
-  initial_admin:
-    username: superadmin
-    password: 123
-
-  # 初始管理员
   # initial_admin:
   #   username: superadmin
-  #   password: gqkt111!
+  #   password: 123
+
+  # 初始管理员
+  initial_admin:
+    username: superadmin
+    password: gqkt111!
   # 教务管理员
   dean:
     姓名: &dean_name Auto_dean{suffix}
