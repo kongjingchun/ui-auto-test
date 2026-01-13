@@ -31,6 +31,8 @@ class TestMajorPortal:
         with allure.step("登录并进入专业门户管理"):
             result = helper.setup_context(
                 user_info=prof_cms_user_info,
+                school_name="智慧大学",
+                role_name="专业管理员",
                 menu_name="专业门户管理"
             )
             assert result is True, "登录或导航失败"

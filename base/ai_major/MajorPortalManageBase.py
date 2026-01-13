@@ -56,7 +56,7 @@ class MajorPortalManageBase:
 
     def header_navigation_bar(self):
         """头部导航栏元素定位"""
-        return "//div[@class='page-header']"
+        return "//div[@class='page-header']//h1"
 
     def edit_page_button(self):
         """编辑页面按钮定位"""

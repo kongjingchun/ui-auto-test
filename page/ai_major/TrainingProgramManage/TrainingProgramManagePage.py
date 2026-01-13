@@ -436,7 +436,7 @@ class TrainingProgramManagePage(TrainingProgramManageBase, ObjectMap):
         log.info(f"断言删除成功提示框是否出现，xpath定位为：{xpath}")
         return self.element_is_display(driver, By.XPATH, xpath)
 
-    def create_training_program(self, driver, training_program_info=None):
+    def create_training_program(self, driver, training_program_info):
         """创建培养方案
 
         Args:
