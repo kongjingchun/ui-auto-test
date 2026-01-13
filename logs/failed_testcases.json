@@ -1,8 +1,13 @@
 {
-  "failed_testcases": [
-    "\n测试api注册cms账户流程\n:param driver: WebDriver实例\n:return: None\n"
-  ],
+  "failed_testcases": [],
   "success_testcases": [
+    "删除cms用户流程",
+    "删除用户流程",
+    "删除院系流程",
+    "删除专业流程",
+    "删除行政班流程",
+    "删除课程流程",
+    "删除培养方案流程",
     "添加知识图谱测试流程",
     "专业图谱概览测试流程",
     "专业门户管理流程",
@@ -14,6 +19,7 @@
     "创建院系流程",
     "\n测试分配角色流程\n:param driver: WebDriver实例\n:return: None\n",
     "\n测试绑定用户流程\n:param driver: WebDriver实例\n:return: None\n",
-    "\n测试创建用户流程\n:param driver: WebDriver实例\n:return: None\n"
+    "\n测试创建用户流程\n:param driver: WebDriver实例\n:return: None\n",
+    "\n测试api注册cms账户流程\n:param driver: WebDriver实例\n:return: None\n"
   ]
 }
