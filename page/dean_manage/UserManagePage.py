@@ -151,7 +151,7 @@ class UserManagePage(BasePage):
             点击操作结果
         """
         log.info(f"点击提交信息按钮，定位器为：{self.SUBMIT_USER_BUTTON[1]}")
-        return self.double_click(self.SUBMIT_USER_BUTTON)
+        return self.click(self.SUBMIT_USER_BUTTON)
 
     def is_create_success_alert_display(self):
         """判断创建成功的提示框是否出现

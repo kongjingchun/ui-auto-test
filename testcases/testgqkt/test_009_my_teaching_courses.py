@@ -8,10 +8,11 @@ import allure
 import pytest
 
 from common.report_add_img import add_img_2_report
+from page.teacher_workbench.CourseWorkbenchPage import CourseWorkbenchPage
+from page.teacher_workbench.ai_vertical_model.KnowledgeGraphPage import KnowledgeGraphPage
 from testcases.helpers.test_context_helper import TestContextHelper
 from common.yaml_config import GetConf
 from page.teacher_workbench.MyTeachingCoursesPage import MyTeachingCoursesPage
-from page.teacher_workbench.course_construction.AIVerticalModelPage import AIVerticalModelPage
 
 
 class TestMyTeachingCourses:
@@ -52,3 +53,14 @@ class TestMyTeachingCourses:
             result = my_teaching_courses_page.click_course(course_info['课程名称'])
             add_img_2_report(driver, "根据课程名称点击课程卡片")
             assert result is True, "根据课程名称点击课程卡片失败"
+        with allure.step("点击知识图谱菜单栏"):
+            course_workbench_page = CourseWorkbenchPage(driver)
+            course_workbench_page.click_left_menu("AI垂直模型")
+            result = course_workbench_page.click_left_menu("知识图谱")
+            add_img_2_report(driver, "点击知识图谱菜单栏")
+            assert result is True, "点击知识图谱菜单栏失败"
+        with allure.step("新建主图谱"):
+            knowledge_graph_page = KnowledgeGraphPage(driver)
+            result = knowledge_graph_page.create_main_graph(course_info['课程名称'], "课程知识图谱", "1.0", "课程知识图谱")
+            add_img_2_report(driver, "新建主图谱")
+            assert result is True, "新建主图谱失败"

@@ -1,7 +1,8 @@
 {
-  "failed_testcases": [],
+  "failed_testcases": [
+    "\n测试分配角色流程\n\nArgs:\n    driver: WebDriver实例（通过pytest fixture注入）\n\nReturns:\n    None\n"
+  ],
   "success_testcases": [
-    "\n测试分配角色流程\n\nArgs:\n    driver: WebDriver实例（通过pytest fixture注入）\n\nReturns:\n    None\n",
     "\n测试初始化密码流程\n\nArgs:\n    driver: WebDriver实例（通过pytest fixture注入）\n\nReturns:\n    None\n",
     "\n测试创建用户流程\n\nArgs:\n    driver: WebDriver实例（通过pytest fixture注入）\n\nReturns:\n    None\n"
   ]
