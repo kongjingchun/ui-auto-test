@@ -72,7 +72,11 @@ def pytest_collection_finish(session):
 
 def pytest_runtest_setup(item):
     """测试用例执行前调用，输出测试用例开始分界线"""
-    test_name = item.function.__doc__ if item.function.__doc__ else item.name
+    # 只获取文档字符串的第一行（简短描述），去掉 Args 和 Returns 部分
+    if item.function.__doc__:
+        test_name = item.function.__doc__.strip().split('\n')[0]
+    else:
+        test_name = item.name
     log.info("=" * 80)
     log.info(f"{'=' * 20} 开始执行测试用例: {test_name} {'=' * 20}")
     log.info("=" * 80)
@@ -80,7 +84,11 @@ def pytest_runtest_setup(item):
 
 def pytest_runtest_teardown(item, nextitem):
     """测试用例执行后调用，输出测试用例结束分界线"""
-    test_name = item.function.__doc__ if item.function.__doc__ else item.name
+    # 只获取文档字符串的第一行（简短描述），去掉 Args 和 Returns 部分
+    if item.function.__doc__:
+        test_name = item.function.__doc__.strip().split('\n')[0]
+    else:
+        test_name = item.name
     # 获取测试结果（通过检查是否有异常）
     result_status = "执行完成"
     log.info("=" * 80)
@@ -126,7 +134,11 @@ def pytest_runtest_makereport(item, call):
     report.description = str(item.function.__doc__)
     # 测试用例执行阶段
     if report.when == "call":
-        test_name = item.function.__doc__ if item.function.__doc__ else item.name
+        # 只获取文档字符串的第一行（简短描述），去掉 Args 和 Returns 部分
+        if item.function.__doc__:
+            test_name = item.function.__doc__.strip().split('\n')[0]
+        else:
+            test_name = item.name
         # 如果测试失败，添加失败截图到报告
         if report.failed:
             log.info("=" * 80)

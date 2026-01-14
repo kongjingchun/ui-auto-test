@@ -2,7 +2,7 @@
 # @File  : test_005_course.py
 # @Author: 孔敬淳
 # @Date  : 2025/12/31
-# @Desc  :
+# @Desc  : 课程管理测试用例，符合Selenium官方Page Object Model和pytest框架规范
 
 import allure
 import pytest
@@ -14,12 +14,26 @@ from page.dean_manage.CourseManagePage import CourseManagePage
 
 
 class TestCourse:
-    """创建课程测试"""
+    """课程管理测试类
+
+    测试用例按照Selenium官方Page Object Model规范编写：
+    1. 页面对象在测试用例中创建，driver通过pytest fixture注入
+    2. 页面对象方法不包含driver参数
+    3. 断言在测试用例中，不在页面对象中
+    """
 
     @pytest.mark.run(order=150)
     @allure.story("创建课程")
     def test_001_create_course(self, driver):
-        """创建课程流程"""
+        """
+        测试创建课程流程
+
+        Args:
+            driver: WebDriver实例（通过pytest fixture注入）
+
+        Returns:
+            None
+        """
         # 教务管理员账号
         dean_cms_user_info = GetConf().get_user_info("dean_cms")
         # 新建的课程信息
@@ -36,6 +50,7 @@ class TestCourse:
             assert result is True, "登录或导航失败"
 
         with allure.step("创建课程"):
-            result = CourseManagePage().create_course(driver, course_info)
+            course_page = CourseManagePage(driver)
+            result = course_page.create_course(course_info)
             add_img_2_report(driver, "创建课程")
             assert result is True, "创建课程失败"

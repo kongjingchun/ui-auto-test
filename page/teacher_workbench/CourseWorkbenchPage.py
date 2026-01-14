@@ -6,15 +6,14 @@
 
 from selenium.webdriver.common.by import By
 
-from base.ObjectMap import ObjectMap
-from base.teacher_workbench.CourseWorkbenchBase import CourseWorkbenchBase
+from base.BasePage import BasePage
 from logs.log import log
 
 
-class CourseWorkbenchPage(CourseWorkbenchBase, ObjectMap):
+class CourseWorkbenchPage(BasePage):
     """课程工作台页面类
 
-    继承CourseWorkbenchBase和ObjectMap类，提供课程工作台页面的元素操作方法
+    继承BasePage类，提供课程工作台页面的元素操作方法
     """
 
     def switch_into_course_workbench_iframe(self, driver):
@@ -28,5 +27,5 @@ class CourseWorkbenchPage(CourseWorkbenchBase, ObjectMap):
         """
         xpath = self.course_workbench_iframe()
         log.info(f"切换到课程工作台iframe，xpath定位为：{xpath}")
-        return self.switch_into_iframe(driver, By.XPATH, xpath)
+        return self.switch_to_iframe((By.XPATH, xpath))
 

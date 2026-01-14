@@ -3,264 +3,345 @@
 # @Author: 孔敬淳
 # @Date  : 2025/12/31
 # @Desc  : 专业图谱模型页面对象类，封装专业图谱模型相关的页面操作方法
-
-from inspect import isframe
 from selenium.webdriver.common.by import By
 
-from base.ObjectMap import ObjectMap
-from base.ai_major.MajorAIModel.MajorGraphModelBase import MajorGraphModelBase
+from base.BasePage import BasePage
 from logs.log import log
 
 
-class MajorGraphModelPage(MajorGraphModelBase, ObjectMap):
+class MajorGraphModelPage(BasePage):
     """专业图谱模型页面类
 
-    继承MajorGraphModelBase和ObjectMap类，提供专业图谱模型页面的元素操作方法
-    MajorGraphModelBase已继承MajorAIModelBase，可以访问父类的定位方法
+    继承BasePage类，提供专业图谱模型页面元素操作方法
+    符合Selenium官方Page Object Model设计模式
     """
 
-    def switch_into_major_ai_model_iframe(self, driver):
-        """切换到专业AI模型iframe
+    def __init__(self, driver):
+        """初始化专业图谱模型页面
 
         Args:
             driver: WebDriver实例
+        """
+        super().__init__(driver)
+
+    # ==================== 元素定位器（静态定位器）====================
+    # 专业AI模型iframe
+    MAJOR_AI_MODEL_IFRAME = (By.XPATH, "//iframe[@id='app-iframe-2110']")
+    # 创建专业图谱按钮
+    CREATE_MAJOR_GRAPH_BUTTON = (By.XPATH, "//button[./span[contains(.,'创建专业图谱')]]")
+    # 创建图谱名称输入框
+    CREATE_MAJOR_GRAPH_INPUT = (By.XPATH, "//input[@placeholder='请输入图谱名称']")
+    # 创建图谱创建按钮
+    CREATE_MAJOR_GRAPH_CONFIRM_BUTTON = (By.XPATH, "//div[@aria-label='创建专业图谱']//button[./span[contains(.,'创建')]]")
+    # 节点标题输入框
+    NODE_TITLE_INPUT = (By.XPATH, "//div[@aria-label='添加节点']//input[contains(@placeholder,'节点标题')]")
+    # 添加节点按钮
+    ADD_NODE_BUTTON = (By.XPATH, "//div[@aria-label='添加节点']//button[contains(.,'添加')]")
+    # 关联确定按钮
+    ASSOCIATE_CONFIRM_BUTTON = (By.XPATH, "//button[contains(.,'确定')]")
+
+    # ==================== 动态定位器方法（需要参数的定位器）====================
+
+    def get_menu_locator(self, menu_name):
+        """获取根据菜单名称定位菜单的定位器
+
+        Args:
+            menu_name: 菜单名称
+
+        Returns:
+            tuple: 定位器元组 (By.XPATH, xpath)
+        """
+        return (By.XPATH, f"//span[text()='{menu_name}']/parent::li")
+
+    def get_add_major_node_button_locator(self, node_type):
+        """获取专业节点添加按钮的定位器
+
+        Args:
+            node_type: 节点类型，可选值：'能力'、'知识'、'素质'、'问题'
+
+        Returns:
+            tuple: 定位器元组 (By.XPATH, xpath)
+        """
+        if '能力' in node_type:
+            return (By.XPATH, "//h4[text()='专业能力节点']/following-sibling::div/button")
+        elif '知识' in node_type:
+            return (By.XPATH, "//h4[text()='专业知识节点']/following-sibling::div/button")
+        elif '素质' in node_type:
+            return (By.XPATH, "//h4[text()='专业素质节点']/following-sibling::div/button")
+        elif '问题' in node_type:
+            return (By.XPATH, "//h4[text()='专业问题节点']/following-sibling::div/button")
+        else:
+            return (By.XPATH, "//h4[text()='专业能力节点']/following-sibling::div/button")
+
+    def get_node_locator(self, node_name):
+        """获取根据节点名称定位节点的定位器
+
+        Args:
+            node_name: 节点名称
+
+        Returns:
+            tuple: 定位器元组 (By.XPATH, xpath)
+        """
+        return (By.XPATH, f"//div[text()='{node_name}']")
+
+    def get_associate_node_button_locator(self, node_name):
+        """获取根据节点名称定位关联按钮的定位器
+
+        Args:
+            node_name: 节点名称
+
+        Returns:
+            tuple: 定位器元组 (By.XPATH, xpath)
+        """
+        return (By.XPATH, f"//div[contains(@class,'node-list') and contains(.,'{node_name}')]//button[2]")
+
+    def get_associate_node_category_locator(self, node_name):
+        """获取根据节点名称定位关联分类的定位器
+
+        Args:
+            node_name: 节点名称
+
+        Returns:
+            tuple: 定位器元组 (By.XPATH, xpath)
+        """
+        if '能力' in node_name:
+            return (By.XPATH, "//span[text()='专业能力节点']//parent::button")
+        elif '知识' in node_name:
+            return (By.XPATH, "//span[text()='专业知识节点']//parent::button")
+        elif '素质' in node_name:
+            return (By.XPATH, "//span[text()='专业素质节点']//parent::button")
+        elif '问题' in node_name:
+            return (By.XPATH, "//span[text()='专业问题节点']//parent::button")
+        else:
+            return (By.XPATH, "//span[text()='专业能力节点']//parent::button")
+
+    def get_checkbox_locator(self, node_name):
+        """获取根据节点名称定位复选框的定位器
+
+        Args:
+            node_name: 节点名称
+
+        Returns:
+            tuple: 定位器元组 (By.XPATH, xpath)
+        """
+        return (By.XPATH, f"//label[contains(.,'{node_name}')]/span[1]")
+
+    # ==================== 页面操作方法 ====================
+
+    def switch_2_major_ai_model_iframe(self):
+        """切换到专业AI模型页面的iframe
 
         Returns:
             切换操作结果
         """
-        xpath = self.major_ai_model_iframe()
-        log.info(f"切换到专业AI模型iframe，xpath定位为：{xpath}")
-        return self.switch_into_iframe(driver, By.XPATH, xpath)
+        log.info(f"切换到专业AI模型页面的iframe，定位器为：{self.MAJOR_AI_MODEL_IFRAME[1]}")
+        return self.switch_to_iframe(self.MAJOR_AI_MODEL_IFRAME)
 
-    def click_menu_by_name(self, driver, menu_name):
+    def click_menu_by_name(self, menu_name):
         """根据菜单名称点击菜单
 
         Args:
-            driver: WebDriver实例
             menu_name: 菜单名称
 
         Returns:
             点击操作结果
         """
         # 切换到专业AI模型iframe
-        self.switch_into_major_ai_model_iframe(driver)
+        self.switch_2_major_ai_model_iframe()
         # 根据菜单名称点击菜单
-        xpath = self.menu_by_name(menu_name)
-        log.info(f"点击菜单：{menu_name}，xpath定位为：{xpath}")
-        result = self.element_click(driver, By.XPATH, xpath)
+        locator = self.get_menu_locator(menu_name)
+        log.info(f"点击菜单：{menu_name}，定位器为：{locator[1]}")
+        result = self.click(locator)
         # 切出专业AI模型iframe
-        self.switch_out_iframe(driver)
+        self.switch_out_iframe()
         return result
 
     # ======================================= 专业图谱概览=========================================
-    def click_create_major_graph_button(self, driver):
-        """点击创建专业图谱按钮
 
-        Args:
-            driver: WebDriver实例
+    def click_create_major_graph_button(self):
+        """点击创建专业图谱按钮
 
         Returns:
             点击操作结果
         """
-        xpath = self.create_major_graph_button()
-        log.info(f"点击创建专业图谱按钮，xpath定位为：{xpath}")
-        return self.element_click(driver, By.XPATH, xpath)
+        log.info(f"点击创建专业图谱按钮，定位器为：{self.CREATE_MAJOR_GRAPH_BUTTON[1]}")
+        return self.click(self.CREATE_MAJOR_GRAPH_BUTTON)
 
-    def input_create_major_graph_input(self, driver, graph_name):
+    def input_create_major_graph_input(self, graph_name):
         """输入创建图谱名称
 
         Args:
-            driver: WebDriver实例
             graph_name: 图谱名称
 
         Returns:
             输入操作结果
         """
-        xpath = self.create_major_graph_input()
-        log.info(f"输入创建图谱名称：{graph_name}，xpath定位为：{xpath}")
-        return self.element_input_value(driver, By.XPATH, xpath, graph_name)
+        log.info(f"输入创建图谱名称：{graph_name}，定位器为：{self.CREATE_MAJOR_GRAPH_INPUT[1]}")
+        return self.input_text(self.CREATE_MAJOR_GRAPH_INPUT, graph_name)
 
-    def click_create_major_graph_confirm_button(self, driver):
+    def click_create_major_graph_confirm_button(self):
         """点击创建图谱确认按钮
-
-        Args:
-            driver: WebDriver实例
 
         Returns:
             点击操作结果
         """
-        xpath = self.create_major_graph_confirm_button()
-        log.info(f"点击创建图谱确认按钮，xpath定位为：{xpath}")
-        return self.element_click(driver, By.XPATH, xpath)
+        log.info(f"点击创建图谱确认按钮，定位器为：{self.CREATE_MAJOR_GRAPH_CONFIRM_BUTTON[1]}")
+        return self.click(self.CREATE_MAJOR_GRAPH_CONFIRM_BUTTON)
 
-    def click_add_major_node_button(self, driver, node_type):
+    def click_add_major_node_button(self, node_type):
         """点击专业节点添加按钮（通用方法）
 
         Args:
-            driver: WebDriver实例
             node_type: 节点类型，可选值：'能力'、'知识'、'素质'、'问题'
 
         Returns:
             点击操作结果
         """
-        xpath = self.add_major_node_button(node_type)
-        log.info(f"点击专业{node_type}节点添加按钮，xpath定位为：{xpath}")
-        return self.element_click(driver, By.XPATH, xpath)
+        locator = self.get_add_major_node_button_locator(node_type)
+        log.info(f"点击专业{node_type}节点添加按钮，定位器为：{locator[1]}")
+        return self.click(locator)
 
-    def input_node_title_input(self, driver, node_title):
+    def input_node_title_input(self, node_title):
         """输入节点标题
 
         Args:
-            driver: WebDriver实例
             node_title: 节点标题
 
         Returns:
             输入操作结果
         """
-        xpath = self.node_title_input()
-        log.info(f"输入节点标题：{node_title}，xpath定位为：{xpath}")
-        return self.element_input_value(driver, By.XPATH, xpath, node_title)
+        log.info(f"输入节点标题：{node_title}，定位器为：{self.NODE_TITLE_INPUT[1]}")
+        return self.input_text(self.NODE_TITLE_INPUT, node_title)
 
-    def click_add_node_button(self, driver):
+    def click_add_node_button(self):
         """点击添加节点按钮
-
-        Args:
-            driver: WebDriver实例
 
         Returns:
             点击操作结果
         """
-        xpath = self.add_node_button()
-        log.info(f"点击添加节点按钮，xpath定位为：{xpath}")
-        return self.element_click(driver, By.XPATH, xpath)
+        log.info(f"点击添加节点按钮，定位器为：{self.ADD_NODE_BUTTON[1]}")
+        return self.click(self.ADD_NODE_BUTTON)
 
-    def hover_node_by_name(self, driver, node_name):
-        """悬浮到节点名称
+    def hover_node_by_name(self, node_name):
+        """鼠标悬停到节点名称
 
         Args:
-            driver: WebDriver实例
             node_name: 节点名称
-        """
-        xpath = self.node_by_name(node_name)
-        log.info(f"悬浮到节点名称'{node_name}'，xpath定位为：{xpath}")
-        return self.element_hover(driver, By.XPATH, xpath)
 
-    def click_associate_node_button_by_name(self, driver, node_name):
+        Returns:
+            悬停操作结果
+        """
+        locator = self.get_node_locator(node_name)
+        log.info(f"鼠标悬停到节点名称'{node_name}'，定位器为：{locator[1]}")
+        return self.hover(locator)
+
+    def click_associate_node_button_by_name(self, node_name):
         """根据节点名称点击关联按钮
 
         Args:
-            driver: WebDriver实例
             node_name: 节点名称
 
         Returns:
             点击操作结果
         """
-        xpath = self.associate_node_button_by_name(node_name)
-        log.info(f"根据节点名称'{node_name}'点击关联按钮，xpath定位为：{xpath}")
-        return self.element_click(driver, By.XPATH, xpath)
+        locator = self.get_associate_node_button_locator(node_name)
+        log.info(f"根据节点名称'{node_name}'点击关联按钮，定位器为：{locator[1]}")
+        return self.click(locator)
 
-    def click_associate_node_category_by_name(self, driver, node_name):
+    def click_associate_node_category_by_name(self, node_name):
         """根据节点名称点击关联分类
 
         Args:
-            driver: WebDriver实例
             node_name: 节点名称
 
         Returns:
             点击操作结果
         """
-        xpath = self.associate_node_category_by_name(node_name)
-        log.info(f"根据节点名称'{node_name}'点击关联分类，xpath定位为：{xpath}")
-        return self.element_click(driver, By.XPATH, xpath)
+        locator = self.get_associate_node_category_locator(node_name)
+        log.info(f"根据节点名称'{node_name}'点击关联分类，定位器为：{locator[1]}")
+        return self.click(locator)
 
-    def click_checkbox_by_name(self, driver, node_name):
+    def click_checkbox_by_name(self, node_name):
         """根据节点名称点击复选框
 
         Args:
-            driver: WebDriver实例
             node_name: 节点名称
 
         Returns:
             点击操作结果
         """
-        xpath = self.checkbox_by_name(node_name)
-        log.info(f"根据节点名称'{node_name}'点击复选框，xpath定位为：{xpath}")
-        return self.element_click(driver, By.XPATH, xpath)
+        locator = self.get_checkbox_locator(node_name)
+        log.info(f"根据节点名称'{node_name}'点击复选框，定位器为：{locator[1]}")
+        return self.click(locator)
 
-    def click_associate_confirm_button(self, driver):
+    def click_associate_confirm_button(self):
         """点击关联确定按钮
-
-        Args:
-            driver: WebDriver实例
 
         Returns:
             点击操作结果
         """
-        xpath = self.associate_confirm_button()
-        log.info(f"点击关联确定按钮，xpath定位为：{xpath}")
-        return self.element_click(driver, By.XPATH, xpath)
+        log.info(f"点击关联确定按钮，定位器为：{self.ASSOCIATE_CONFIRM_BUTTON[1]}")
+        return self.click(self.ASSOCIATE_CONFIRM_BUTTON)
 
-    def create_major_graph_overview(self, driver):
+    def create_major_graph_overview(self):
         """创建专业图谱概览流程
 
-        Args:
-            driver: WebDriver实例
-
         Returns:
-            创建操作结果
+            bool: True表示创建成功，False表示创建失败
         """
         # 切换到专业AI模型iframe
-        self.switch_into_major_ai_model_iframe(driver)
+        self.switch_2_major_ai_model_iframe()
         # 点击创建专业图谱按钮
-        self.click_create_major_graph_button(driver)
+        self.click_create_major_graph_button()
         # 输入图谱名称
-        self.input_create_major_graph_input(driver, "测试图谱")
+        self.input_create_major_graph_input("测试图谱")
         # 点击创建确认按钮
-        self.click_create_major_graph_confirm_button(driver)
+        self.click_create_major_graph_confirm_button()
         # 点击专业能力节点添加按钮
-        self.click_add_major_node_button(driver, "能力")
+        self.click_add_major_node_button("能力")
         # 输入节点标题
-        self.input_node_title_input(driver, "测试能力节点")
+        self.input_node_title_input("测试能力节点")
         # 点击添加节点按钮
-        self.click_add_node_button(driver)
+        self.click_add_node_button()
         # 点击专业知识节点添加按钮
-        self.click_add_major_node_button(driver, "知识")
+        self.click_add_major_node_button("知识")
         # 输入节点标题
-        self.input_node_title_input(driver, "测试知识节点")
+        self.input_node_title_input("测试知识节点")
         # 点击添加节点按钮
-        self.click_add_node_button(driver)
+        self.click_add_node_button()
         # 点击专业素质节点添加按钮
-        self.click_add_major_node_button(driver, "素质")
+        self.click_add_major_node_button("素质")
         # 输入节点标题
-        self.input_node_title_input(driver, "测试素质节点")
+        self.input_node_title_input("测试素质节点")
         # 点击添加节点按钮
-        self.click_add_node_button(driver)
+        self.click_add_node_button()
         # 点击专业问题节点添加按钮
-        self.click_add_major_node_button(driver, "问题")
+        self.click_add_major_node_button("问题")
         # 输入节点标题
-        self.input_node_title_input(driver, "测试问题节点")
+        self.input_node_title_input("测试问题节点")
         # 点击添加节点按钮
-        self.click_add_node_button(driver)
-        # 悬浮到测试能力节点
-        self.hover_node_by_name(driver, "测试能力节点")
+        self.click_add_node_button()
+        # 鼠标悬停到测试能力节点
+        self.hover_node_by_name("测试能力节点")
         # 点击测试能力节点关联按钮
-        self.click_associate_node_button_by_name(driver, "测试能力节点")
+        self.click_associate_node_button_by_name("测试能力节点")
         # 点击测试能力节点关联分类
-        self.click_associate_node_category_by_name(driver, "知识")
+        self.click_associate_node_category_by_name("知识")
         # 点击测试知识节点复选框
-        self.click_checkbox_by_name(driver, "测试知识节点")
+        self.click_checkbox_by_name("测试知识节点")
         # 点击测试知识节点关联确定按钮
-        self.click_associate_confirm_button(driver)
-        # 悬浮到测试素质节点
-        self.hover_node_by_name(driver, "测试素质节点")
+        self.click_associate_confirm_button()
+        # 鼠标悬停到测试素质节点
+        self.hover_node_by_name("测试素质节点")
         # 点击测试素质节点关联按钮
-        self.click_associate_node_button_by_name(driver, "测试素质节点")
+        self.click_associate_node_button_by_name("测试素质节点")
         # 点击测试素质节点关联分类
-        self.click_associate_node_category_by_name(driver, "问题")
+        self.click_associate_node_category_by_name("问题")
         # 点击测试问题节点复选框
-        self.click_checkbox_by_name(driver, "测试问题节点")
+        self.click_checkbox_by_name("测试问题节点")
         # 点击测试问题节点关联确定按钮
-        result = self.click_associate_confirm_button(driver)
+        result = self.click_associate_confirm_button()
         # 切出专业AI模型iframe
-        self.switch_out_iframe(driver)
+        self.switch_out_iframe()
+        log.info(f"创建专业图谱概览结果：{result}")
         return result

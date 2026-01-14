@@ -2,7 +2,7 @@
 # @File  : test_008_ai_model.py
 # @Author: 孔敬淳
 # @Date  : 2025/12/31
-# @Desc  : 专业AI模型测试用例
+# @Desc  : 专业AI模型测试用例，符合Selenium官方Page Object Model和pytest框架规范
 
 import allure
 import pytest
@@ -15,12 +15,26 @@ from page.ai_major.MajorAIModel.MajorGraphModelPage import MajorGraphModelPage
 
 
 class TestAIModel:
-    """专业AI模型测试"""
+    """专业AI模型测试类
+
+    测试用例按照Selenium官方Page Object Model规范编写：
+    1. 页面对象在测试用例中创建，driver通过pytest fixture注入
+    2. 页面对象方法不包含driver参数
+    3. 断言在测试用例中，不在页面对象中
+    """
 
     @pytest.mark.run(order=190)
     @allure.story("专业图谱概览")
     def test_001_major_graph_overview(self, driver):
-        """专业图谱概览测试流程"""
+        """
+        测试专业图谱概览流程
+
+        Args:
+            driver: WebDriver实例（通过pytest fixture注入）
+
+        Returns:
+            None
+        """
         # 专业管理员账号
         prof_cms_user_info = GetConf().get_user_info("prof_cms")
 
@@ -33,7 +47,9 @@ class TestAIModel:
                 menu_name="专业AI模型"
             )
             assert result is True, "登录或导航失败"
+
         with allure.step("创建专业图谱概览"):
-            result = MajorGraphModelPage().create_major_graph_overview(driver)
+            major_graph_page = MajorGraphModelPage(driver)
+            result = major_graph_page.create_major_graph_overview()
             add_img_2_report(driver, "创建专业图谱概览")
             assert result is True, "创建专业图谱概览失败"

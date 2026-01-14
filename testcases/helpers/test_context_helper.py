@@ -27,9 +27,9 @@ class TestContextHelper:
             driver: WebDriver实例
         """
         self.driver = driver
-        self.login_page = LoginPage()
-        self.top_menu = TopMenuPage()
-        self.left_menu = LeftMenuPage()
+        self.login_page = LoginPage(driver)
+        self.top_menu = TopMenuPage(driver)
+        self.left_menu = LeftMenuPage(driver)
 
     def _execute_operation(self, operation_func, description, take_screenshot=True):
         """
@@ -77,7 +77,7 @@ class TestContextHelper:
         description = step_description or f"登录用户: {username}"
 
         return self._execute_operation(
-            operation_func=lambda: self.login_page.user_login(self.driver, user_info),
+            operation_func=lambda: self.login_page.user_login(user_info),
             description=description,
             take_screenshot=take_screenshot
         )
@@ -97,7 +97,7 @@ class TestContextHelper:
         description = step_description or f"切换到学校: {school_name}"
 
         return self._execute_operation(
-            operation_func=lambda: self.top_menu.switch_school(self.driver, school_name),
+            operation_func=lambda: self.top_menu.switch_school(school_name),
             description=description,
             take_screenshot=take_screenshot
         )
@@ -117,7 +117,7 @@ class TestContextHelper:
         description = step_description or f"切换到角色: {role_name}"
 
         return self._execute_operation(
-            operation_func=lambda: self.top_menu.switch_role(self.driver, role_name),
+            operation_func=lambda: self.top_menu.switch_role(role_name),
             description=description,
             take_screenshot=take_screenshot
         )
@@ -137,7 +137,7 @@ class TestContextHelper:
         description = step_description or f"导航到菜单: {menu_name}"
 
         return self._execute_operation(
-            operation_func=lambda: self.left_menu.click_two_level_menu(self.driver, menu_name),
+            operation_func=lambda: self.left_menu.click_two_level_menu(menu_name),
             description=description,
             take_screenshot=take_screenshot
         )

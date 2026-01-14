@@ -3,49 +3,70 @@
 # @Author: 孔敬淳
 # @Date  : 2025/12/31
 # @Desc  : 专业AI模型页面对象类，封装专业AI模型相关的页面操作方法
-
 from selenium.webdriver.common.by import By
 
-from base.ObjectMap import ObjectMap
-from base.ai_major.MajorAIModel.MajorAIModelBase import MajorAIModelBase
+from base.BasePage import BasePage
 from logs.log import log
 
 
-class MajorAIModelPage(MajorAIModelBase, ObjectMap):
+class MajorAIModelPage(BasePage):
     """专业AI模型页面类
 
-    继承MajorAIModelBase和ObjectMap类，提供专业AI模型页面的元素操作方法
+    继承BasePage类，提供专业AI模型页面元素操作方法
+    符合Selenium官方Page Object Model设计模式
     """
 
-    def switch_into_major_ai_model_iframe(self, driver):
-        """切换到专业AI模型iframe
+    def __init__(self, driver):
+        """初始化专业AI模型页面
 
         Args:
             driver: WebDriver实例
+        """
+        super().__init__(driver)
+
+    # ==================== 元素定位器（静态定位器）====================
+    # 专业AI模型iframe
+    MAJOR_AI_MODEL_IFRAME = (By.XPATH, "//iframe[@id='app-iframe-2110']")
+
+    # ==================== 动态定位器方法（需要参数的定位器）====================
+
+    def get_menu_locator(self, menu_name):
+        """获取根据菜单名称定位菜单的定位器
+
+        Args:
+            menu_name: 菜单名称
+
+        Returns:
+            tuple: 定位器元组 (By.XPATH, xpath)
+        """
+        return (By.XPATH, f"//span[text()='{menu_name}']/parent::li")
+
+    # ==================== 页面操作方法 ====================
+
+    def switch_2_major_ai_model_iframe(self):
+        """切换到专业AI模型页面的iframe
 
         Returns:
             切换操作结果
         """
-        xpath = self.major_ai_model_iframe()
-        log.info(f"切换到专业AI模型iframe，xpath定位为：{xpath}")
-        return self.switch_into_iframe(driver, By.XPATH, xpath)
+        log.info(f"切换到专业AI模型页面的iframe，定位器为：{self.MAJOR_AI_MODEL_IFRAME[1]}")
+        return self.switch_to_iframe(self.MAJOR_AI_MODEL_IFRAME)
 
-    def click_menu_by_name(self, driver, menu_name):
+    def click_menu_by_name(self, menu_name):
         """根据菜单名称点击菜单
 
         Args:
-            driver: WebDriver实例
             menu_name: 菜单名称
 
         Returns:
             点击操作结果
         """
         # 切换到专业AI模型iframe
-        self.switch_into_major_ai_model_iframe(driver)
+        self.switch_2_major_ai_model_iframe()
         # 根据菜单名称点击菜单
-        xpath = self.menu_by_name(menu_name)
-        log.info(f"点击菜单：{menu_name}，xpath定位为：{xpath}")
-        result = self.element_click(driver, By.XPATH, xpath)
+        locator = self.get_menu_locator(menu_name)
+        log.info(f"点击菜单：{menu_name}，定位器为：{locator[1]}")
+        result = self.click(locator)
         # 切出专业AI模型iframe
-        self.switch_out_iframe(driver)
+        self.switch_out_iframe()
         return result

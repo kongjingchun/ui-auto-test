@@ -2,7 +2,7 @@
 # @File  : test_004_admin_class.py
 # @Author: 孔敬淳
 # @Date  : 2025/12/31
-# @Desc  :
+# @Desc  : 行政班管理测试用例，符合Selenium官方Page Object Model和pytest框架规范
 
 import allure
 import pytest
@@ -14,12 +14,26 @@ from page.dean_manage.AdminClassManagePage import AdminClassManagePage
 
 
 class TestAdminClass:
-    """创建行政班测试"""
+    """行政班管理测试类
+
+    测试用例按照Selenium官方Page Object Model规范编写：
+    1. 页面对象在测试用例中创建，driver通过pytest fixture注入
+    2. 页面对象方法不包含driver参数
+    3. 断言在测试用例中，不在页面对象中
+    """
 
     @pytest.mark.run(order=140)
     @allure.story("创建行政班")
     def test_001_create_admin_class(self, driver):
-        """创建行政班流程"""
+        """
+        测试创建行政班流程
+
+        Args:
+            driver: WebDriver实例（通过pytest fixture注入）
+
+        Returns:
+            None
+        """
         # 教务管理员账号
         dean_cms_user_info = GetConf().get_user_info("dean_cms")
         # 新建的行政班信息
@@ -36,6 +50,7 @@ class TestAdminClass:
             assert result is True, "登录或导航失败"
 
         with allure.step("创建行政班"):
-            result = AdminClassManagePage().create_admin_class(driver, admin_class_info)
+            admin_class_page = AdminClassManagePage(driver)
+            result = admin_class_page.create_admin_class(admin_class_info)
             add_img_2_report(driver, "创建行政班")
             assert result is True, "创建行政班失败"
