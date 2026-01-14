@@ -75,6 +75,27 @@ class DriverConfig:
             "--no-sandbox",  # 禁用沙箱模式，适用于容器化环境或权限受限的系统
             "--disable-dev-shm-usage",  # 禁用devshm使用，解决内存不足问题
         ]
+        
+        # macOS 系统专用配置（解决 Chrome instance exited 问题）
+        if sys.platform == "darwin":
+            compatibility_args.extend([
+                "--disable-software-rasterizer",  # 禁用软件光栅化
+                "--disable-extensions",  # 禁用扩展
+                "--disable-background-networking",  # 禁用后台网络
+                "--disable-background-timer-throttling",  # 禁用后台定时器节流
+                "--disable-renderer-backgrounding",  # 禁用渲染器后台化
+                "--disable-backgrounding-occluded-windows",  # 禁用被遮挡窗口的后台化
+                "--disable-breakpad",  # 禁用崩溃报告
+                "--disable-component-update",  # 禁用组件更新
+                "--disable-default-apps",  # 禁用默认应用
+                "--disable-domain-reliability",  # 禁用域可靠性
+                "--disable-features=TranslateUI",  # 禁用翻译UI
+                "--disable-sync",  # 禁用同步
+                "--metrics-recording-only",  # 仅记录指标
+                "--no-first-run",  # 不运行首次运行向导
+                "--safebrowsing-disable-auto-update",  # 禁用安全浏览自动更新
+                "--password-store=basic",  # 使用基本密码存储
+            ])
 
         # 读取配置，判断是否使用Headless模式
         try:
@@ -88,28 +109,55 @@ class DriverConfig:
         # Headless模式相关配置（所有平台都支持）
         headless_args = []
         if use_headless:
-            headless_args = [
-                "--headless=new",  # 使用新的无头模式（支持Linux、Mac、Windows）
-                "--disable-software-rasterizer",  # 禁用软件光栅化
-                "--disable-extensions",  # 禁用扩展
-                "--disable-background-networking",  # 禁用后台网络
-                "--disable-background-timer-throttling",  # 禁用后台定时器节流
-                "--disable-renderer-backgrounding",  # 禁用渲染器后台化
-                "--disable-backgrounding-occluded-windows",  # 禁用被遮挡窗口的后台化
-                "--disable-breakpad",  # 禁用崩溃报告
-                "--disable-component-extensions-with-background-pages",  # 禁用有后台页面的组件扩展
-                "--disable-default-apps",  # 禁用默认应用
-                "--disable-domain-reliability",  # 禁用域可靠性
-                "--disable-features=TranslateUI",  # 禁用翻译UI
-                "--disable-ipc-flooding-protection",  # 禁用IPC洪水保护
-                "--disable-sync",  # 禁用同步
-                "--metrics-recording-only",  # 仅记录指标
-                "--no-first-run",  # 不运行首次运行向导
-                "--safebrowsing-disable-auto-update",  # 禁用安全浏览自动更新
-                "--enable-automation",  # 启用自动化
-                "--password-store=basic",  # 使用基本密码存储
-                "--remote-debugging-port=0",  # 随机选择调试端口
-            ]
+            # macOS 上使用传统的 headless 模式，更稳定
+            if sys.platform == "darwin":
+                headless_args = [
+                    "--headless",  # macOS 上使用传统 headless 模式，更稳定
+                    "--window-size=1920,1080",  # 设置窗口大小（Headless 模式必需）
+                    "--disable-software-rasterizer",  # 禁用软件光栅化
+                    "--disable-extensions",  # 禁用扩展
+                    "--disable-background-networking",  # 禁用后台网络
+                    "--disable-background-timer-throttling",  # 禁用后台定时器节流
+                    "--disable-renderer-backgrounding",  # 禁用渲染器后台化
+                    "--disable-backgrounding-occluded-windows",  # 禁用被遮挡窗口的后台化
+                    "--disable-breakpad",  # 禁用崩溃报告
+                    "--disable-component-extensions-with-background-pages",  # 禁用有后台页面的组件扩展
+                    "--disable-default-apps",  # 禁用默认应用
+                    "--disable-domain-reliability",  # 禁用域可靠性
+                    "--disable-features=TranslateUI",  # 禁用翻译UI
+                    "--disable-ipc-flooding-protection",  # 禁用IPC洪水保护
+                    "--disable-sync",  # 禁用同步
+                    "--metrics-recording-only",  # 仅记录指标
+                    "--no-first-run",  # 不运行首次运行向导
+                    "--safebrowsing-disable-auto-update",  # 禁用安全浏览自动更新
+                    "--enable-automation",  # 启用自动化
+                    "--password-store=basic",  # 使用基本密码存储
+                    "--remote-debugging-port=0",  # 随机选择调试端口
+                ]
+            else:
+                # Linux 和 Windows 使用新的 headless 模式
+                headless_args = [
+                    "--headless=new",  # 使用新的无头模式（支持Linux、Windows）
+                    "--disable-software-rasterizer",  # 禁用软件光栅化
+                    "--disable-extensions",  # 禁用扩展
+                    "--disable-background-networking",  # 禁用后台网络
+                    "--disable-background-timer-throttling",  # 禁用后台定时器节流
+                    "--disable-renderer-backgrounding",  # 禁用渲染器后台化
+                    "--disable-backgrounding-occluded-windows",  # 禁用被遮挡窗口的后台化
+                    "--disable-breakpad",  # 禁用崩溃报告
+                    "--disable-component-extensions-with-background-pages",  # 禁用有后台页面的组件扩展
+                    "--disable-default-apps",  # 禁用默认应用
+                    "--disable-domain-reliability",  # 禁用域可靠性
+                    "--disable-features=TranslateUI",  # 禁用翻译UI
+                    "--disable-ipc-flooding-protection",  # 禁用IPC洪水保护
+                    "--disable-sync",  # 禁用同步
+                    "--metrics-recording-only",  # 仅记录指标
+                    "--no-first-run",  # 不运行首次运行向导
+                    "--safebrowsing-disable-auto-update",  # 禁用安全浏览自动更新
+                    "--enable-automation",  # 启用自动化
+                    "--password-store=basic",  # 使用基本密码存储
+                    "--remote-debugging-port=0",  # 随机选择调试端口
+                ]
             DriverConfig.log.info(f"启用Headless模式（{sys.platform}）")
         else:
             DriverConfig.log.info(f"使用有界面模式（{sys.platform}）")
@@ -119,6 +167,12 @@ class DriverConfig:
         if sys.platform.startswith("linux"):
             linux_specific_args = []
 
+        # macOS 系统：设置 Chrome 二进制路径（如果存在）
+        if sys.platform == "darwin":
+            chrome_binary_path = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+            if os.path.exists(chrome_binary_path):
+                options.binary_location = chrome_binary_path
+        
         # 应用所有配置参数
         for arg in security_args + compatibility_args + headless_args + linux_specific_args:
             options.add_argument(arg)
@@ -127,9 +181,18 @@ class DriverConfig:
         # Linux系统或Headless模式下需要设置用户数据目录
         if sys.platform.startswith("linux") or use_headless:
             import tempfile
-            user_data_dir = os.path.join(tempfile.gettempdir(), "chrome_user_data")
+            import uuid
+            # 为每个实例创建唯一的用户数据目录，避免冲突
+            if use_headless:
+                # Headless 模式下使用带时间戳的唯一目录
+                unique_id = str(uuid.uuid4())[:8]
+                user_data_dir = os.path.join(tempfile.gettempdir(), f"chrome_user_data_{unique_id}")
+            else:
+                user_data_dir = os.path.join(tempfile.gettempdir(), "chrome_user_data")
             os.makedirs(user_data_dir, exist_ok=True)
             options.add_argument(f"--user-data-dir={user_data_dir}")
+            if use_headless:
+                DriverConfig.log.info(f"Headless模式用户数据目录: {user_data_dir}")
 
         return options
 

@@ -1,12 +1,4 @@
 {
   "failed_testcases": [],
-  "success_testcases": [
-    "\n测试删除CMS用户流程\n\nArgs:\n    driver: WebDriver实例（通过pytest fixture注入）\n\nReturns:\n    None\n",
-    "\n测试删除用户流程\n\nArgs:\n    driver: WebDriver实例（通过pytest fixture注入）\n\nReturns:\n    None\n",
-    "\n测试删除院系流程\n\nArgs:\n    driver: WebDriver实例（通过pytest fixture注入）\n\nReturns:\n    None\n",
-    "\n测试删除专业流程\n\nArgs:\n    driver: WebDriver实例（通过pytest fixture注入）\n\nReturns:\n    None\n",
-    "\n测试删除行政班流程\n\nArgs:\n    driver: WebDriver实例（通过pytest fixture注入）\n\nReturns:\n    None\n",
-    "\n测试删除课程流程\n\nArgs:\n    driver: WebDriver实例（通过pytest fixture注入）\n\nReturns:\n    None\n",
-    "\n测试删除培养方案流程\n\nArgs:\n    driver: WebDriver实例（通过pytest fixture注入）\n\nReturns:\n    None\n"
-  ]
+  "success_testcases": []
 }
