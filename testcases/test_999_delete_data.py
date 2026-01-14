@@ -223,6 +223,7 @@ class TestDeleteData:
             result = helper.setup_context(
                 user_info=initial_admin,
                 school_name=school_name,
+                role_name="教务管理员",
                 menu_name="用户管理"
             )
             assert result is True, "设置用户上下文失败"

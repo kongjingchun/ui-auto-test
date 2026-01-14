@@ -65,3 +65,4 @@ Desktop.ini
 *.cache
 
 
+logs/failed_testcases.json

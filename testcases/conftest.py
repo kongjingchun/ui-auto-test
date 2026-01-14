@@ -7,6 +7,7 @@
 import os
 import shutil
 import pytest
+import datetime
 
 from common.ding_talk import send_ding_talk
 from common.process_file import Process  # 使用文件存储测试进度
@@ -63,7 +64,7 @@ def pytest_configure(config):
 
 
 def pytest_collection_modifyitems(config, items):
-    """在收集测试用例时，根据部署环境自动跳过标记的用例"""
+    """在收集测试用例时，根据部署环境自动跳过标记的用例，并按照order标记全局排序"""
     is_local = GetConf().is_local_deploy()
 
     for item in items:
@@ -73,6 +74,17 @@ def pytest_collection_modifyitems(config, items):
         # 如果标记了 skip_internet 且是网络部署，则跳过
         elif item.get_closest_marker("skip_internet") and not is_local:
             item.add_marker(pytest.mark.skip(reason="网络部署环境，跳过该测试用例"))
+
+    # 按照order标记全局排序（pytest-ordering只在文件内排序，这里实现跨文件全局排序）
+    def get_order(item):
+        """获取测试用例的order值，如果没有order标记则返回999999（排在最后）"""
+        run_marker = item.get_closest_marker("run")
+        if run_marker and "order" in run_marker.kwargs:
+            return run_marker.kwargs["order"]
+        return 999999
+
+    # 按照order值排序
+    items.sort(key=get_order)
 
 
 def pytest_collection_finish(session):
@@ -105,7 +117,60 @@ def pytest_sessionfinish(session, exitstatus):
         pass
 
     # 获取测试结果统计
-    total, success, fail, _ = Process().get_result()
+    total, success, fail, start_time = Process().get_result()
+    
+    # 记录结束时间（如果还没有记录）
+    process_instance = Process()
+    process_instance.write_end_time()
+    
+    # 获取结束时间并计算执行耗时
+    process_data = process_instance._read_json_file(process_instance.process_file)
+    end_time_str = process_data.get("end_time", "")
+    
+    # 计算执行耗时（精确到秒）
+    duration_seconds = 0
+    duration_str = "未知"
+    try:
+        if start_time and start_time != "-" and end_time_str:
+            # 解析时间字符串（格式：2026-01-14 22:44:00.123456 或 2026-01-14 22:44:00）
+            time_formats = [
+                "%Y-%m-%d %H:%M:%S.%f",
+                "%Y-%m-%d %H:%M:%S",
+            ]
+            start_dt = None
+            end_dt = None
+            
+            for fmt in time_formats:
+                try:
+                    start_dt = datetime.datetime.strptime(str(start_time), fmt)
+                    break
+                except ValueError:
+                    continue
+            
+            for fmt in time_formats:
+                try:
+                    end_dt = datetime.datetime.strptime(str(end_time_str), fmt)
+                    break
+                except ValueError:
+                    continue
+            
+            if start_dt and end_dt:
+                duration = end_dt - start_dt
+                duration_seconds = int(duration.total_seconds())
+                # 格式化显示：XX小时XX分XX秒 或 XX分XX秒 或 XX秒
+                hours = duration_seconds // 3600
+                minutes = (duration_seconds % 3600) // 60
+                seconds = duration_seconds % 60
+                
+                if hours > 0:
+                    duration_str = f"{hours}小时{minutes}分{seconds}秒"
+                elif minutes > 0:
+                    duration_str = f"{minutes}分{seconds}秒"
+                else:
+                    duration_str = f"{seconds}秒"
+    except Exception as e:
+        log.warning(f"计算执行耗时失败: {e}")
+        duration_str = "计算失败"
 
     # 从pytest session的stats中获取跳过的用例数和名称
     skipped = 0
@@ -186,6 +251,7 @@ def pytest_sessionfinish(session, exitstatus):
     log.info(f"  测试用例总数:     {total:>6} 个")
     log.info(f"  实际执行用例:     {executed:>6} 个")
     log.info(f"  跳过用例数:      {skipped:>6} 个")
+    log.info(f"  执行耗时:        {duration_str:>15}")
     log.info("-" * 80)
     log.info("")
 
@@ -201,11 +267,13 @@ def pytest_sessionfinish(session, exitstatus):
     success_testcase_names = Process().get_success_testcase_names()
     fail_testcase_names = Process().get_fail_testcase_names()
 
-    # 展示成功的用例名称
+    # 展示成功的用例名称（反转列表，因为存储时是插入到开头，所以顺序是倒的）
     if success_testcase_names:
         log.info(" " * 25 + "【执行成功的用例】" + " " * 25)
         log.info("-" * 80)
-        for idx, testcase_name in enumerate(success_testcase_names, 1):
+        # 反转列表，使顺序与执行顺序一致（从最早执行的到最晚执行的）
+        success_testcase_names_reversed = list(reversed(success_testcase_names))
+        for idx, testcase_name in enumerate(success_testcase_names_reversed, 1):
             # 只显示第一行（简短描述）
             display_name = testcase_name.strip().split('\n')[0] if testcase_name else "未知用例"
             log.info(f"  ✅ {idx:>3}. {display_name}")
@@ -219,11 +287,13 @@ def pytest_sessionfinish(session, exitstatus):
             log.info("-" * 80)
             log.info("")
 
-    # 展示失败的用例名称
+    # 展示失败的用例名称（反转列表，因为存储时是插入到开头，所以顺序是倒的）
     if fail_testcase_names:
         log.info(" " * 25 + "【执行失败的用例】" + " " * 25)
         log.info("-" * 80)
-        for idx, testcase_name in enumerate(fail_testcase_names, 1):
+        # 反转列表，使顺序与执行顺序一致（从最早执行的到最晚执行的）
+        fail_testcase_names_reversed = list(reversed(fail_testcase_names))
+        for idx, testcase_name in enumerate(fail_testcase_names_reversed, 1):
             # 只显示第一行（简短描述）
             display_name = testcase_name.strip().split('\n')[0] if testcase_name else "未知用例"
             log.info(f"  ❌ {idx:>3}. {display_name}")
