@@ -33,9 +33,11 @@ XuetangUI/
 │  │  └──DeptListManagePage.py  # 院系列表管理页面
 │  ├──teacher_workbench/  # 教师工作台页面
 │  │  ├──__init__.py  # 教师工作台页面对象模块初始化文件
-│  │  ├──course_construction/  # 课程建设页面
-│  │  │  ├──__init__.py  # 课程建设页面对象模块初始化文件
-│  │  │  └──AIVerticalModelPage.py  # AI垂直模型页面
+│  │  ├──ai_vertical_model/  # AI垂直模型页面
+│  │  │  ├──__init__.py  # AI垂直模型模块初始化文件
+│  │  │  └──KnowledgeGraphPage.py  # 知识图谱页面
+│  │  ├──course_construction/  # 课程建设页面（预留目录）
+│  │  │  └──__init__.py  # 课程建设页面对象模块初始化文件
 │  │  ├──CourseWorkbenchPage.py  # 课程工作台页面
 │  │  └──MyTeachingCoursesPage.py  # 我教的课页面
 │  ├──login/  # 登录相关页面
@@ -46,7 +48,8 @@ XuetangUI/
 │
 ├──testcases/  # 测试用例目录
 │  ├──__init__.py  # 测试用例模块初始化文件
-│  ├──conftest.py  # pytest配置文件（fixture定义）
+│  ├──conftest.py  # pytest配置文件（fixture定义和钩子函数）
+│  ├──conftest.py.bak  # pytest配置文件备份
 │  ├──helpers/  # 测试辅助工具目录
 │  │  ├──__init__.py  # 测试辅助工具模块初始化文件
 │  │  └──test_context_helper.py  # 测试上下文辅助工具类（封装登录、切换身份、切换学校等公共操作）
@@ -69,11 +72,11 @@ XuetangUI/
 │  ├──yaml_config.py  # YAML配置文件读取
 │  ├──mysql_operate.py  # MySQL数据库操作
 │  ├──redis_operation.py  # Redis操作
-│  ├──process_redis.py  # Redis进程处理
+│  ├──process_redis.py  # Redis进程处理（测试进度管理）
+│  ├──process_file.py  # 文件进程处理（测试进度管理）
 │  ├──ding_talk.py  # 钉钉通知
 │  ├──ocr_identify.py  # OCR识别
 │  ├──find_img.py  # 图片查找
-│  ├──process_file.py  # 文件处理
 │  └──report_add_img.py  # 报告图片添加
 │
 ├──config/  # 配置文件目录
@@ -82,33 +85,43 @@ XuetangUI/
 │  └──environment.yaml  # 环境配置文件
 │
 ├──driver_files/  # 浏览器驱动文件目录
-│  ├──chromedriver  # Chrome浏览器驱动（macOS/Linux）
+│  ├──chromedriver  # Chrome浏览器驱动（macOS）
 │  ├──chromedriver_linux  # Chrome浏览器驱动（Linux）
 │  └──chromedriver.exe  # Chrome浏览器驱动（Windows）
 │
 ├──logs/  # 日志目录
 │  ├──__init__.py  # 日志模块初始化文件
-│  ├──all_logs/  # 所有日志文件
+│  ├──all_logs/  # 所有日志文件目录
+│  │  └──*.log  # 按时间戳命名的日志文件（格式：YYYYMMDDHHMM.log）
 │  ├──log.py  # 日志配置
 │  ├──failed_testcases.json  # 失败测试用例记录
 │  └──test_process.json  # 测试过程记录
 │
 ├──img/  # 图片资源目录
+│  ├──search.png  # 搜索图片
+│  ├──source.png  # 源图片
+│  └──*.jpg  # 其他图片资源
 │
 ├──assets/  # 资源文件目录
 │  └──style.css  # 样式文件
 │
 ├──UIreport/  # UI测试报告输出目录（Allure报告）
+│  └──report/  # 生成的HTML报告目录
 │
 ├──requirements.txt  # Python依赖包列表
 ├──pytest.ini  # pytest配置文件
 ├──pyproject.toml  # 项目配置文件
 ├──setup.cfg  # 安装配置文件
 ├──pyrightconfig.json  # Pyright类型检查配置文件
-├──testcase_result.py  # 测试用例结果处理
+├──testcase_result.py  # 测试用例结果处理脚本
+├──view_report_http.py  # 启动HTTP服务器查看Allure报告（Python脚本）
+├──view_report.sh  # 启动HTTP服务器查看Allure报告（Shell脚本）
+├──查看报告说明.md  # Allure报告查看说明文档
 ├──Dockerfile  # Docker镜像构建文件
 ├──LINUX_DEPLOY.md  # Linux部署说明文档
-└──README.txt  # 项目说明文档
+├──test.log  # pytest日志文件（由pytest.ini配置生成）
+├──report.html  # pytest-html生成的HTML报告
+└──README.txt  # 项目说明文档（本文件）
 
 二、测试Linux准备工作
     依赖：
@@ -116,5 +129,48 @@ XuetangUI/
         pip         25.3
         git
     步骤：
+        1. 安装Python依赖包
+           pip install -r requirements.txt
         
+        2. 配置环境变量
+           编辑 config/environment.yaml 文件，配置测试环境信息
         
+        3. 运行测试用例
+           pytest testcases/ -v
+        
+        4. 生成Allure报告
+           pytest testcases/ --alluredir=UIreport -v
+           allure generate UIreport -o UIreport/report --clean
+        
+        5. 查看报告
+           方法1：allure serve UIreport
+           方法2：python3 view_report_http.py
+           方法3：./view_report.sh
+           详细说明请参考：查看报告说明.md
+
+三、测试执行说明
+    1. 运行所有测试用例
+       pytest testcases/ -v
+    
+    2. 运行指定测试文件
+       pytest testcases/testgqkt/test_001_user.py -v
+    
+    3. 运行指定测试用例
+       pytest testcases/testgqkt/test_001_user.py::TestUser::test_001_create_user -v
+    
+    4. 并行执行测试（4个进程）
+       pytest testcases/ -n 4
+    
+    5. 生成Allure报告
+       pytest testcases/ --alluredir=UIreport -v
+       allure generate UIreport -o UIreport/report --clean
+    
+    6. 查看测试日志
+       日志文件保存在 logs/all_logs/ 目录下，按时间戳命名（格式：YYYYMMDDHHMM.log）
+       测试执行结果汇总报告会在日志文件末尾自动生成
+
+四、注意事项
+    1. 在IDE中编辑测试用例文件时，不会创建日志文件，避免干扰开发
+    2. 只有在真正执行测试时，才会创建日志文件和输出日志内容
+    3. 测试报告需要使用HTTP服务器访问，不能直接打开HTML文件
+    4. 详细报告查看说明请参考：查看报告说明.md

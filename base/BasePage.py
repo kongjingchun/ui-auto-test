@@ -786,7 +786,7 @@ class BasePage:
             _, locator_expression = locator
             raise Exception(f"切换到iframe失败：{locator_expression} - {str(e)}")
 
-    def switch_out_iframe(self, to_root=False):
+    def switch_out_iframe(self, to_root=True):
         """
         从iframe切回主文档
 

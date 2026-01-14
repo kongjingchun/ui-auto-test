@@ -81,6 +81,17 @@ training_program:
   学制: 4年
   授予学位: 工学学士
 
+main_graph:
+  图谱名称: Auto_main_graph{suffix}
+  图谱描述: 图谱描述
+  图谱版本号: Auto_main_graph_version{suffix}
+  节点1: Auto节点1
+  节点1描述: 节点1描述
+  节点1.1: Auto节点1.1
+  节点1.1描述: 节点1.1描述
+
+
+
 mysql:
   db: trading_system
   host: 120.53.230.254

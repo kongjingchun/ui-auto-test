@@ -26,8 +26,10 @@ class KnowledgeGraphPage(BasePage):
         super().__init__(driver)
 
     # ==================== 知识图谱页面定位器=============================================================
+    # 课程工作台iframe
+    COURSE_WORKBENCH_IFRAME = (By.XPATH, "//iframe[@id='app-iframe-4002']")
     # 知识图谱iframe
-    KNOWLEDGE_GRAPH_IFRAME = (By.XPATH, "//iframe[@id='app-iframe-4003']")
+    KNOWLEDGE_GRAPH_IFRAME = (By.XPATH, "//iframe[@id='course-workspace-iframe']")
     # 新建主图谱button
     CREATE_MAIN_GRAPH_BUTTON = (By.XPATH, "//button[./span[contains(.,'新建主图谱')]]")
 
@@ -61,14 +63,22 @@ class KnowledgeGraphPage(BasePage):
         Returns:
             点击操作结果
         """
+        # 切换到课程工作台iframe
+        self.switch_to_iframe(self.COURSE_WORKBENCH_IFRAME)
+        # 切换到知识图谱iframe
+        self.switch_to_iframe(self.KNOWLEDGE_GRAPH_IFRAME)
+        # 根据图谱名称点击编辑数据按钮
         locator = self.get_edit_data_button_locator_by_name(graph_name)
         log.info(f"根据图谱名称点击编辑数据按钮，定位器为：{locator[1]}")
-        return self.click(locator)
+        result = self.click(locator)
+        # 切出知识图谱iframe
+        self.switch_out_iframe()
+        return result
 
     # ====================新建图谱页面定位器==============================================================
 
     # 新建主图谱名称输入框
-    CREATE_MAIN_GRAPH_NAME_INPUT = (By.XPATH, "//input[@placeholder='请输入图谱名称']']")
+    CREATE_MAIN_GRAPH_NAME_INPUT = (By.XPATH, "//input[@placeholder='请输入图谱名称']")
     # 新建主图谱描述输入框
     CREATE_MAIN_GRAPH_DESCRIPTION_INPUT = (By.XPATH, "//textarea[@placeholder='请输入图谱描述']")
     # 新建主图谱版本号输入框
@@ -149,7 +159,7 @@ class KnowledgeGraphPage(BasePage):
         log.info(f"断言新建图谱成功，定位器为：{self.CREATE_MAIN_GRAPH_SUCCESS_MESSAGE[1]}")
         return self.is_displayed(self.CREATE_MAIN_GRAPH_SUCCESS_MESSAGE)
 
-    def create_main_graph(self, name, description, version, title):
+    def create_main_graph(self, name, description=None, version=None, title=None):
         """新建主图谱
 
         Args:
@@ -158,24 +168,29 @@ class KnowledgeGraphPage(BasePage):
             version: 新建主图谱版本号
             title: 第1级标题
         """
+        # 切换到课程工作台iframe
+        self.switch_to_iframe(self.COURSE_WORKBENCH_IFRAME)
         # 切换到知识图谱iframe
         self.switch_to_iframe(self.KNOWLEDGE_GRAPH_IFRAME)
         # 点击新建主图谱按钮
         self.click_create_main_graph_button()
         # 输入新建主图谱名称
         self.input_create_main_graph_name(name)
-        # 输入新建主图谱描述
-        self.input_create_main_graph_description(description)
-        # 输入新建主图谱版本号
-        self.input_create_main_graph_version(version)
-        # 输入第1级标题
-        self.input_first_level_title(title)
+        if description:
+            # 输入新建主图谱描述
+            self.input_create_main_graph_description(description)
+        if version:
+            # 输入新建主图谱版本号
+            self.input_create_main_graph_version(version)
+        if title:
+            # 输入第1级标题
+            self.input_first_level_title(title)
         # 点击确定按钮
         self.click_create_main_graph_confirm_button()
         # 断言新建图谱成功
         result = self.assert_create_main_graph_success()
         log.info(f"新建主图谱结果：{result}")
-        # 切出知识图谱iframe
+        # 切回顶层文档
         self.switch_out_iframe()
         return result
 
@@ -266,13 +281,17 @@ class KnowledgeGraphPage(BasePage):
         log.info(f"断言添加节点成功，定位器为：{self.ADD_NODE_SUCCESS_MESSAGE[1]}")
         return self.is_displayed(self.ADD_NODE_SUCCESS_MESSAGE)
 
-    def add_node(self, title, description):
+    def add_node(self, graph_name, title, description):
         """添加节点
 
         Args:
+            graph_name: 图谱名称
             title: 节点标题
             description: 节点描述
         """
+        # 切换到课程工作台iframe
+        self.switch_to_iframe(self.COURSE_WORKBENCH_IFRAME)
+        # 切换到知识图谱iframe
         self.switch_to_iframe(self.KNOWLEDGE_GRAPH_IFRAME)
         # 点击添加数据按钮
         self.click_add_data_button()
@@ -285,7 +304,7 @@ class KnowledgeGraphPage(BasePage):
         # 断言添加节点成功
         result = self.assert_add_node_success()
         log.info(f"添加节点结果：{result}")
-        # 切出知识图谱iframe
+        # 切回顶层文档
         self.switch_out_iframe()
         return result
 
@@ -324,6 +343,8 @@ class KnowledgeGraphPage(BasePage):
             title: 子级节点标题
             description: 子级节点描述
         """
+        # 切换到课程工作台iframe
+        self.switch_to_iframe(self.COURSE_WORKBENCH_IFRAME)
         # 切换到知识图谱iframe
         self.switch_to_iframe(self.KNOWLEDGE_GRAPH_IFRAME)
         # 鼠标悬停到节点名称
@@ -339,6 +360,6 @@ class KnowledgeGraphPage(BasePage):
         # 断言添加子级节点成功
         result = self.assert_add_node_success()
         log.info(f"添加子级节点结果：{result}")
-        # 切出知识图谱iframe
+        # 切回顶层文档
         self.switch_out_iframe()
         return result

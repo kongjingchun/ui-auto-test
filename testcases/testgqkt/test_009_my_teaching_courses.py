@@ -40,7 +40,8 @@ class TestMyTeachingCourses:
         prof_cms_user_info = GetConf().get_user_info("prof_cms")
         # 课程信息
         course_info = GetConf().get_info("course")
-
+        # 主图谱信息
+        main_graph_info = GetConf().get_info("main_graph")
         # 使用TestContextHelper封装公共操作
         helper = TestContextHelper(driver)
 
@@ -53,14 +54,34 @@ class TestMyTeachingCourses:
             result = my_teaching_courses_page.click_course(course_info['课程名称'])
             add_img_2_report(driver, "根据课程名称点击课程卡片")
             assert result is True, "根据课程名称点击课程卡片失败"
+
         with allure.step("点击知识图谱菜单栏"):
             course_workbench_page = CourseWorkbenchPage(driver)
             course_workbench_page.click_left_menu("AI垂直模型")
             result = course_workbench_page.click_left_menu("知识图谱")
             add_img_2_report(driver, "点击知识图谱菜单栏")
             assert result is True, "点击知识图谱菜单栏失败"
+
         with allure.step("新建主图谱"):
             knowledge_graph_page = KnowledgeGraphPage(driver)
-            result = knowledge_graph_page.create_main_graph(course_info['课程名称'], "课程知识图谱", "1.0", "课程知识图谱")
+            result = knowledge_graph_page.create_main_graph(main_graph_info['图谱名称'], main_graph_info['图谱描述'], main_graph_info['图谱版本号'], title='第1级标题')
             add_img_2_report(driver, "新建主图谱")
             assert result is True, "新建主图谱失败"
+
+        with allure.step("根据图谱名称点击编辑数据按钮"):
+            knowledge_graph_page = KnowledgeGraphPage(driver)
+            result = knowledge_graph_page.click_edit_data_button_by_name(main_graph_info['图谱名称'])
+            add_img_2_report(driver, "根据图谱名称点击编辑数据按钮")
+            assert result is True, "根据图谱名称点击编辑数据按钮失败"
+
+        with allure.step("添加节点"):
+            knowledge_graph_page = KnowledgeGraphPage(driver)
+            result = knowledge_graph_page.add_node(main_graph_info['图谱名称'], main_graph_info['节点1'], main_graph_info['节点1描述'])
+            add_img_2_report(driver, "添加节点")
+            assert result is True, "添加节点失败"
+
+        with allure.step("添加子级节点"):
+            knowledge_graph_page = KnowledgeGraphPage(driver)
+            result = knowledge_graph_page.add_sub_node_by_name(main_graph_info['节点1'], main_graph_info['节点1.1'], main_graph_info['节点1.1描述'])
+            add_img_2_report(driver, "添加子级节点")
+            assert result is True, "添加子级节点失败"

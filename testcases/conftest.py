@@ -22,6 +22,17 @@ os.environ.setdefault('ALLURE_LANG', 'zh-CN')
 
 def pytest_sessionstart(session):
     """pytest会话开始时执行，删除并重新创建UIreport目录"""
+    # 检查是否是真正的测试执行，而不是IDE的代码检查
+    # 通过检查命令行参数或环境变量来判断
+    # 如果只是代码检查（如pytest --collect-only），则不执行目录操作
+    try:
+        # 检查是否有--collect-only参数（只收集不执行）
+        if hasattr(session.config, 'option') and hasattr(session.config.option, 'collectonly'):
+            if session.config.option.collectonly:
+                return
+    except Exception:
+        pass
+
     uireport_path = os.path.join(get_project_path(), "UIreport")
     if os.path.exists(uireport_path):
         try:
@@ -66,6 +77,10 @@ def pytest_collection_modifyitems(config, items):
 
 def pytest_collection_finish(session):
     """pytest收集完测试用例后执行，初始化测试进度（只在主进程中执行）"""
+    # 检查是否是真正的测试执行（有测试用例要执行），而不是IDE的代码检查
+    if not hasattr(session, 'items') or len(session.items) == 0:
+        return
+
     # 只在主进程中初始化进度，避免并行执行时多个worker重复初始化
     if not hasattr(session.config, 'workerinput'):  # workerinput存在说明是worker进程
         total = len(session.items)
@@ -78,6 +93,16 @@ def pytest_sessionfinish(session, exitstatus):
     # 只在主进程中生成汇总报告，避免并行执行时多个worker重复输出
     if hasattr(session.config, 'workerinput'):  # workerinput存在说明是worker进程
         return
+
+    # 检查是否是真正的测试执行，而不是IDE的代码检查
+    # 参考pytest_sessionstart的检查方式
+    try:
+        # 检查是否有--collect-only参数（只收集不执行）
+        if hasattr(session.config, 'option') and hasattr(session.config.option, 'collectonly'):
+            if session.config.option.collectonly:
+                return
+    except Exception:
+        pass
 
     # 获取测试结果统计
     total, success, fail, _ = Process().get_result()
@@ -131,10 +156,13 @@ def pytest_sessionfinish(session, exitstatus):
     if skipped == 0 and len(skipped_nodeids) > 0:
         skipped = len(skipped_nodeids)
 
-    # 计算实际执行的用例数（总数减去跳过的）
-    executed = total - skipped
-    if executed < 0:
-        executed = 0
+    # 计算实际执行的用例数（成功数 + 失败数，这是最准确的方法）
+    executed = success + fail
+
+    # 重新计算跳过的用例数（总数 - 实际执行数，确保数据一致性）
+    skipped = total - executed
+    if skipped < 0:
+        skipped = 0
 
     # 计算成功率和失败率（分母为实际执行的用例数）
     if executed > 0:
@@ -168,25 +196,6 @@ def pytest_sessionfinish(session, exitstatus):
     log.info(f"  ❌ 执行失败:      {fail:>6} 个  |  失败率: {fail_rate:>6.2f}%")
     log.info("-" * 80)
     log.info("")
-
-    # 成功率可视化条
-    if executed > 0:
-        bar_length = 50
-        success_bar = int((success / executed) * bar_length)
-        fail_bar = int((fail / executed) * bar_length)
-        skip_bar = bar_length - success_bar - fail_bar
-
-        log.info(" " * 20 + "【执行结果可视化】" + " " * 20)
-        log.info("-" * 80)
-        bar = "█" * success_bar + "▓" * fail_bar + "░" * skip_bar
-        log.info(f"  [{bar}]")
-        log.info(f"  {'█' * success_bar} 成功 ({success}/{executed})")
-        if fail > 0:
-            log.info(f"  {'▓' * fail_bar} 失败 ({fail}/{executed})")
-        if skipped > 0:
-            log.info(f"  {'░' * skip_bar} 跳过 ({skipped}/{total})")
-        log.info("-" * 80)
-        log.info("")
 
     # 获取成功和失败的用例名称列表
     success_testcase_names = Process().get_success_testcase_names()

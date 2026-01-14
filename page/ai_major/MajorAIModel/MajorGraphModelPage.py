@@ -24,9 +24,11 @@ class MajorGraphModelPage(BasePage):
         """
         super().__init__(driver)
 
-    # ==================== 元素定位器（静态定位器）====================
     # 专业AI模型iframe
     MAJOR_AI_MODEL_IFRAME = (By.XPATH, "//iframe[@id='app-iframe-2110']")
+
+    # ==================== 专业图谱概览元素定位器 ==============================================================
+
     # 创建专业图谱按钮
     CREATE_MAJOR_GRAPH_BUTTON = (By.XPATH, "//button[./span[contains(.,'创建专业图谱')]]")
     # 创建图谱名称输入框
@@ -40,7 +42,7 @@ class MajorGraphModelPage(BasePage):
     # 关联确定按钮
     ASSOCIATE_CONFIRM_BUTTON = (By.XPATH, "//button[contains(.,'确定')]")
 
-    # ==================== 动态定位器方法（需要参数的定位器）====================
+    # ==================== 专业图谱概览动态定位器方法（需要参数的定位器）==============================================================
 
     def get_menu_locator(self, menu_name):
         """获取根据菜单名称定位菜单的定位器
@@ -126,16 +128,7 @@ class MajorGraphModelPage(BasePage):
         """
         return (By.XPATH, f"//label[contains(.,'{node_name}')]/span[1]")
 
-    # ==================== 页面操作方法 ====================
-
-    def switch_2_major_ai_model_iframe(self):
-        """切换到专业AI模型页面的iframe
-
-        Returns:
-            切换操作结果
-        """
-        log.info(f"切换到专业AI模型页面的iframe，定位器为：{self.MAJOR_AI_MODEL_IFRAME[1]}")
-        return self.switch_to_iframe(self.MAJOR_AI_MODEL_IFRAME)
+    # ==================== 专业图谱概览页面操作方法 ==============================================================  ==============================================================
 
     def click_menu_by_name(self, menu_name):
         """根据菜单名称点击菜单
@@ -147,7 +140,7 @@ class MajorGraphModelPage(BasePage):
             点击操作结果
         """
         # 切换到专业AI模型iframe
-        self.switch_2_major_ai_model_iframe()
+        self.switch_to_iframe(self.MAJOR_AI_MODEL_IFRAME)
         # 根据菜单名称点击菜单
         locator = self.get_menu_locator(menu_name)
         log.info(f"点击菜单：{menu_name}，定位器为：{locator[1]}")
@@ -156,7 +149,7 @@ class MajorGraphModelPage(BasePage):
         self.switch_out_iframe()
         return result
 
-    # ======================================= 专业图谱概览=========================================
+    # ==================== 专业图谱概览操作方法 ==============================================================
 
     def click_create_major_graph_button(self):
         """点击创建专业图谱按钮
@@ -290,7 +283,7 @@ class MajorGraphModelPage(BasePage):
             bool: True表示创建成功，False表示创建失败
         """
         # 切换到专业AI模型iframe
-        self.switch_2_major_ai_model_iframe()
+        self.switch_to_iframe(self.MAJOR_AI_MODEL_IFRAME)
         # 点击创建专业图谱按钮
         self.click_create_major_graph_button()
         # 输入图谱名称
@@ -344,4 +337,106 @@ class MajorGraphModelPage(BasePage):
         # 切出专业AI模型iframe
         self.switch_out_iframe()
         log.info(f"创建专业图谱概览结果：{result}")
+        return result
+
+    # ==================== 专业课程群图谱元素定位 ==============================================================
+    # 专业AI模型iframe
+    MAJOR_AI_MODEL_IFRAME = (By.XPATH, "//iframe[@id='app-iframe-2110']")
+    # 编辑图谱按钮
+    EDIT_GRAPH_BUTTON = (By.XPATH, "//span[contains(.,'编辑图谱')]/parent::button")
+    # 关联图谱成功提示框
+    ASSOCIATE_GRAPH_SUCCESS_MESSAGE = (By.XPATH, "//p[text()='关联图谱成功']")
+
+    # ==================== 专业课程群图谱页面操作方法 ==============================================================
+    def click_edit_graph_button(self):
+        """点击编辑图谱按钮
+
+        Returns:
+            点击操作结果
+        """
+        log.info(f"点击编辑图谱按钮，定位器为：{self.EDIT_GRAPH_BUTTON[1]}")
+        return self.click(self.EDIT_GRAPH_BUTTON)
+    # ==================== 群图谱管理元素定位 ==============================================================
+    # 关联图谱按钮
+    ASSOCIATE_GRAPH_BUTTON = (By.XPATH, "//span[contains(.,'关联图谱')]/parent::button")
+    # 确定关联按钮
+    CONFIRM_ASSOCIATE_GRAPH_BUTTON = (By.XPATH, "//span[contains(.,'确定关联')]/parent::button")
+
+    def get_graph_checkbox_locator_by_name(self, graph_name):
+        """根据图谱名称返回复选框的定位器
+
+        Args:
+            graph_name: 图谱名称
+
+        Returns:
+            tuple: 定位器元组 (By.XPATH, xpath)
+        """
+        return (By.XPATH, f"//tr[contains(.,'{graph_name}')]//span[@class='el-checkbox__inner']")
+
+    # ==================== 群图谱管理操作方法 ==============================================================
+
+    def click_associate_graph_button(self):
+        """点击关联图谱按钮
+
+        Returns:
+            点击操作结果
+        """
+        log.info(f"点击关联图谱按钮，定位器为：{self.ASSOCIATE_GRAPH_BUTTON[1]}")
+        return self.click(self.ASSOCIATE_GRAPH_BUTTON)
+
+    def click_graph_checkbox_by_name(self, graph_name):
+        """根据图谱名称点击复选框
+
+        Args:
+            graph_name: 图谱名称
+
+        Returns:
+            点击操作结果
+        """
+        locator = self.get_graph_checkbox_locator_by_name(graph_name)
+        log.info(f"根据图谱名称'{graph_name}'点击复选框，定位器为：{locator[1]}")
+        return self.click(locator)
+
+    def click_confirm_associate_graph_button(self):
+        """点击确定关联按钮
+
+        Returns:
+            点击操作结果
+        """
+        log.info(f"点击确定关联按钮，定位器为：{self.CONFIRM_ASSOCIATE_GRAPH_BUTTON[1]}")
+        return self.click(self.CONFIRM_ASSOCIATE_GRAPH_BUTTON)
+
+    def assert_associate_graph_success(self):
+        """断言关联图谱成功
+
+        Returns:
+            断言操作结果
+        """
+        log.info(f"断言关联图谱成功，定位器为：{self.ASSOCIATE_GRAPH_SUCCESS_MESSAGE[1]}")
+        return self.is_displayed(self.ASSOCIATE_GRAPH_SUCCESS_MESSAGE)
+
+    def associate_graph(self, graph_name):
+        """关联图谱
+
+        Args:
+            graph_name: 图谱名称
+
+        Returns:
+            关联操作结果
+        """
+        # 切换到专业AI模型iframe
+        self.switch_to_iframe(self.MAJOR_AI_MODEL_IFRAME)
+        # 点击编辑图谱按钮
+        self.click_edit_graph_button()
+        # 点击关联图谱按钮
+        self.click_associate_graph_button()
+        # 根据图谱名称点击复选框
+        self.click_graph_checkbox_by_name(graph_name)
+        # 点击确定关联按钮
+        self.click_confirm_associate_graph_button()
+        # 断言关联图谱成功
+        result = self.assert_associate_graph_success()
+        # 切出专业AI模型iframe
+        self.switch_out_iframe()
+        log.info(f"关联图谱结果：{result}")
         return result
