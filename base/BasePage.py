@@ -325,8 +325,32 @@ class BasePage:
 
         for attempt in range(2):
             try:
-                element = self._wait_for_element(locator, condition_type="clickable", timeout=timeout)
-                time.sleep(0.2)
+                is_headless = self._is_headless_mode()
+                element = None
+                use_js_click_fallback = False
+
+                # 尝试等待元素可点击
+                try:
+                    element = self._wait_for_element(locator, condition_type="clickable", timeout=timeout)
+                    time.sleep(0.2)
+                except TimeoutException:
+                    # 在无头模式下，如果clickable检查超时，尝试使用presence检查 + JavaScript点击
+                    if is_headless:
+                        log.warning(f"Headless模式：等待元素clickable超时，尝试使用presence检查 + JavaScript点击")
+                        try:
+                            element = self._wait_for_element(locator, condition_type="presence", timeout=timeout)
+                            use_js_click_fallback = True
+                            log.info(f"Headless模式：元素已存在于DOM中，将使用JavaScript点击")
+                        except TimeoutException:
+                            # 如果presence也超时，抛出异常
+                            raise
+                    else:
+                        # 非无头模式下，直接抛出异常
+                        raise
+
+                # 确保element不为None（类型检查）
+                if element is None:
+                    raise Exception(f"元素 {locator_expression} 定位失败：element为None")
 
                 if need_hover:
                     try:
@@ -335,22 +359,42 @@ class BasePage:
                     except Exception as hover_error:
                         log.warning(f"hover操作失败，继续尝试点击：{hover_error}")
 
-                # 滚动元素到可视区域
+                # 滚动元素到可视区域（无头模式下增加等待时间）
                 try:
+                    scroll_behavior = "smooth" if not is_headless else "auto"
                     self.driver.execute_script(
-                        "arguments[0].scrollIntoView({block: 'center', behavior: 'smooth'});",
+                        f"arguments[0].scrollIntoView({{block: 'center', behavior: '{scroll_behavior}'}});",
                         element
                     )
-                    time.sleep(0.3)
+                    # 无头模式下增加等待时间，确保滚动完成
+                    wait_time = 0.5 if is_headless else 0.3
+                    time.sleep(wait_time)
                 except Exception as scroll_error:
                     log.warning(f"滚动元素失败，继续尝试点击：{scroll_error}")
 
+                # 如果使用JavaScript点击回退，直接使用JavaScript点击
+                if use_js_click_fallback:
+                    try:
+                        log.info(f"Headless模式：使用JavaScript点击元素 {locator_expression}")
+                        self.driver.execute_script("arguments[0].click();", element)
+                        time.sleep(0.2)
+                        self.wait_for_ready_state_complete(timeout=2)
+                        log.info(f"元素 {locator_expression} JavaScript点击成功")
+                        return self if fluent else True
+                    except Exception as js_error:
+                        log.error(f"Headless模式：JavaScript点击失败：{js_error}")
+                        raise Exception(f"元素 {locator_expression} JavaScript点击失败：{js_error}")
+
                 # 尝试多种点击方式
                 click_success = False
+                # 确保element不为None（用于类型检查）
+                assert element is not None, f"元素 {locator_expression} 定位失败：element为None"
+                # 保存element的引用，避免lambda闭包问题
+                element_ref = element
                 click_methods = [
-                    ("普通点击", lambda: element.click()),
-                    ("ActionChains点击", lambda: ActionChains(self.driver).move_to_element(element).click().perform()),
-                    ("JavaScript点击", lambda: self.driver.execute_script("arguments[0].click();", element)),
+                    ("普通点击", lambda: element_ref.click()),
+                    ("ActionChains点击", lambda: ActionChains(self.driver).move_to_element(element_ref).click().perform()),
+                    ("JavaScript点击", lambda: self.driver.execute_script("arguments[0].click();", element_ref)),
                 ]
 
                 for method_name, click_func in click_methods:
