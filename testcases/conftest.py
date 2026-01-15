@@ -118,15 +118,15 @@ def pytest_sessionfinish(session, exitstatus):
 
     # 获取测试结果统计
     total, success, fail, start_time = Process().get_result()
-    
+
     # 记录结束时间（如果还没有记录）
     process_instance = Process()
     process_instance.write_end_time()
-    
+
     # 获取结束时间并计算执行耗时
     process_data = process_instance._read_json_file(process_instance.process_file)
     end_time_str = process_data.get("end_time", "")
-    
+
     # 计算执行耗时（精确到秒）
     duration_seconds = 0
     duration_str = "未知"
@@ -139,21 +139,21 @@ def pytest_sessionfinish(session, exitstatus):
             ]
             start_dt = None
             end_dt = None
-            
+
             for fmt in time_formats:
                 try:
                     start_dt = datetime.datetime.strptime(str(start_time), fmt)
                     break
                 except ValueError:
                     continue
-            
+
             for fmt in time_formats:
                 try:
                     end_dt = datetime.datetime.strptime(str(end_time_str), fmt)
                     break
                 except ValueError:
                     continue
-            
+
             if start_dt and end_dt:
                 duration = end_dt - start_dt
                 duration_seconds = int(duration.total_seconds())
@@ -161,7 +161,7 @@ def pytest_sessionfinish(session, exitstatus):
                 hours = duration_seconds // 3600
                 minutes = (duration_seconds % 3600) // 60
                 seconds = duration_seconds % 60
-                
+
                 if hours > 0:
                     duration_str = f"{hours}小时{minutes}分{seconds}秒"
                 elif minutes > 0:
@@ -434,16 +434,16 @@ def pytest_runtest_makereport(item, call):
             Process().insert_into_success_testcase_names(report.description)
         else:
             pass
-        # 本地部署时不发送钉钉消息
-        if not GetConf().is_local_deploy():
-            process = Process().get_process()  # 获取测试进度
-            webhook = GetConf().get_dingding_webhook()
-            send_ding_talk(
-                webhook,
-                "测试用例:"
-                + report.description
-                + "\n测试结果: "
-                + report.outcome
-                + "\n自动化测试进度: "
-                + process,
-            )
+        # # 本地部署时不发送钉钉消息
+        # if not GetConf().is_local_deploy():
+        #     process = Process().get_process()  # 获取测试进度
+        #     webhook = GetConf().get_dingding_webhook()
+            # send_ding_talk(
+            #     webhook,
+            #     "测试用例:"
+            #     + report.description
+            #     + "\n测试结果: "
+            #     + report.outcome
+            #     + "\n自动化测试进度: "
+            #     + process,
+            # )

@@ -269,7 +269,7 @@ class MajorManagePage(BasePage):
         log.info(f"判断创建成功提示框是否出现，定位器为：{self.CREATE_SUCCESS_ALERT[1]}")
         return self.is_displayed(self.CREATE_SUCCESS_ALERT)
 
-    def create_major(self, major_info=None):
+    def create_major(self, major_info):
         """创建专业
 
         Args:
@@ -285,32 +285,34 @@ class MajorManagePage(BasePage):
         # 点击新建专业按钮
         self.click_new_major_button()
 
-        # 从上到下设置新建信息
-        # 1. 专业名称
-        self.input_new_major_input("名称", major_info['专业名称'])
+        # 从下到上依次设置新建信息
 
-        # 2. 学校专业代码
-        self.input_new_major_input("学校专业代码", major_info['学校专业代码'])
+        # 1. 专业特色标签（循环选择多个特色标签）
+        for feature in major_info['专业特色标签']:
+            self.click_new_major_feature_checkbox(feature)
 
-        # 3. 国家专业代码
-        self.input_new_major_input("国家专业代码", major_info['国家专业代码'])
+        # 2. 专业建设层次
+        self.click_new_major_build_level_radio(major_info['专业建设层次'])
+
+        # 3. 专业负责人
+        self.click_new_major_belong_prof_dropdown()
+        self.click_new_major_belong_prof_dropdown_option(major_info['专业负责人'])
+        # 关闭下拉框
+        self.click_close_dropdown()
 
         # 4. 所属院系
         self.click_new_major_belong_dep_dropdown()
         sleep(0.5)
         self.click_new_major_belong_dep_dropdown_option(major_info['所属院系'])
 
-        # 5. 专业负责人
-        self.click_new_major_belong_prof_dropdown()
-        self.click_new_major_belong_prof_dropdown_option(major_info['专业负责人'])
-        # 关闭下拉框
-        self.click_close_dropdown()
-        # 6. 专业建设层次
-        self.click_new_major_build_level_radio(major_info['专业建设层次'])
+        # 5. 国家专业代码
+        self.input_new_major_input("国家专业代码", major_info['国家专业代码'])
 
-        # 7. 专业特色标签（循环选择多个特色标签）
-        for feature in major_info['专业特色标签']:
-            self.click_new_major_feature_checkbox(feature)
+        # 6. 学校专业代码
+        self.input_new_major_input("学校专业代码", major_info['学校专业代码'])
+
+        # 7. 专业名称
+        self.input_new_major_input("名称", major_info['专业名称'])
 
         # 点击确定按钮
         self.click_new_major_confirm_button()

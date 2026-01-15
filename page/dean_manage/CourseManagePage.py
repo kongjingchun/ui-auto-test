@@ -299,30 +299,30 @@ class CourseManagePage(BasePage):
         # 点击新建课程按钮
         self.click_new_course_button()
 
-        # 从上到下设置新建信息
-        # 1. 课程名称
-        self.input_new_course_input("名称", course_info['课程名称'])
-
-        # 2. 课程代码
-        self.input_new_course_input("代码", course_info['课程代码'])
-
-        # 3. 课程描述（如果存在则输入）
-        if course_info.get('课程描述'):
-            self.input_new_course_input("描述", course_info['课程描述'])
-
-        # 4. 所属学院
-        self.click_new_course_dept_dropdown()
-        self.click_new_course_dept_dropdown_option(course_info['所属学院'])
-
-        # 5. 课程负责人
-        self.click_new_course_responsible_person_dropdown()
-        self.click_new_course_responsible_person_dropdown_option(course_info['课程负责人'])
+        # 从下到上设置新建信息
+        # 7. 课程图片不上传，跳过
 
         # 6. 是否一流课程（如果为true，则打开开关）
         if course_info.get('是否一流课程', False):
             self.click_new_course_first_class_switch()
 
-        # 7. 课程图片不上传，跳过
+        # 5. 课程负责人
+        self.click_new_course_responsible_person_dropdown()
+        self.click_new_course_responsible_person_dropdown_option(course_info['课程负责人'])
+
+        # 4. 所属学院
+        self.click_new_course_dept_dropdown()
+        self.click_new_course_dept_dropdown_option(course_info['所属学院'])
+
+        # 3. 课程描述（如果存在则输入）
+        if course_info.get('课程描述'):
+            self.input_new_course_input("描述", course_info['课程描述'])
+
+        # 2. 课程代码
+        self.input_new_course_input("代码", course_info['课程代码'])
+
+        # 1. 课程名称
+        self.input_new_course_input("名称", course_info['课程名称'])
 
         # 点击确定按钮
         self.click_new_course_confirm_button()
