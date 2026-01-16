@@ -49,6 +49,8 @@ class CourseManagePage(BasePage):
     NEW_COURSE_DEPT_DROPDOWN = (By.XPATH, "//div[@aria-label='新建课程']//span[text()='请选择学院']/parent::div")
     # 课程负责人下拉框
     NEW_COURSE_RESPONSIBLE_PERSON_DROPDOWN = (By.XPATH, "//div[@aria-label='新建课程']//span[text()='请选择课程负责人']/parent::div")
+    # 课程负责人下拉框关闭
+    NEW_COURSE_RESPONSIBLE_PERSON_DROPDOWN_CLOSE = (By.XPATH, "//div[@aria-label='新建课程']//label[text()='课程负责人']/following-sibling::div//div[@class='el-select__suffix']")
 
     # ==================== 动态定位器方法（需要参数的定位器）====================
 
@@ -192,6 +194,18 @@ class CourseManagePage(BasePage):
         sleep(0.5)
         return result
 
+    def click_new_course_responsible_person_dropdown_close(self):
+        """点击课程负责人下拉框关闭
+
+        Returns:
+            点击操作结果
+        """
+        log.info(f"点击课程负责人下拉框关闭，定位器为：{self.NEW_COURSE_RESPONSIBLE_PERSON_DROPDOWN_CLOSE[1]}")
+        result = self.click(self.NEW_COURSE_RESPONSIBLE_PERSON_DROPDOWN_CLOSE)
+        # 点击后等待下拉菜单关闭
+        sleep(0.5)
+        return result
+
     def click_new_course_first_class_switch(self):
         """点击是否一流课程开关
 
@@ -299,30 +313,31 @@ class CourseManagePage(BasePage):
         # 点击新建课程按钮
         self.click_new_course_button()
 
-        # 从下到上设置新建信息
-        # 7. 课程图片不上传，跳过
+        # 从1到7从上到下设置新建信息
+        # 1. 课程名称
+        self.input_new_course_input("名称", course_info['课程名称'])
 
-        # 6. 是否一流课程（如果为true，则打开开关）
-        if course_info.get('是否一流课程', False):
-            self.click_new_course_first_class_switch()
-
-        # 5. 课程负责人
-        self.click_new_course_responsible_person_dropdown()
-        self.click_new_course_responsible_person_dropdown_option(course_info['课程负责人'])
-
-        # 4. 所属学院
-        self.click_new_course_dept_dropdown()
-        self.click_new_course_dept_dropdown_option(course_info['所属学院'])
+        # 2. 课程代码
+        self.input_new_course_input("代码", course_info['课程代码'])
 
         # 3. 课程描述（如果存在则输入）
         if course_info.get('课程描述'):
             self.input_new_course_input("描述", course_info['课程描述'])
 
-        # 2. 课程代码
-        self.input_new_course_input("代码", course_info['课程代码'])
+        # 4. 所属学院
+        self.click_new_course_dept_dropdown()
+        self.click_new_course_dept_dropdown_option(course_info['所属学院'])
 
-        # 1. 课程名称
-        self.input_new_course_input("名称", course_info['课程名称'])
+        # 5. 是否一流课程（如果为true，则打开开关）
+        if course_info.get('是否一流课程', False):
+            self.click_new_course_first_class_switch()
+
+        # 6. 课程负责人
+        self.click_new_course_responsible_person_dropdown()
+        self.click_new_course_responsible_person_dropdown_option(course_info['课程负责人'])
+        self.click_new_course_responsible_person_dropdown_close()
+
+        # 7. 课程图片不上传，跳过
 
         # 点击确定按钮
         self.click_new_course_confirm_button()

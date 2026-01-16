@@ -355,16 +355,7 @@ def pytest_runtest_setup(item):
 
 def pytest_runtest_teardown(item, nextitem):
     """测试用例执行后调用，输出测试用例结束分界线"""
-    # 只获取文档字符串的第一行（简短描述），去掉 Args 和 Returns 部分
-    if item.function.__doc__:
-        test_name = item.function.__doc__.strip().split('\n')[0]
-    else:
-        test_name = item.name
-    # 获取测试结果（通过检查是否有异常）
-    result_status = "执行完成"
-    log.info("=" * 80)
-    log.info(f"{'=' * 20} 测试用例{result_status}: {test_name} {'=' * 20}")
-    log.info("=" * 80)
+    pass
 
 
 @pytest.fixture(scope="function")
