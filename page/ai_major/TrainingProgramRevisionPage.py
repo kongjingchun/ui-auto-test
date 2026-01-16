@@ -688,6 +688,7 @@ class TrainingProgramRevisionPage(BasePage):
         self.click_add_course_button()
         # 输入课程搜索关键词
         self.input_course_search(course_name)
+        sleep(1)
         # 点击课程复选框
         self.click_course_checkbox_by_name(course_name)
         # 点击确认添加课程按钮

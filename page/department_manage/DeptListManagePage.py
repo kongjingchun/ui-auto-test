@@ -3,6 +3,7 @@
 # @Author: 孔敬淳
 # @Date  : 2025/12/29/16:27
 # @Desc  : 院系列表管理页面对象类，封装院系列表管理相关的页面操作方法
+from time import sleep
 from selenium.webdriver.common.by import By
 
 from base.BasePage import BasePage
@@ -231,6 +232,7 @@ class DeptListManagePage(BasePage):
         self.switch_2_dept_manage_iframe()
         # 输入搜索关键词
         self.input_search_keyword(dept_code)
+        sleep(1)
         # 鼠标悬停编辑按钮
         self.hover_edit_button(dept_code)
         # 点击编辑按钮

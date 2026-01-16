@@ -177,6 +177,7 @@ class MajorPortalManagePage(BasePage):
         self.input_search_keyword(major_name)
         # 点击搜索按钮
         self.click_search_button()
+        sleep(1)
         # 根据专业名称点击编辑按钮
         result = self.click_edit_button_by_major_name(major_name)
         # 切出专业门户管理iframe

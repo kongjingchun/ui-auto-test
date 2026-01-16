@@ -3,6 +3,7 @@
 # @Author: 孔敬淳
 # @Date  : 2025/12/26/14:11
 # @Desc  : CMS用户管理页面对象类，封装CMS用户管理相关的页面操作方法
+from time import sleep
 import requests
 from selenium.webdriver.common.by import By
 
@@ -160,6 +161,7 @@ class CmsUserManagePage(BasePage):
         log.info(f"搜索用户:{username}")
         self.switch_to_iframe(self.CMS_USER_MANAGE_IFRAME)
         self.input_search_value(username)
+        sleep(1)
         # 使用动态定位器方法
         user_id_locator = self.get_user_id_locator(username)
         log.info(f"获取用户ID，xpath定位为：{user_id_locator[1]}")

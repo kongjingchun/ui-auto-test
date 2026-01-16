@@ -365,6 +365,7 @@ class CourseManagePage(BasePage):
         self.switch_to_iframe(self.COURSE_MANAGE_IFRAME)
         # 输入搜索关键词
         self.input_search_keyword(course_code)
+        sleep(1)
         # 鼠标悬停编辑按钮
         self.hover_edit_button(course_code)
         # 点击编辑按钮

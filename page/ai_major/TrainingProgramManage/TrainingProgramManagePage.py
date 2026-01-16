@@ -375,6 +375,7 @@ class TrainingProgramManagePage(BasePage):
         self.switch_to_iframe(self.TRAINING_PROGRAM_MANAGE_IFRAME)
         # 输入搜索关键词
         self.input_search_keyword(program_name)
+        sleep(1)
         # 点击更多按钮
         self.click_more_button_by_program_name(program_name)
         # 点击编辑属性按钮

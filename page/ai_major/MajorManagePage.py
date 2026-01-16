@@ -405,6 +405,7 @@ class MajorManagePage(BasePage):
         self.switch_to_iframe(self.MAJOR_MANAGE_IFRAME)
         # 输入搜索关键词
         self.input_search_keyword(major_name)
+        sleep(1)
         # 鼠标悬停编辑按钮
         self.hover_edit_button(major_name)
         # 点击编辑按钮

@@ -360,6 +360,7 @@ class AdminClassManagePage(BasePage):
         self.input_search_keyword(admin_class_name)
         # 点击搜索按钮
         self.click_search_button()
+        sleep(1)
         # 根据行政班名称点击操作按钮
         self.click_operation_button_by_admin_class_name(admin_class_name)
         # 点击删除下拉选项

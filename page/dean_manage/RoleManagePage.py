@@ -4,6 +4,7 @@
 # @Date  : 2025/12/31
 # @Desc  : 角色管理页面对象类，封装角色管理相关的页面操作方法
 
+from time import sleep
 from selenium.webdriver.common.by import By
 
 from base.BasePage import BasePage
@@ -142,6 +143,7 @@ class RoleManagePage(BasePage):
         self.click_assign_role_button(role_name)
         # 输入用户名称进行搜索
         self.input_user_search(user_name)
+        sleep(1)
         # 勾选用户复选框
         self.click_user_checkbox(user_name)
         # 点击分配角色确认按钮

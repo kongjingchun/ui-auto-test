@@ -253,12 +253,20 @@ class UserManagePage(BasePage):
         Returns:
             bool: True表示绑定成功，False表示失败
         """
+        # 切换到iframe
         self.switch_to_iframe(self.USER_MANAGE_IFRAME)
+        # 输入工号进行搜索
         self.input_search_input("工号", user)
+        sleep(1)
+        # 点击用户绑定按钮
         self.click_user_bind_button(user)
+        # 输入用户绑定ID
         self.input_user_bind_input(user_id)
+        # 点击确认绑定按钮
         self.click_user_bind_confirm_button()
+        # 判断绑定成功提示框是否出现
         result = self.is_user_bind_success_alert_display()
+        # 切出iframe
         self.switch_out_iframe()
         log.info("绑定用户结果：" + str(result))
         return result
@@ -329,6 +337,7 @@ class UserManagePage(BasePage):
         self.switch_to_iframe(self.USER_MANAGE_IFRAME)
         # 输入工号搜索
         self.input_search_input("工号", code)
+        sleep(1)
         # 点击编辑按钮
         self.click_edit_button_by_code(code)
         # 点击删除用户按钮
