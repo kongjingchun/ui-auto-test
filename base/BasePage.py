@@ -61,6 +61,8 @@ class BasePage:
 
     # 类属性：基础URL
     BASE_URL = GetConf().get_url()
+    # 类属性：缓存 headless 模式状态，避免重复读取配置
+    _headless_mode_cache = None
 
     def __init__(self, driver):
         """
@@ -89,22 +91,23 @@ class BasePage:
 
     # ==================== 配置相关方法 ====================
 
-    @staticmethod
-    def _is_headless_mode():
+    @classmethod
+    def _is_headless_mode(cls):
         """
-        检查是否使用Headless模式
+        检查是否使用Headless模式（带缓存机制，避免重复读取配置）
 
         Returns:
             bool: True表示使用Headless模式，False表示使用有界面模式
         """
-        try:
-            deploy_config = GetConf().get_info("部署环境")
-            is_headless = deploy_config.get("是否Headless模式", False) if deploy_config else False
-            return is_headless
-        except Exception:
-            # 如果读取配置失败，默认根据操作系统判断
-            import sys
-            return sys.platform.startswith("linux")
+        if cls._headless_mode_cache is None:
+            try:
+                deploy_config = GetConf().get_info("部署环境")
+                cls._headless_mode_cache = deploy_config.get("是否Headless模式", False) if deploy_config else False
+            except Exception:
+                # 如果读取配置失败，默认根据操作系统判断
+                import sys
+                cls._headless_mode_cache = sys.platform.startswith("linux")
+        return cls._headless_mode_cache
 
     def _wait_for_headless_render(self, wait_time=0.3):
         """
@@ -141,7 +144,7 @@ class BasePage:
 
     def wait_for_ready_state_complete(self, timeout=10):
         """
-        等待页面完全加载
+        等待页面完全加载（优化：减少轮询次数，提高响应速度）
 
         Args:
             timeout: 超时时间(秒)，默认10秒
@@ -152,12 +155,14 @@ class BasePage:
         Raises:
             Exception: 如果页面在超时时间内未完全加载
         """
-        start_ms = time.time() * 1000
-        stop_ms = start_ms + (timeout * 1000)
+        start_time = time.time()
+        check_interval = 0.05  # 减少轮询间隔，提高响应速度
 
-        for _ in range(int(timeout * 10)):
+        while time.time() - start_time < timeout:
             try:
                 ready_state = self.driver.execute_script("return document.readyState")
+                if ready_state == "complete":
+                    return True
             except InvalidSessionIdException:
                 log.error("浏览器会话已关闭，无法等待页面加载完成")
                 raise InvalidSessionIdException("浏览器会话已关闭，无法继续操作")
@@ -165,17 +170,10 @@ class BasePage:
                 if "invalid session id" in str(e).lower() or "session deleted" in str(e).lower():
                     log.error("浏览器会话已关闭，无法等待页面加载完成")
                     raise InvalidSessionIdException("浏览器会话已关闭，无法继续操作")
-                time.sleep(0.03)
-                return True
+                # 其他 WebDriverException 可能表示页面正在加载，继续等待
+                pass
 
-            if ready_state == "complete":
-                time.sleep(0.01)
-                return True
-            else:
-                now_ms = time.time() * 1000
-                if now_ms >= stop_ms:
-                    break
-                time.sleep(0.1)
+            time.sleep(check_interval)
 
         raise Exception(f"打开网页时，页面元素在{timeout}秒后仍然没有完全加载完")
 
@@ -225,7 +223,7 @@ class BasePage:
 
     def find_element(self, locator, timeout=10, must_be_visible=False):
         """
-        查找单个元素（Selenium 官方标准方法）
+        查找单个元素（Selenium 官方标准方法，优化：减少不必要的等待）
 
         Args:
             locator: 定位器元组 (By.ID, "element_id") 或 (By.XPATH, "xpath")
@@ -238,8 +236,9 @@ class BasePage:
         Raises:
             ElementNotVisibleException: 如果元素定位失败
         """
-        self.wait_for_ready_state_complete(timeout=5)
-        self._wait_for_headless_render(wait_time=0.2)
+        # 只在必要时等待页面加载（减少等待时间）
+        self.wait_for_ready_state_complete(timeout=3)
+        self._wait_for_headless_render(wait_time=0.1)  # 减少 headless 等待时间
 
         try:
             if must_be_visible:
@@ -258,7 +257,7 @@ class BasePage:
 
     def find_elements(self, locator, timeout=10):
         """
-        查找多个元素
+        查找多个元素（优化：减少等待时间）
 
         Args:
             locator: 定位器元组
@@ -267,13 +266,13 @@ class BasePage:
         Returns:
             list: 元素列表
         """
-        self.wait_for_ready_state_complete(timeout=5)
+        self.wait_for_ready_state_complete(timeout=3)
         locate_type, locator_expression = locator
         return self.driver.find_elements(locate_type, locator_expression)
 
     def wait_for_element_to_disappear(self, locator, timeout=10):
         """
-        等待元素消失
+        等待元素消失（优化：减少等待时间）
 
         Args:
             locator: 定位器元组
@@ -285,7 +284,7 @@ class BasePage:
         Raises:
             Exception: 如果元素在超时时间内未消失
         """
-        self.wait_for_ready_state_complete(timeout=5)
+        self.wait_for_ready_state_complete(timeout=3)
         locate_type, locator_expression = locator
 
         try:
@@ -317,8 +316,8 @@ class BasePage:
         Raises:
             Exception: 如果点击失败（当fluent=True时）
         """
-        self.wait_for_ready_state_complete(timeout=5)
-        self._wait_for_headless_render(wait_time=0.3)
+        self.wait_for_ready_state_complete(timeout=3)  # 减少等待时间
+        self._wait_for_headless_render(wait_time=0.2)  # 减少 headless 等待时间
 
         locate_type, locator_expression = locator
         log.info(f"准备点击元素：{locator_expression}，定位方式：{locate_type}")
@@ -332,7 +331,7 @@ class BasePage:
                 # 尝试等待元素可点击
                 try:
                     element = self._wait_for_element(locator, condition_type="clickable", timeout=timeout)
-                    time.sleep(0.2)
+                    time.sleep(0.1)  # 减少等待时间
                 except TimeoutException:
                     # 在无头模式下，如果clickable检查超时，尝试使用presence检查 + JavaScript点击
                     if is_headless:
@@ -342,13 +341,10 @@ class BasePage:
                             use_js_click_fallback = True
                             log.info(f"Headless模式：元素已存在于DOM中，将使用JavaScript点击")
                         except TimeoutException:
-                            # 如果presence也超时，抛出异常
                             raise
                     else:
-                        # 非无头模式下，直接抛出异常
                         raise
 
-                # 确保element不为None（类型检查）
                 if element is None:
                     raise Exception(f"元素 {locator_expression} 定位失败：element为None")
 
@@ -359,15 +355,15 @@ class BasePage:
                     except Exception as hover_error:
                         log.warning(f"hover操作失败，继续尝试点击：{hover_error}")
 
-                # 滚动元素到可视区域（无头模式下增加等待时间）
+                # 滚动元素到可视区域（优化：减少等待时间）
                 try:
                     scroll_behavior = "smooth" if not is_headless else "auto"
                     self.driver.execute_script(
                         f"arguments[0].scrollIntoView({{block: 'center', behavior: '{scroll_behavior}'}});",
                         element
                     )
-                    # 无头模式下增加等待时间，确保滚动完成
-                    wait_time = 0.5 if is_headless else 0.3
+                    # 减少等待时间
+                    wait_time = 0.2 if is_headless else 0.15
                     time.sleep(wait_time)
                 except Exception as scroll_error:
                     log.warning(f"滚动元素失败，继续尝试点击：{scroll_error}")
@@ -377,19 +373,15 @@ class BasePage:
                     try:
                         log.info(f"Headless模式：使用JavaScript点击元素 {locator_expression}")
                         self.driver.execute_script("arguments[0].click();", element)
-                        time.sleep(0.2)
-                        self.wait_for_ready_state_complete(timeout=2)
+                        time.sleep(0.1)  # 减少等待时间
+                        self.wait_for_ready_state_complete(timeout=1)  # 减少等待时间
                         log.info(f"元素 {locator_expression} JavaScript点击成功")
                         return self if fluent else True
                     except Exception as js_error:
                         log.error(f"Headless模式：JavaScript点击失败：{js_error}")
                         raise Exception(f"元素 {locator_expression} JavaScript点击失败：{js_error}")
 
-                # 尝试多种点击方式
-                click_success = False
-                # 确保element不为None（用于类型检查）
-                assert element is not None, f"元素 {locator_expression} 定位失败：element为None"
-                # 保存element的引用，避免lambda闭包问题
+                # 尝试多种点击方式（优化：减少日志输出）
                 element_ref = element
                 click_methods = [
                     ("普通点击", lambda: element_ref.click()),
@@ -399,31 +391,32 @@ class BasePage:
 
                 for method_name, click_func in click_methods:
                     try:
-                        log.info(f"尝试使用{method_name}点击元素 {locator_expression}")
                         click_func()
-                        time.sleep(0.1)
-                        click_success = True
+                        time.sleep(0.05)  # 减少等待时间
                         log.info(f"{method_name}成功")
                         break
                     except Exception as click_error:
                         error_msg = str(click_error).lower()
-                        if method_name == click_methods[-1][0]:
+                        is_last_method = method_name == click_methods[-1][0]
+                        if is_last_method:
                             log.warning(f"{method_name}失败：{click_error}")
+
                         if any(keyword in error_msg for keyword in [
                             "click intercepted", "not clickable", "element not interactable",
                             "element click intercepted", "is not clickable"
                         ]):
-                            log.warning(f"{method_name}失败（元素被遮挡或不可点击），尝试下一种方法")
+                            if not is_last_method:
+                                log.warning(f"{method_name}失败（元素被遮挡或不可点击），尝试下一种方法")
                             continue
                         else:
-                            log.warning(f"{method_name}失败：{click_error}，尝试下一种方法")
+                            if not is_last_method:
+                                log.warning(f"{method_name}失败：{click_error}，尝试下一种方法")
                             continue
-
-                if not click_success:
+                else:
                     raise Exception("所有点击方式都失败了")
 
-                self.wait_for_ready_state_complete(timeout=2)
-                time.sleep(0.2)
+                self.wait_for_ready_state_complete(timeout=1)  # 减少等待时间
+                time.sleep(0.1)  # 减少等待时间
 
                 log.info(f"元素 {locator_expression} 点击成功")
                 return self if fluent else True
@@ -559,7 +552,7 @@ class BasePage:
                             self.wait_for_ready_state_complete(timeout=5)
                             self.driver.execute_script("arguments[0].click();", element)
                             time.sleep(0.1)
-                            # 使用send_keys输入值
+                            # 使用send_keys输入值（关键：某些输入框需要键盘事件）
                             element.send_keys(fill_value)
                         except Exception:
                             pass  # click事件触发失败不影响后续操作
@@ -605,7 +598,7 @@ class BasePage:
 
     def hover(self, locator, timeout=10):
         """
-        鼠标悬停到指定元素
+        鼠标悬停到指定元素（优化：减少等待时间）
 
         Args:
             locator: 定位器元组
@@ -614,8 +607,8 @@ class BasePage:
         Returns:
             self: 返回自身，支持链式调用
         """
-        self.wait_for_ready_state_complete(timeout=5)
-        self._wait_for_headless_render(wait_time=0.3)
+        self.wait_for_ready_state_complete(timeout=3)
+        self._wait_for_headless_render(wait_time=0.2)
 
         _, locator_expression = locator
         log.info(f"鼠标悬停到元素 {locator_expression}")
@@ -625,12 +618,12 @@ class BasePage:
 
         actions = ActionChains(self.driver)
         actions.move_to_element(element).perform()
-        time.sleep(0.5)
+        time.sleep(0.2)  # 减少等待时间
         return self
 
     def double_click(self, locator, timeout=10):
         """
-        双击元素
+        双击元素（优化：减少等待时间）
 
         Args:
             locator: 定位器元组
@@ -639,8 +632,8 @@ class BasePage:
         Returns:
             self: 返回自身，支持链式调用
         """
-        self.wait_for_ready_state_complete(timeout=5)
-        self._wait_for_headless_render(wait_time=0.3)
+        self.wait_for_ready_state_complete(timeout=3)
+        self._wait_for_headless_render(wait_time=0.2)
 
         element = self._wait_for_element(locator, condition_type="clickable", timeout=timeout)
         actions = ActionChains(self.driver)
@@ -651,7 +644,7 @@ class BasePage:
 
     def get_text(self, locator, timeout=10):
         """
-        获取元素的文本内容（Selenium 官方标准方法）
+        获取元素的文本内容（Selenium 官方标准方法，优化：减少等待时间）
 
         Args:
             locator: 定位器元组
@@ -660,7 +653,7 @@ class BasePage:
         Returns:
             str: 元素的文本内容
         """
-        self.wait_for_ready_state_complete(timeout=5)
+        self.wait_for_ready_state_complete(timeout=3)
         element = self.find_element(locator, timeout=timeout)
         text = element.text.strip()
         _, locator_expression = locator
@@ -669,7 +662,7 @@ class BasePage:
 
     def get_attribute(self, locator, attribute_name, timeout=10):
         """
-        获取元素的指定属性值（Selenium 官方标准方法）
+        获取元素的指定属性值（Selenium 官方标准方法，优化：减少等待时间）
 
         Args:
             locator: 定位器元组
@@ -679,7 +672,7 @@ class BasePage:
         Returns:
             str: 属性值
         """
-        self.wait_for_ready_state_complete(timeout=5)
+        self.wait_for_ready_state_complete(timeout=3)
         element = self.find_element(locator, timeout=timeout)
         attr_value = element.get_attribute(attribute_name)
         _, locator_expression = locator
@@ -701,7 +694,7 @@ class BasePage:
 
     def is_displayed(self, locator, timeout=5):
         """
-        检查元素是否显示（Selenium 官方标准方法）
+        检查元素是否显示（Selenium 官方标准方法，优化：减少等待时间）
 
         Args:
             locator: 定位器元组
@@ -710,7 +703,7 @@ class BasePage:
         Returns:
             bool: 元素存在且可见返回True，否则返回False
         """
-        self.wait_for_ready_state_complete(timeout=5)
+        self.wait_for_ready_state_complete(timeout=3)
         try:
             element = self.find_element(locator, timeout=timeout, must_be_visible=True)
             return element is not None
@@ -734,12 +727,12 @@ class BasePage:
         self.driver.get(full_url)
 
         if wait_for_load:
-            page_timeout = 15 if self._is_headless_mode() else 10
+            page_timeout = 12 if self._is_headless_mode() else 8  # 优化：减少等待时间
             self.wait_for_ready_state_complete(timeout=page_timeout)
 
             if self._is_headless_mode():
-                time.sleep(1)
-                log.info("Headless模式：页面跳转后额外等待1秒，确保元素完全渲染")
+                time.sleep(0.5)  # 优化：减少等待时间
+                log.info("Headless模式：页面跳转后额外等待0.5秒，确保元素完全渲染")
 
         return self
 
@@ -763,42 +756,42 @@ class BasePage:
 
     def refresh(self):
         """
-        刷新当前页面
+        刷新当前页面（优化：减少等待时间）
 
         Returns:
             self: 返回自身，支持链式调用
         """
         self.driver.refresh()
-        self.wait_for_ready_state_complete(timeout=5)
+        self.wait_for_ready_state_complete(timeout=3)
         return self
 
     def back(self):
         """
-        浏览器后退
+        浏览器后退（优化：减少等待时间）
 
         Returns:
             self: 返回自身，支持链式调用
         """
         self.driver.back()
-        self.wait_for_ready_state_complete(timeout=5)
+        self.wait_for_ready_state_complete(timeout=3)
         return self
 
     def forward(self):
         """
-        浏览器前进
+        浏览器前进（优化：减少等待时间）
 
         Returns:
             self: 返回自身，支持链式调用
         """
         self.driver.forward()
-        self.wait_for_ready_state_complete(timeout=5)
+        self.wait_for_ready_state_complete(timeout=3)
         return self
 
     # ==================== iframe 操作 ====================
 
     def switch_to_iframe(self, locator, timeout=10):
         """
-        切换到iframe
+        切换到iframe（优化：减少等待时间）
 
         Args:
             locator: iframe定位器元组
@@ -811,15 +804,15 @@ class BasePage:
             Exception: 如果切换到iframe失败
         """
         try:
-            self.wait_for_ready_state_complete(timeout=5)
+            self.wait_for_ready_state_complete(timeout=3)
             _, locator_expression = locator
             log.info(f"切换到iframe：{locator_expression}")
 
             iframe = self.find_element(locator, timeout=timeout)
             self.driver.switch_to.frame(iframe)
 
-            self.wait_for_ready_state_complete(timeout=5)
-            self._wait_for_headless_render(wait_time=0.3)
+            self.wait_for_ready_state_complete(timeout=3)
+            self._wait_for_headless_render(wait_time=0.2)
 
             log.info(f"成功切换到iframe：{locator_expression}")
             return self
@@ -832,7 +825,7 @@ class BasePage:
 
     def switch_out_iframe(self, to_root=True):
         """
-        从iframe切回主文档
+        从iframe切回主文档（优化：减少等待时间）
 
         Args:
             to_root: True切回顶层文档，False切回上一层
@@ -840,7 +833,7 @@ class BasePage:
         Returns:
             self: 返回自身，支持链式调用
         """
-        self.wait_for_ready_state_complete(timeout=5)
+        self.wait_for_ready_state_complete(timeout=3)
         log.info("从iframe切回主文档")
         if to_root:
             self.driver.switch_to.default_content()
@@ -852,19 +845,19 @@ class BasePage:
 
     def switch_to_new_window(self):
         """
-        切换到最新打开的窗口
+        切换到最新打开的窗口（优化：减少等待时间）
 
         Returns:
             self: 返回自身，支持链式调用
         """
-        self.wait_for_ready_state_complete(timeout=5)
+        self.wait_for_ready_state_complete(timeout=3)
         window_handles = self.driver.window_handles
         self.driver.switch_to.window(window_handles[-1])
         return self
 
     def close_current_window(self, switch_to_first=True):
         """
-        关闭当前窗口
+        关闭当前窗口（优化：减少等待时间）
 
         Args:
             switch_to_first: 关闭后是否切换到第一个窗口，True切换到第一个窗口，False切换到上一个窗口
@@ -872,7 +865,7 @@ class BasePage:
         Returns:
             bool: True成功，False失败
         """
-        self.wait_for_ready_state_complete(timeout=5)
+        self.wait_for_ready_state_complete(timeout=3)
         try:
             current_handle = self.driver.current_window_handle
             all_handles = self.driver.window_handles
@@ -903,7 +896,7 @@ class BasePage:
 
     def upload_file(self, locator, file_path):
         """
-        上传文件
+        上传文件（优化：减少等待时间）
 
         Args:
             locator: 文件输入框定位器元组
@@ -912,7 +905,7 @@ class BasePage:
         Returns:
             self: 返回自身，支持链式调用
         """
-        self.wait_for_ready_state_complete(timeout=5)
+        self.wait_for_ready_state_complete(timeout=3)
         element = self.find_element(locator)
         element.send_keys(file_path)
         return self
@@ -921,7 +914,7 @@ class BasePage:
 
     def page_contains_text(self, text, case_sensitive=False):
         """
-        判断当前页面是否包含指定文字
+        判断当前页面是否包含指定文字（优化：减少等待时间）
 
         Args:
             text: 要查找的文字
@@ -930,7 +923,7 @@ class BasePage:
         Returns:
             bool: True表示页面包含该文字，False表示不包含
         """
-        self.wait_for_ready_state_complete(timeout=5)
+        self.wait_for_ready_state_complete(timeout=3)
         try:
             page_source = self.driver.page_source
 
@@ -949,7 +942,7 @@ class BasePage:
 
     def scroll_to_element(self, locator):
         """
-        滚动页面至元素可见
+        滚动页面至元素可见（优化：减少等待时间）
 
         Args:
             locator: 定位器元组
@@ -957,29 +950,32 @@ class BasePage:
         Returns:
             self: 返回自身，支持链式调用
         """
-        self.wait_for_ready_state_complete(timeout=5)
+        self.wait_for_ready_state_complete(timeout=3)
         element = self.find_element(locator)
         self.driver.execute_script("arguments[0].scrollIntoView()", element)
+        time.sleep(0.1)  # 确保滚动完成
         return self
 
     def scroll_to_top(self):
         """
-        滚动到页面顶部
+        滚动到页面顶部（优化：减少等待时间）
 
         Returns:
             self: 返回自身，支持链式调用
         """
         self.driver.execute_script("window.scrollTo(0, 0);")
+        time.sleep(0.1)  # 确保滚动完成
         return self
 
     def scroll_to_bottom(self):
         """
-        滚动到页面底部
+        滚动到页面底部（优化：减少等待时间）
 
         Returns:
             self: 返回自身，支持链式调用
         """
         self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        time.sleep(0.1)  # 确保滚动完成
         return self
 
     # ==================== 截图操作 ====================
@@ -1006,7 +1002,7 @@ class BasePage:
 
     def element_screenshot(self, locator, file_path=None):
         """
-        对指定元素截图
+        对指定元素截图（优化：减少等待时间）
 
         Args:
             locator: 定位器元组
@@ -1015,7 +1011,7 @@ class BasePage:
         Returns:
             str: 截图文件路径
         """
-        self.wait_for_ready_state_complete(timeout=5)
+        self.wait_for_ready_state_complete(timeout=3)
         element = self.find_element(locator)
 
         if file_path is None:
