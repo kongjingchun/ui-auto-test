@@ -7,10 +7,11 @@
 from selenium.webdriver.common.by import By
 
 from base.BasePage import BasePage
+from page.course_workbench.CourseWorkbenchPage import CourseWorkbenchPage
 from logs.log import log
 
 
-class KnowledgeGraphPage(BasePage):
+class KnowledgeGraphPage(CourseWorkbenchPage, BasePage):
     """知识图谱页面类
 
     继承BasePage类，提供知识图谱页面元素操作方法
@@ -26,8 +27,6 @@ class KnowledgeGraphPage(BasePage):
         super().__init__(driver)
 
     # ==================== 知识图谱页面定位器=============================================================
-    # 课程工作台iframe
-    COURSE_WORKBENCH_IFRAME = (By.XPATH, "//iframe[@id='app-iframe-4002']")
     # 知识图谱iframe
     KNOWLEDGE_GRAPH_IFRAME = (By.XPATH, "//iframe[@id='course-workspace-iframe']")
     # 新建主图谱button
@@ -90,22 +89,22 @@ class KnowledgeGraphPage(BasePage):
     # 新建图谱成功提示框
     CREATE_MAIN_GRAPH_SUCCESS_MESSAGE = (By.XPATH, "//p[text()='新建图谱成功']")
 
-    # =====================新建图谱界面操作方法============================================================================================
+    # =====================新建知识图谱界面操作方法============================================================================================
 
     def input_create_main_graph_name(self, name):
-        """输入新建主图谱名称
+        """输入新建知识图谱名称
 
         Args:
-            name: 新建主图谱名称
+            name: 新建知识图谱名称
 
         Returns:
             输入操作结果
         """
-        log.info(f"输入新建主图谱名称：{name}，定位器为：{self.CREATE_MAIN_GRAPH_NAME_INPUT[1]}")
+        log.info(f"输入新建知识图谱名称：{name}，定位器为：{self.CREATE_MAIN_GRAPH_NAME_INPUT[1]}")
         return self.input_text(self.CREATE_MAIN_GRAPH_NAME_INPUT, name)
 
     def input_create_main_graph_description(self, description):
-        """输入新建主图谱描述
+        """输入新建知识图谱描述
 
         Args:
             description: 新建主图谱描述

@@ -1,22 +1,21 @@
 # encoding: utf-8
-# @File  : test_009_my_teaching_courses.py
+# @File  : test_009_ai_vertical_model.py
 # @Author: 孔敬淳
 # @Date  : 2025/12/31
-# @Desc  : 我教的课测试用例，符合Selenium官方Page Object Model和pytest框架规范
+# @Desc  : AI垂直模型测试用例，符合Selenium官方Page Object Model和pytest框架规范
 
 import allure
 import pytest
 
 from common.report_add_img import add_img_2_report
-from page.teacher_workbench.CourseWorkbenchPage import CourseWorkbenchPage
-from page.teacher_workbench.ai_vertical_model.KnowledgeGraphPage import KnowledgeGraphPage
+from page.course_workbench.ai_vertical_model.KnowledgeGraphPage import KnowledgeGraphPage
 from testcases.helpers.test_context_helper import TestContextHelper
 from common.yaml_config import GetConf
 from page.teacher_workbench.MyTeachingCoursesPage import MyTeachingCoursesPage
 
 
-class TestMyTeachingCourses:
-    """我教的课测试类
+class TestAiVerticalModel:
+    """AI垂直模型测试类
 
     测试用例按照Selenium官方Page Object Model规范编写：
     1. 页面对象在测试用例中创建，driver通过pytest fixture注入
@@ -26,9 +25,9 @@ class TestMyTeachingCourses:
 
     @pytest.mark.run(order=200)
     @allure.story("添加知识图谱")
-    def test_001_my_teaching_courses(self, driver):
+    def test_001_add_knowledge_graph(self, driver):
         """
-        测试添加知识图谱流程
+        测试添加知识图谱
 
         Args:
             driver: WebDriver实例（通过pytest fixture注入）
@@ -56,7 +55,7 @@ class TestMyTeachingCourses:
             assert result is True, "根据课程名称点击课程卡片失败"
 
         with allure.step("点击知识图谱菜单栏"):
-            course_workbench_page = CourseWorkbenchPage(driver)
+            course_workbench_page = KnowledgeGraphPage(driver)
             course_workbench_page.click_left_menu("AI垂直模型")
             result = course_workbench_page.click_left_menu("知识图谱")
             add_img_2_report(driver, "点击知识图谱菜单栏")

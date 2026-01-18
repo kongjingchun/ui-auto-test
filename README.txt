@@ -33,13 +33,19 @@ XuetangUI/
 │  │  └──DeptListManagePage.py  # 院系列表管理页面
 │  ├──teacher_workbench/  # 教师工作台页面
 │  │  ├──__init__.py  # 教师工作台页面对象模块初始化文件
+│  │  └──MyTeachingCoursesPage.py  # 我教的课页面
+│  ├──course_workbench/  # 课程工作台页面
+│  │  ├──__init__.py  # 课程工作台页面对象模块初始化文件
 │  │  ├──ai_vertical_model/  # AI垂直模型页面
 │  │  │  ├──__init__.py  # AI垂直模型模块初始化文件
 │  │  │  └──KnowledgeGraphPage.py  # 知识图谱页面
-│  │  ├──course_construction/  # 课程建设页面（预留目录）
-│  │  │  └──__init__.py  # 课程建设页面对象模块初始化文件
-│  │  ├──CourseWorkbenchPage.py  # 课程工作台页面
-│  │  └──MyTeachingCoursesPage.py  # 我教的课页面
+│  │  ├──course_construction/  # 课程建设页面
+│  │  │  ├──__init__.py  # 课程建设页面对象模块初始化文件
+│  │  │  └──course_outline/  # 课程大纲页面
+│  │  │     ├──__init__.py  # 课程大纲模块初始化文件
+│  │  │     ├──CourseInfoPage.py  # 课程信息页面
+│  │  │     └──CourseObjectivePage.py  # 课程目标页面
+│  │  └──CourseWorkbenchPage.py  # 课程工作台页面
 │  ├──login/  # 登录相关页面
 │  │  ├──__init__.py  # 登录模块初始化文件
 │  │  └──LoginPage.py  # 登录页面
@@ -63,7 +69,8 @@ XuetangUI/
 │  │  ├──test_006_training_program.py  # 培养方案管理测试用例
 │  │  ├──test_007_major_portal.py  # 专业门户管理测试用例
 │  │  ├──test_008_ai_model.py  # AI模型测试用例
-│  │  └──test_009_my_teaching_courses.py  # 我教的课测试用例
+│  │  ├──test_009_ai_vertical_model.py  # AI垂直模型测试用例
+│  │  └──test_010_course_outline.py  # 课程大纲测试用例
 │  └──test_999_delete_data.py  # 数据清理测试用例
 │
 ├──common/  # 公共工具目录
