@@ -1,38 +1,39 @@
-# coding:utf-8
+# encoding: utf-8
+# @File  : test_login.py
+# @Author: 孔敬淳
+# @Date  : 2025/12/24/21:27
+# @Desc  : 登录测试用例，符合Selenium官方Page Object Model和pytest框架规范
 
-import unittest
-
+import allure
 import pytest
-from ddt import ddt, data, unpack
-from selenium import webdriver
 
-from base.base_util import BaseUtil
-# from common.excel_util import ExcelUtil  # 文件不存在，暂时注释
+from common.report_add_img import add_img_2_report
 from page.login_page import LoginPage
 
-#print(">>> DEBUG: loading", __file__)
 
-@ddt
-class TestLogin(BaseUtil):
+class TestLogin:
+    """登录测试类
 
-    """账密登录"""
-
-    #@data(*ExcelUtil().read_excel())
-    #@unpack
-    #def test_01_login(self,index,username,password):
-    def test_01_login(self):
-    
-        #print(index,username,password)
-
-        lp = LoginPage(self.driver)
-        lp.login_first()
-         #断言(用例1是正例)
-        #if index ==1:
-        self.assertEqual(lp.get_except_result(),'我的资源')
-
-
+    测试用例按照Selenium官方Page Object Model规范编写：
+    1. 页面对象在测试用例中创建，driver通过pytest fixture注入
+    2. 页面对象方法不包含driver参数
+    3. 断言在测试用例中，不在页面对象中
     """
-    @pytest.mark.parametrize("datainfo",ExcelUtil().read_excel())
-    def test_01_login(self,datainfo):
-        print(datainfo)
+
+    @pytest.mark.run(order=1)
+    @allure.story("账密登录")
+    def test_01_login(self, driver):
         """
+        测试账密登录流程
+
+        Args:
+            driver: WebDriver实例（通过pytest fixture注入）
+
+        Returns:
+            None
+        """
+        with allure.step("执行登录操作"):
+            login_page = LoginPage(driver)
+            result = login_page.login_first()
+            add_img_2_report(driver, "登录操作")
+            assert result is True, "登录操作失败"

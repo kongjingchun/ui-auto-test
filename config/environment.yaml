@@ -4,7 +4,7 @@ test_suffix: 677 # 测试环境序号
 # 部署环境配置（控制浏览器驱动和用例执行）
 部署环境:
   是否本地部署: false  # true: 本地部署，false: 网络部署
-  是否Headless模式: false  # true: 使用Headless模式（无界面），false: 使用有界面模式（需要显示环境）
+  是否Headless模式: true  # true: 使用Headless模式（无界面），false: 使用有界面模式（需要显示环境）
 school_name: 智慧大学
 url: https://hhtest-envning.rainclassroom.com
 # url: http://192.168.200.215/
@@ -14,36 +14,21 @@ user:
   # initial_admin:
   #   username: orgadmin
   #   password: 123
-
-  # 初始管理员
-  initial_admin:
-    username: superadmin
-    password: gqkt111!
-  # 教务管理员
-  dean:
-    姓名: &dean_name dean{suffix}
-    工号: &dean_code dean_code{suffix}
-    手机: "15100000001"
-    邮箱: Autotest001@xuetangx.com
-  # CMS 教务管理员
-  dean_cms:
-    username: *dean_code
-    password: dean_code
-  # 专业管理员
-  prof:
-    姓名: &prof_name prof{suffix}
-    工号: &prof_code prof_code{suffix}
-    手机: "15100000002"
-    邮箱: Autotest002@xuetangx.com
-  # CMS 专业管理员
-  prof_cms:
-    username: *prof_code
-    password: prof_code
+  
+  # 教师
+  teacher:
+    username: 20210708
+    password: Abcd1234
+  
 
 # 院系信息
 department:
   院系名称: &dept_name auto_dept{suffix}
   院系代码: Auto_dept{suffix}
+
+# 专业负责人信息
+professor:
+  专业负责人: &prof_name auto_prof{suffix}
 
 major:
   专业名称: &major_name auto_major{suffix}

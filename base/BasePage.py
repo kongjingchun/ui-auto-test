@@ -14,12 +14,19 @@ BasePage - Selenium Page Object Model 基础类
 """
 
 import datetime
+import os
 import os.path
+import random
+import re
+import ssl
 import time
+from urllib import request as urllib_request
 
+import cv2
 from selenium.common.exceptions import ElementNotVisibleException, WebDriverException, NoSuchElementException, \
     StaleElementReferenceException, TimeoutException, InvalidSessionIdException
 from selenium.webdriver import ActionChains
+from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -1023,3 +1030,161 @@ class BasePage:
 
         element.screenshot(file_path)
         return file_path
+
+    # ==================== 验证码滑块操作 ====================
+
+    def jy_slide(self):
+        """处理验证码滑块操作
+
+        Returns:
+            bool: 验证码处理结果，True表示成功
+        """
+        log.info("开始处理验证码滑块")
+        try:
+            # 切换到验证码iframe
+            iframe_locator = (By.ID, "tcaptcha_iframe_dy")
+            self.switch_to_iframe(iframe_locator, timeout=20)
+
+            # 等待验证码元素出现
+            tc_operation_locator = (By.ID, 'tcOperation')
+            self.find_element(tc_operation_locator, timeout=10)
+
+            # 创建滑块图片目录
+            slider_img_dir = os.path.join(get_project_path(), "img", "jsfile")
+            if not os.path.exists(slider_img_dir):
+                os.makedirs(slider_img_dir, exist_ok=True)
+                log.info(f"创建滑块图片目录：{slider_img_dir}")
+
+            max_retries = 3
+            retries = 0
+            distance = None
+
+            while retries < max_retries and distance is None:
+                # 等待背景图加载
+                def bg_has_image(driver):
+                    try:
+                        div = driver.find_element(By.ID, "slideBg")
+                        return "background-image" in div.get_attribute("style")
+                    except:
+                        return False
+
+                WebDriverWait(self.driver, 20).until(bg_has_image)
+
+                # 获取背景图 URL
+                bg_div = self.driver.find_element(By.ID, "slideBg")
+                style = bg_div.get_attribute("style")
+                match = re.search(r'background-image:\s*url\("([^"]+)"\)', style)
+                if not match:
+                    raise Exception("无法提取背景图 URL")
+                bigImage_src = match.group(1)
+                log.info(f"获取到背景图URL：{bigImage_src}")
+
+                # 使用相对路径保存图片
+                big_image_path = os.path.join(slider_img_dir, "bigImage.png")
+                log.info(f"准备保存背景图到：{big_image_path}")
+
+                try:
+                    # 创建不验证SSL证书的上下文（用于下载HTTPS图片）
+                    ssl_context = ssl.create_default_context()
+                    ssl_context.check_hostname = False
+                    ssl_context.verify_mode = ssl.CERT_NONE
+
+                    # 下载并保存图片
+                    req = urllib_request.Request(bigImage_src)
+                    with urllib_request.urlopen(req, context=ssl_context) as response:
+                        with open(big_image_path, 'wb') as out_file:
+                            out_file.write(response.read())
+
+                    # 验证文件是否保存成功
+                    if os.path.exists(big_image_path) and os.path.getsize(big_image_path) > 0:
+                        log.info(f"背景图保存成功，文件大小：{os.path.getsize(big_image_path)} 字节")
+                    else:
+                        raise Exception(f"背景图保存失败，文件不存在或大小为0：{big_image_path}")
+                except Exception as download_error:
+                    log.error(f"下载背景图失败：{str(download_error)}")
+                    raise Exception(f"下载背景图失败：{str(download_error)}")
+
+                # 获取缺口位置
+                distance = self.get_pos(big_image_path)
+
+                if distance is None:
+                    log.warning("未找到缺口位置，尝试刷新验证码...")
+                    # 点击刷新按钮
+                    refresh_button_locator = (By.ID, "reload")
+                    self.click(refresh_button_locator, timeout=10)
+                    retries += 1
+                    time.sleep(2)  # 等待新验证码加载
+                else:
+                    break
+
+            if distance is None:
+                raise Exception("验证码处理失败，已达最大重试次数")
+
+            # 执行滑块操作
+            smallImage_locator = (By.XPATH, "//div[contains(@class,'tc-fg-item tc-slider-normal')]")
+            smallImage = self.find_element(smallImage_locator)
+            distance = int(distance * 340 / 672 - smallImage.location['x'])
+
+            ActionChains(self.driver).click_and_hold(smallImage).perform()
+            moved = 0
+            while moved < distance:
+                x = random.randint(3, 8)
+                moved += x
+                ActionChains(self.driver).move_by_offset(xoffset=x, yoffset=0).perform()
+            ActionChains(self.driver).release().perform()
+
+            # 切换回默认内容
+            self.switch_out_iframe()
+            time.sleep(3)  # 等待登录完成
+            log.info("验证码滑块处理完成")
+            return True
+        except Exception as e:
+            log.error(f"验证码滑块处理失败：{str(e)}")
+            # 确保切换回默认内容
+            try:
+                self.switch_out_iframe()
+            except:
+                pass
+            return False
+
+    def get_pos(self, imageSrc):
+        """获取验证码图片中缺口的位置
+
+        Args:
+            imageSrc: 图片路径
+
+        Returns:
+            int: 缺口位置的x坐标，如果未找到则返回None
+        """
+        try:
+            # 创建滑块图片目录
+            slider_img_dir = os.path.join(get_project_path(), "img", "jsfile")
+            if not os.path.exists(slider_img_dir):
+                os.makedirs(slider_img_dir, exist_ok=True)
+
+            image = cv2.imread(imageSrc)
+            if image is None:
+                log.error(f"无法读取图片：{imageSrc}")
+                return None
+
+            blurred = cv2.GaussianBlur(image, (5, 5), 0)
+            canny = cv2.Canny(blurred, 0, 10)
+            contours, _ = cv2.findContours(canny, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+            for contour in contours:
+                x, y, w, h = cv2.boundingRect(contour)
+                area = cv2.contourArea(contour)
+                perimeter = cv2.arcLength(contour, True)
+                if 5025 < area < 7225 and 300 < perimeter < 380:
+                    cv2.rectangle(image, (x, y), (x + w, y + h), (0, 0, 255), 2)
+                    # 使用相对路径保存结果图片
+                    result_image_path = os.path.join(slider_img_dir, "result.jpg")
+                    if cv2.imwrite(result_image_path, image):
+                        log.info(f"结果图片保存成功：{result_image_path}")
+                    else:
+                        log.warning(f"结果图片保存失败：{result_image_path}")
+                    return x
+            return None
+        except Exception as e:
+            log.error(f"获取验证码缺口位置失败：{str(e)}")
+            return None

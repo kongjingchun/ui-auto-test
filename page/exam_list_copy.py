@@ -8,7 +8,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 
 from base.BasePage import BasePage
-from page.login_page import LoginPage
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
@@ -36,9 +35,7 @@ class ExamList(BasePage):
     # 页面动作
     def exam_check(self):
         driver = self.driver
-        #登录
-        lp = LoginPage(self.driver)
-        lp.login_first()
+        # 注意：登录操作应该在测试用例中完成，此方法只负责页面操作
 
         # 等待我的资源tab可见
         WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.ID, 'my_resource')))
