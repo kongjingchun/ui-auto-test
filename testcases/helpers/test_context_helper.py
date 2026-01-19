@@ -8,7 +8,7 @@ from common.report_add_img import add_img_2_report
 from logs.log import log
 from page.LeftMenuPage import LeftMenuPage
 from page.TopMenuPage import TopMenuPage
-from page.login.LoginPage import LoginPage
+from page.login_page import LoginPage
 
 
 class TestContextHelper:
