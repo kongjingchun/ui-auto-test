@@ -3,7 +3,7 @@ import unittest
 
 import allure
 from common.report_add_img import add_img_2_report
-from page.problems_list import ProblemList
+from page.problems_list import ProblemListPage
 from page.login_page import LoginPage
 from common.yaml_config import GetConf
 
@@ -19,7 +19,7 @@ class TestProblemList():
             assert login_result is True, "登录操作失败"
 
         with allure.step("执行题库检查"):
-            pl = ProblemList(driver)
+            pl = ProblemListPage(driver)
             pl.problem_check()
             result = pl.search_problem("资源")
             add_img_2_report(driver, "搜索操作")

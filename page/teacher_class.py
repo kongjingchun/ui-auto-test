@@ -6,11 +6,11 @@
 
 from selenium.webdriver.common.by import By
 
-from base.BasePage import BasePage
+from base.base_page import BasePage
 from logs.log import log
 
 
-class TeacherClassList(BasePage):
+class TeacherClassPage(BasePage):
     """教师班级列表页面类
 
     继承BasePage类，提供教师班级列表页面的元素操作方法

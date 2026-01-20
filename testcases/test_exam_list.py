@@ -1,7 +1,7 @@
 # coding:utf-8
 import unittest
 from base.base_util import BaseUtil
-from page.exam_list_copy import ExamList
+from page.exam_list import ExamListPage
 from page.login_page import LoginPage
 
 class TestExamList(BaseUtil):
@@ -13,7 +13,7 @@ class TestExamList(BaseUtil):
         assert login_result is True, "登录操作失败"
         
         # 执行试卷库检查
-        el = ExamList(self.driver)
+        el = ExamListPage(self.driver)
         el.exam_check()
 
 if __name__ == '__main__':

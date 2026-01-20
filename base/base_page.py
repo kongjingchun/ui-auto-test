@@ -1,5 +1,5 @@
 # encoding: utf-8
-# @File  : BasePage.py
+# @File  : base_page.py
 # @Author: 孔敬淳
 # @Date  : 2025/01/13
 # @Desc  : 基础页面类，符合 Selenium 官方 Page Object Model 设计模式

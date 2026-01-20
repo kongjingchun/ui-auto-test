@@ -7,12 +7,12 @@ import time
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 
-from base.BasePage import BasePage
+from base.base_page import BasePage
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 
-class ExamList(BasePage):
+class ExamListPage(BasePage):
     # "我的资源"
     my_resource_tab_loc = (By.ID, 'my_resource')
     # 试卷库tab
@@ -39,14 +39,14 @@ class ExamList(BasePage):
 
         # 等待我的资源tab可见
         WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.ID, 'my_resource')))
-        self.click(ExamList.my_resource_tab_loc)
+        self.click(ExamListPage.my_resource_tab_loc)
 
         WebDriverWait(driver, 20).until(
             EC.visibility_of_element_located((By.XPATH, "//span[contains(text(), '试卷库')]")))
-        self.click(ExamList.my_exam_tab)
+        self.click(ExamListPage.my_exam_tab)
         
         # 等待试卷列表加载完成
-        WebDriverWait(driver, 20).until(EC.presence_of_element_located(ExamList.cards_list_loc))
+        WebDriverWait(driver, 20).until(EC.presence_of_element_located(ExamListPage.cards_list_loc))
         time.sleep(2)  # 等待页面完全渲染
         
         # 点击发布按钮
@@ -58,9 +58,9 @@ class ExamList(BasePage):
         
         # 尝试多种定位方式
         publish_locators = [
-            ExamList.publish_button,
-            ExamList.publish_button_alt1,
-            ExamList.publish_button_alt2
+            ExamListPage.publish_button,
+            ExamListPage.publish_button_alt1,
+            ExamListPage.publish_button_alt2
         ]
         
         publish_element = None

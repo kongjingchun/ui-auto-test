@@ -7,11 +7,11 @@
 import time
 from selenium.webdriver.common.by import By
 
-from base.BasePage import BasePage
+from base.base_page import BasePage
 from logs.log import log
 
 
-class ProblemList(BasePage):
+class ProblemListPage(BasePage):
     """题库列表页面类
 
     继承BasePage类，提供题库列表页面的元素操作方法
